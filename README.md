@@ -7,7 +7,7 @@ Backup and clone your entire Github instance to a local machine.
 
 ## Setup
 
-Change the Username in the `clone.sh` file to your username. The script will ask for your password each time.
+Change the Username in the `backup.sh` file to your username. The script will ask for your password each time.
 
 ## Usage
 

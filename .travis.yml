@@ -1,4 +1,4 @@
 language: bash
 
 script: 
-    - shellcheck clone.sh
+    - shellcheck backup.sh
