@@ -13,6 +13,8 @@ Change the Username in the `backup.sh` file to your username. The script will as
 
 This script is intended to either be used to grab an archive of your entire Github instance or to be setup with a Cron to run daily to pull in any changes to keep a local copy of your Github repos.
 
+It will pull/clone from the master branch of each repo.
+
 ```bash
 ./backup.sh
 ```
