@@ -7,7 +7,7 @@ Backup and clone your entire Github instance to a local machine.
 
 ## Setup
 
-Change the Username in the `backup.sh` file to your username. The script will ask for your password each time.
+Edit the variables in the `backup.sh` to setup your user, log life, pagination, and scope.
 
 ## Usage
 
@@ -15,6 +15,14 @@ This script is intended to either be used to grab an archive of your entire Gith
 
 It will pull/clone from the master branch of each repo.
 
+**Single Use**
 ```bash
 ./backup.sh
+```
+
+**Cron**
+```bash
+crontab -e
+
+0 1 * * * ~/github-archive/backup.sh
 ```
