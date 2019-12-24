@@ -2,12 +2,12 @@
 
 # Declare variables
 #######################################################################
-SCOPE="users"                   # either users or orgs
-USERNAME=""                     # your username
+SCOPE="users"                   # either "users" or "orgs"
+USERNAME=""                     # your username or organization name
 TOKEN=""                        # this is either your password or a token if 2FA is enabled
-PAGE="1"                        # pagination for repos, currently 100 is the max
+PAGE="1"                        # pagination for repos, currently 100 is the max per page per Github's limits
 DATE=$(date +'%m-%d-%Y')        # date format you'd like your logs saved in
-LOG_LIFE="30"                   # number of days logs will be retained
+LOG_LIFE="30"                   # number of days logs will be retained for
 LOCATION="$HOME/github-archive" # where your archive will be housed
 #######################################################################
 
@@ -24,10 +24,13 @@ cd "$LOCATION" || exit
 # Clone all repos
 {
 curl -u "$USERNAME":"$TOKEN" "https://api.github.com/$SCOPE/$USERNAME/repos?page=$PAGE&per_page=100" |
-# curl -H "Authorization: token \"$TOKEN"\" "https://api.github.com/$SCOPE/$USERNAME/repos?page=$PAGE&per_page=100" |
         grep -e 'git_ur[l]*' |
         cut -d \" -f 4 |
         xargs -L1 git clone
+
+# Use the following to clone private repos. NOTE: This method is not automated as it requires the RSA passphrase for each repository.
+# curl -u "$USERNAME":"$TOKEN" -s "https://api.github.com/$SCOPE/$USERNAME/repos?page=$PAGE&per_page=100" | 
+# python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["ssh_url"])'
 
 # Pull any changes
 for DIR in */ ; do
