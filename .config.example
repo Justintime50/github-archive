@@ -1,9 +1,9 @@
 # Github Archive Congif
 
-SCOPE="users"                   # either "users" or "orgs"
-USERNAME=""                     # your username or organization name
-TOKEN=""                        # this is either your password or a token if 2FA is enabled
-PAGE="1"                        # pagination for repos, currently 100 is the max per page per Github's limits
-DATE=$(date +'%m-%d-%Y')        # date format you'd like your logs saved in
-LOG_LIFE="30"                   # number of days logs will be retained for
-LOCATION="$HOME/github-archive" # where your archive will be housed
+USERNAME=""                       # your username or organization name
+TOKEN=""                          # this is either your password or a token if 2FA is enabled
+ORGS=""                           # (optional) add each org name separated by spaces. eg: "org1 org2 org3"
+PAGE="1"                          # pagination for repos, currently 100 is the max per page per Github's limits
+DATE=$(date +'%m-%d-%Y')          # date format you'd like your logs saved in
+LOG_LIFE="30"                     # number of days logs will be retained for
+LOCATION="$HOME/github-archive"   # where your archive will be housed
