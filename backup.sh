@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Import config and check if something is missing
+# shellcheck disable=SC1091
 source .config
 if [ -z "$SCOPE" ] || [ -z "$USERNAME" ] || [ -z "$TOKEN" ] || [ -z "$PAGE" ] || [ -z "$DATE" ] || [ -z "$LOG_LIFE" ] || [ -z "$LOCATION" ] ; then
     echo "You have variables that have no values, please set them in the \".config\" before continuing."
