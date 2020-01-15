@@ -13,7 +13,7 @@ Backup and clone your entire Github instance.
 
 ## Install
 
-1. Edit the variables in the `backup.sh` to setup your user, log life, pagination, and scope.
+1. Run `cp .config.example .config` and edit the values to your liking.
 1. For private repos, you must have an SSH key generated on your local machine and added to Github.
 
 ### Automating SSH Key Prompt on macOS (optional)

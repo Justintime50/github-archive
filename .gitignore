@@ -1,2 +1,3 @@
-.env
+.config
 .DS_Store
+.idea

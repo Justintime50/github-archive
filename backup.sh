@@ -1,18 +1,9 @@
 #!/bin/bash
 
-# Declare variables
-#######################################################################
-SCOPE="users"                   # either "users" or "orgs"
-USERNAME=""                     # your username or organization name
-TOKEN=""                        # this is either your password or a token if 2FA is enabled
-PAGE="1"                        # pagination for repos, currently 100 is the max per page per Github's limits
-DATE=$(date +'%m-%d-%Y')        # date format you'd like your logs saved in
-LOG_LIFE="30"                   # number of days logs will be retained for
-LOCATION="$HOME/github-archive" # where your archive will be housed
-#######################################################################
-
+# Import config and check if something is missing
+source .config
 if [ -z "$SCOPE" ] || [ -z "$USERNAME" ] || [ -z "$TOKEN" ] || [ -z "$PAGE" ] || [ -z "$DATE" ] || [ -z "$LOG_LIFE" ] || [ -z "$LOCATION" ] ; then
-    echo "You have variables that have no values, please set them before continuing."
+    echo "You have variables that have no values, please set them in the \".config\" before continuing."
     exit
 fi
 
