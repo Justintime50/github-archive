@@ -1,26 +1,41 @@
+<div align="center">
+
 # Github Archive
 
 [![Build Status](https://travis-ci.org/Justintime50/github-archive.svg?branch=master)](https://travis-ci.org/Justintime50/github-archive)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 
-Backup and clone your entire Github instance to a local machine.
+Backup and clone your entire Github instance.
 
-## Setup
+<img src="assets/showcase.gif">
 
-Edit the variables in the `backup.sh` to setup your user, log life, pagination, and scope.
+</div>
+
+## Install
+
+1. Edit the variables in the `backup.sh` to setup your user, log life, pagination, and scope.
+1. For private repos, you must have an SSH key generated on your local machine and added to Github.
+
+### Automating SSH Key Prompt on macOS (optional)
+
+To allow the script to run continuosly without user intervention, you'll need to add your SSH key to the SSH agent.
+
+```bash
+ssh-add -K ~/.ssh/id_rsa
+```
 
 ## Usage
 
-This script is intended to either be used to grab an archive of your entire Github instance or to be setup with a Cron to run daily to pull in any changes to keep a local copy of your Github repos.
+This script is intended to grab an archive of your entire Github instance or to be setup with a cron to run occasionally and pull in any changes to keep a local copy of your Github repos.
 
-It will pull/clone from the master branch of each repo.
+Github Archive will pull/clone from the master branch of each repo that you have access to including organizations.
 
 **Single Use**
 ```bash
 ./backup.sh
 ```
 
-**Cron**
+**Cron Example**
 ```bash
 crontab -e
 
