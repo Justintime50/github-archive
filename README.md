@@ -18,7 +18,7 @@ This project requires that you have Python installed. Python comes built-in on m
 1. Run `cp .config.example .config` and edit the values to your liking.
 1. For private repos, you must have an SSH key generated on your local machine and added to Github.
 
-### Automating SSH Key Prompt (optional)
+### Automating SSH Passphrase Prompt (optional)
 
 To allow the script to run continuosly without requiring your SSH passphrase, you'll need to add your passphrase to the SSH agent.
 
