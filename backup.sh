@@ -21,16 +21,12 @@ mkdir -p "$LOCATION"
 mkdir -p "$LOCATION"/archive-logs
 cd "$LOCATION" || exit
 
-# Clone all repos
+# Clone all repos you have access to
 {
 curl -u "$USERNAME":"$TOKEN" "https://api.github.com/$SCOPE/$USERNAME/repos?page=$PAGE&per_page=100" |
         grep -e 'git_ur[l]*' |
         cut -d \" -f 4 |
         xargs -L1 git clone
-
-# Use the following to clone private repos. NOTE: This method is not automated as it requires the RSA passphrase for each repository.
-# curl -u "$USERNAME":"$TOKEN" -s "https://api.github.com/$SCOPE/$USERNAME/repos?page=$PAGE&per_page=100" | 
-# python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["ssh_url"])'
 
 # Pull any changes
 for DIR in */ ; do
@@ -38,6 +34,7 @@ for DIR in */ ; do
     cd "$DIR" && git pull origin master
     cd ..
 done
+echo "Github Archive Complete!"
 } 2>&1 | tee "$LOCATION"/archive-logs/"$DATE".log
 
 # Cleanup after being run
