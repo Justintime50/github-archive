@@ -2,10 +2,10 @@
 
 # Github Archive
 
+Clone your entire Github instance or save it to an archive.
+
 [![Build Status](https://travis-ci.org/Justintime50/github-archive.svg?branch=master)](https://travis-ci.org/Justintime50/github-archive)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
-
-Clone your entire Github instance or save it to an archive.
 
 <img src="assets/showcase.gif">
 
@@ -18,9 +18,9 @@ This project requires that you have Python installed. Python comes built-in on m
 1. Run `cp .config.example .config` and edit the values to your liking.
 1. For private repos, you must have an SSH key generated on your local machine and added to Github.
 
-### Automating SSH Key Prompt on macOS (optional)
+### Automating SSH Key Prompt (optional)
 
-To allow the script to run continuosly without requiring your SSH passphrase, you'll need to add your SSH key to the SSH agent.
+To allow the script to run continuosly without requiring your SSH passphrase, you'll need to add your passphrase to the SSH agent.
 
 ```bash
 ssh-add -K ~/.ssh/id_rsa
