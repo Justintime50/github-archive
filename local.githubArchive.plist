@@ -5,7 +5,7 @@
 		<key>Label</key>
 		<string>local.githubArchive.plist</string>
 		<key>Program</key>
-		<string>/Users/jhammond/git/personal/github-archive/backup.sh</string>
+		<string>/Users/admin/Sites/github-archive/backup.sh</string>
 		<key>StartCalendarInterval</key>
 		<dict>
 			<key>Hour</key>
@@ -14,8 +14,8 @@
 			<integer>0</integer>
 		</dict>
 		<key>StandardErrorPath</key>
-		<string>/Users/jhammond/git/personal/github-archive/logs/log.err</string>
+		<string>/Users/admin/Sites/github-archive/logs/log.err</string>
 		<key>StandardOutPath</key>
-		<string>/Users/jhammond/git/personal/github-archive/logs/log.out</string>
+		<string>/Users/admin/Sites/github-archive/logs/log.out</string>
 	</dict>
 </plist>
