@@ -28,18 +28,30 @@ ssh-add -K ~/.ssh/id_rsa
 
 ## Usage
 
-Github Archive will clone any repo that doesn't exist locally and pull those that do from the master branch of each repo that you have access to including organizations (if configured). You can run the script once or have it setup with a cron and run occasionally to clone/pull any changes since it was last run.
+Github Archive will clone any repo that doesn't exist locally and pull those that do from the master branch of each repo that you have access to including organizations (if configured). You can run the script once or have it setup with a cron or Launch Agent and run occasionally to clone/pull any changes since it was last run.
 
-**Merge Conflicts:** *This is not intended to be used to pull repositories you also plan to work on from the `github-archive` location as you will receive merge conflicts. It is recommended to be used once on a new machine for example or setup as a separate archive from your development repositories.*
+**Merge Conflicts:** *Be aware that using Github Archive could lead to Merge Conflicts if you continually pull the same repos you work on without stashing or committing your changes. It is recommended to be used once for example on a new machine or setup as a separate archive from your development repositories. If you use Github Archive to pull in nighly changes from various repos, you should be religious about stashing or committing your changes or you will receive merge conflicts and the script may not complete running.*
 
 ### Single Use
 ```bash
 ./backup.sh
 ```
 
-### Cron Example
+### Cron
 ```bash
 crontab -e
 
 0 1 * * * ~/github-archive/backup.sh
 ```
+
+### Launch Agent (Recommended on macOS)
+
+Edit the path in the plist file to your script and logs as well as the time to execute, then setup the Launch Agent:
+
+```bash
+cp local.githubArchive.plist ~/Library/LaunchAgents
+
+launchctl load ~/Library/LaunchAgents/local.githubArchive.plist
+```
+
+More info on [Launch Agents](https://www.launchd.info).
