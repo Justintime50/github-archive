@@ -11,6 +11,13 @@ Clone your entire Github instance or save it to an archive.
 
 </div>
 
+## What Can it Do?
+
+- Clone/pull personal repos
+- Clone/pull organization repos
+- Clone/pull personal gists
+- Can be setup on a schedule to automate changes
+
 ## Install
 
 This project requires that you have Python installed. Python comes built-in on macOS and Linux.
@@ -28,30 +35,43 @@ ssh-add -K ~/.ssh/id_rsa
 
 ## Usage
 
-Github Archive will clone any repo that doesn't exist locally and pull those that do from the master branch of each repo that you have access to including organizations (if configured). You can run the script once or have it setup with a cron or Launch Agent and run occasionally to clone/pull any changes since it was last run.
+Github Archive will clone any repo and gist that doesn't exist locally and pull those that do from the master branch of each repo and latest revision of each gist that you have access to - including organizations (if configured). You can run the script once or have it setup with a cron or Launch Agent and run occasionally to clone/pull any changes since it was last run.
 
-**Merge Conflicts:** *Be aware that using Github Archive could lead to Merge Conflicts if you continually pull the same repos you work on without stashing or committing your changes. It is recommended to be used once for example on a new machine or setup as a separate archive from your development repositories. If you use Github Archive to pull in nighly changes from various repos, you should be religious about stashing or committing your changes or you will receive merge conflicts and the script may not complete running.*
+**Merge Conflicts:** *Be aware that using Github Archive could lead to merge conflicts if you continually pull the same repos you work on without stashing or committing your changes. It is recommended to be used once for example on a new machine or setup as a separate archive from your development repositories. If you use Github Archive to pull in nighly changes from various repos, you should be religious about stashing or committing your changes or you will receive merge conflicts and the script may not complete running.*
 
 ### Single Use
 ```bash
-./backup.sh
+./github-archive.sh
+```
+
+### Shell Alias
+```bash
+# If using Bash insted of ZSH, use ~/.bash_profile instead
+echo alias github-archive="/path/to/github-archive.sh" >> ~/.zshrc
+source ~/.zshrc
+
+# Usage of alias
+github-archive
 ```
 
 ### Cron
 ```bash
 crontab -e
 
-0 1 * * * ~/github-archive/backup.sh
+0 1 * * * ~/github-archive/github-archive.sh
 ```
 
 ### Launch Agent (Recommended on macOS)
 
-Edit the path in the plist file to your script and logs as well as the time to execute, then setup the Launch Agent:
+Edit the path in the `plist` file to your script and logs as well as the time to execute, then setup the Launch Agent:
 
 ```bash
+# Copy the plist to the Launch Agent directory
 cp local.githubArchive.plist ~/Library/LaunchAgents
 
+# use `load/unload` to add/remove the script as a Launch Agent
 launchctl load ~/Library/LaunchAgents/local.githubArchive.plist
-```
 
-More info on [Launch Agents](https://www.launchd.info).
+# To `start/stop` the script from running, use the following
+launchctl start local.githubArchive.plist
+```

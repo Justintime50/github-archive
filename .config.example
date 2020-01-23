@@ -1,4 +1,4 @@
-# Github Archive Congif
+# Github Archive Config
 
 USERNAME=""                       # your username or organization name
 TOKEN=""                          # this is either your password or a token if 2FA is enabled

@@ -23,6 +23,7 @@ cd "$LOCATION"/repos || exit
     curl -u "$USERNAME":"$TOKEN" -s "https://api.github.com/users/$USERNAME/repos?page=$PAGE&per_page=100" |
     python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["ssh_url"])'
     cd .. || exit
+    echo "Personal repos cloned!"
 
     # Clone all repos from the configured orgs you have access to
     for ORG in ${ORGS[*]} ; do
@@ -32,6 +33,7 @@ cd "$LOCATION"/repos || exit
         python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["ssh_url"])'
         cd .. || exit
     done
+    echo "Organization repos cloned!"
 
     # Pull any changes from each repo in the archive
     DIRARRAY="$USERNAME $ORGS"
@@ -45,11 +47,13 @@ cd "$LOCATION"/repos || exit
         done
         cd .. || exit
     done
+    echo "Personal & Organization repos pulled!"
 
     # Clone all gists from the user's account
     cd "$LOCATION"/gists || exit
     curl -u "$USERNAME":"$TOKEN" -s "https://api.github.com/users/$USERNAME/gists?page=$PAGE&per_page=100" |
     python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["html_url"])'
+    echo "Personal gists cloned!"
 
     # Pull any changes from each gist in the archive
     for DIR in */ ; do
@@ -57,6 +61,7 @@ cd "$LOCATION"/repos || exit
         cd "$DIR" && git pull
         cd .. || exit
     done
+    echo "Personal gists pulled!"
 
     echo "Github Archive Complete!"
 } 2>&1 | tee "$LOCATION"/logs/"$DATE".log
