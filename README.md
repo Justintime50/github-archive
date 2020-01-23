@@ -35,11 +35,11 @@ ssh-add -K ~/.ssh/id_rsa
 
 ## Usage
 
-Github Archive will clone any repo and gist that doesn't exist locally and pull those that do from the master branch of each repo and latest revision of each gist that you have access to - including organizations (if configured). You can run the script once or have it setup with a cron or Launch Agent and run occasionally to clone/pull any changes since it was last run.
+Github Archive will clone any repo and gist that doesn't exist locally and pull those that do from the master branch of each repo and latest revision of each gist that you have access to - including organizations (if configured). You can run the script once, add an alias, or have it setup with a cron or Launch Agent and run occasionally to clone/pull any changes since it was last run.
 
 **Merge Conflicts:** *Be aware that using Github Archive could lead to merge conflicts if you continually pull the same repos you work on without stashing or committing your changes. It is recommended to be used once for example on a new machine or setup as a separate archive from your development repositories. If you use Github Archive to pull in nighly changes from various repos, you should be religious about stashing or committing your changes or you will receive merge conflicts and the script may not complete running.*
 
-### Single Use
+### Run Script
 ```bash
 ./github-archive.sh
 ```
@@ -52,13 +52,6 @@ source ~/.zshrc
 
 # Usage of alias
 github-archive
-```
-
-### Cron
-```bash
-crontab -e
-
-0 1 * * * ~/github-archive/github-archive.sh
 ```
 
 ### Launch Agent (Recommended on macOS)
@@ -74,4 +67,11 @@ launchctl load ~/Library/LaunchAgents/local.githubArchive.plist
 
 # To `start/stop` the script from running, use the following
 launchctl start local.githubArchive.plist
+```
+
+### Cron
+```bash
+crontab -e
+
+0 1 * * * ~/path/to/github-archive.sh
 ```
