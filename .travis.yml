@@ -1,4 +1,4 @@
 language: bash
 
 script: 
-    - shellcheck backup.sh
+    - shellcheck github-archive.sh

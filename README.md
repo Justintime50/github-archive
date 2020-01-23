@@ -2,7 +2,7 @@
 
 # Github Archive
 
-Clone your entire Github instance or save it to an archive.
+Clone your entire Github instance or back it up as an archive.
 
 [![Build Status](https://travis-ci.org/Justintime50/github-archive.svg?branch=master)](https://travis-ci.org/Justintime50/github-archive)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
