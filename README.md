@@ -13,19 +13,39 @@ Clone your entire Github instance or back it up as an archive.
 
 ## What Can it Do?
 
-- Clone/pull personal repos
-- Clone/pull organization repos
-- Clone/pull personal gists
-- Can be setup on a schedule to automate changes
+- Clone/pull personal repos (public and private)
+- Clone/pull organization repos (public and private)
+- Clone/pull personal gists (public and private)
+- Iterate over 100's of repos and gists
+- Can be configured to run on a schedule to automate pulling changes
+
+### Configurable Settings
+
+The power of Github Archive comes in its configuration. You could pull only personal public repos or go all out and include private repos from you and all organizations your belong to including gists. Customize where repos are saved to, how long logs are kept and their format. Iterate over 100's of repos and sit back while Github Archive does all the work.
+
+- Personal repos (on/off)
+- Organization repos (on/off)
+- Personal Gists (on/off)
+- Cloning (on/off)
+- Pulling (on/off)
+- Setup the scope to clone (1-infinite number of repos)
+- Log retention life & filename scheme
+- Github Archive location
+- Which branch to pull from
 
 ## Install
 
 This project requires that you have Python installed. Python comes built-in on macOS and Linux.
 
-1. Run `cp .config.example .config` and edit the values to your liking.
-1. For private repos, you must have an SSH key generated on your local machine and added to Github.
+Copy the configuration file and edit to your liking.
 
-### Automating SSH Passphrase Prompt (optional)
+```bash
+cp .config.example .config
+``` 
+
+**For Private Repos:** You must have an SSH key generated on your local machine and added to Github.
+
+### Automating SSH Passphrase Prompt (Recommended)
 
 To allow the script to run continuosly without requiring your SSH passphrase, you'll need to add your passphrase to the SSH agent.
 
@@ -46,7 +66,7 @@ Github Archive will clone any repo and gist that doesn't exist locally and pull 
 
 ### Shell Alias
 ```bash
-# If using Bash insted of ZSH, use ~/.bash_profile instead
+# If using Bash insted of ZSH, use ~/.bash_profile
 echo alias github-archive="/path/to/github-archive.sh" >> ~/.zshrc
 source ~/.zshrc
 
@@ -73,5 +93,5 @@ launchctl start local.githubArchive.plist
 ```bash
 crontab -e
 
-0 1 * * * ~/path/to/github-archive.sh
+0 1 * * * /path/to/github-archive.sh
 ```
