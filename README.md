@@ -2,7 +2,7 @@
 
 # Github Archive
 
-Clone your entire Github instance or back it up as an archive.
+Powerful script to clone your entire Github instance or save it as an archive.
 
 [![Build Status](https://travis-ci.org/Justintime50/github-archive.svg?branch=master)](https://travis-ci.org/Justintime50/github-archive)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
@@ -37,7 +37,7 @@ The power of Github Archive comes in its configuration. You could pull only pers
 
 This project requires that you have Python installed. Python comes built-in on macOS and Linux.
 
-Copy the configuration file and edit to your liking.
+Copy the configuration file and edit for your needs.
 
 ```bash
 cp .config.example .config
@@ -82,7 +82,7 @@ Edit the path in the `plist` file to your script and logs as well as the time to
 # Copy the plist to the Launch Agent directory
 cp local.githubArchive.plist ~/Library/LaunchAgents
 
-# use `load/unload` to add/remove the script as a Launch Agent
+# Use `load/unload` to add/remove the script as a Launch Agent
 launchctl load ~/Library/LaunchAgents/local.githubArchive.plist
 
 # To `start/stop` the script from running, use the following
