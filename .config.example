@@ -1,9 +1,53 @@
-# Github Archive Config
+## GITHUB ARCHIVE CONFIGURATION ##
+# Only edit the values of each variable, leaving variable names alone.
 
-USERNAME=""                       # your username or organization name
-TOKEN=""                          # this is either your password or a token if 2FA is enabled
-ORGS=""                           # (optional) add each org name separated by spaces. eg: "org1 org2 org3"
-PAGE="1"                          # pagination for repos, currently 100 is the max per page per Github's limits
-DATE=$(date +'%m-%d-%Y')          # date format you'd like your logs saved in
-LOG_LIFE="30"                     # number of days logs will be retained for
-LOCATION="$HOME/github-archive"   # where your archive will be housed
+######################################################################
+## USER CONFIGURATION ##
+# Your username or organization name.
+USERNAME=""
+
+# Your password or a token if 2FA is enabled.
+TOKEN=""
+
+# Enter "enable" to clone/pull personal repos. Default: "enable"
+USER_ON="enable"
+
+######################################################################
+## SCRIPT CONFIGURATION ##
+# Pagination for repos, currently 100 is the max per page per Github's limits (edit this value below).
+# Although you can iterate through various pages of 100 by setting the "PAGES" value to something like: "1 2 3" which would pull up to 300 repos. 
+# Value of at least "1" must be present for script to work. Default: "1"
+PAGES="1"
+
+# How many repos should be pulled per page. Good for only pulling small batches for testing. Github's API allows for a max of 100.
+# Set a limit of something smaller like 10 when testing to avoide cloning/pulling so many. Default: "100"
+PER_PAGE="100"
+
+# Date format you'd like your logs saved in. Default: $(date +'%m-%d-%Y')
+DATE=$(date +'%m-%d-%Y')
+
+# Number of days logs will be retained for. Default: "30"
+LOG_LIFE="30"
+
+# Where your archive will be housed. Default: "$HOME/github-archive"
+LOCATION="$HOME/github-archive"
+
+# Which branch each repo will pull from. Default: "master"
+BRANCH="master"
+
+# Enter "enable" to clone repo and gists. Default: "enable"
+CLONE_ON="enable"
+
+# Enter "enable" to pull repos and gists. Default: "enable"
+PULL_ON="enable"
+
+######################################################################
+## OPTIONAL CONFIGURATION ##
+# Enter "enable" to clone/pull organization repos. Organization names must be entered in the "ORGS" variable below. Default: "disable"
+ORGS_ON="disable"
+
+# Add each org name separated by spaces, eg: "org1 org2 org3". Default: ""
+ORGS=""
+
+# Do you want to clone gists? Enter "enable" to use (must be full word lowercase). Default "disable"
+GISTS_ON="disable"
