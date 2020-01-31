@@ -28,7 +28,7 @@ The power of GitHub Archive comes in its configuration. Maybe you only want to c
 - Personal Gists (on/off)
 - Cloning (on/off)
 - Pulling (on/off)
-- Setup the scope to clone (1-infinite number of repos)
+- Specify the number of repos to include (1 - ∞)
 - Log retention life & filename scheme
 - GitHub Archive location
 - Which branch to pull from
