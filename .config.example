@@ -9,18 +9,18 @@ USERNAME=""
 # Your password or a token if 2FA is enabled.
 TOKEN=""
 
-# Enter "enable" to clone/pull personal repos. Default: "enable"
+# Enter "enable" to clone personal repos (clone_on must also be enabled). Default: "enable"
 USER_ON="enable"
 
 ######################################################################
 ## SCRIPT CONFIGURATION ##
 # Pagination for repos, currently 100 is the max per page per Github's limits (edit this value below).
-# Although you can iterate through various pages of 100 by setting the "PAGES" value to something like: "1 2 3" which would pull up to 300 repos. 
+# However, you can iterate through various pages of 100 by setting the "PAGES" value to something like: "1 2 3" which would pull up to 300 repos. 
 # Value of at least "1" must be present for script to work. Default: "1"
 PAGES="1"
 
-# How many repos should be pulled per page. Good for only pulling small batches for testing. Github's API allows for a max of 100.
-# Set a limit of something smaller like 10 when testing to avoide cloning/pulling so many. Default: "100"
+# How many repos should be pulled per page. This value is great to lower if you'd like to pull small batches for testing. Github's API allows for a max of 100.
+# Set a limit of something smaller such as "10" when testing to avoid cloning/pulling more than needed. Default: "100"
 PER_PAGE="100"
 
 # Date format you'd like your logs saved in. Default: $(date +'%m-%d-%Y')
@@ -49,5 +49,5 @@ ORGS_ON="disable"
 # Add each org name separated by spaces, eg: "org1 org2 org3". Default: ""
 ORGS=""
 
-# Do you want to clone gists? Enter "enable" to use (must be full word lowercase). Default "disable"
+# Do you want to clone/pull gists? (must have pull/clone on also) Enter "enable" to use (must be full word lowercase). Default "disable"
 GISTS_ON="disable"
