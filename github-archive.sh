@@ -23,12 +23,12 @@ cd "$LOCATION"/repos || exit
 # Start archive
 {
     # Clone all repos from the user's account
-    if [[ "$CLONE_ON" == "enable" ]] ; then
+    if [[ "$USER_ON" == "enable" && "$CLONE_ON" == "enable" ]] ; then
         echo -e "Cloning personal repos..."
         for PAGE in ${PAGES[*]} ; do
             mkdir -p "$LOCATION"/repos/"$USERNAME"
             cd "$LOCATION"/repos/"$USERNAME" || exit
-            curl -u "$USERNAME":"$TOKEN" -s "https://api.github.com/users/$USERNAME/repos?page=$PAGE&per_page=$PER_PAGE" |
+            curl -s -H "Authorization: token $TOKEN" "https://api.github.com/user/repos?page=$PAGE&per_page=$PER_PAGE&affiliation=owner" |
             python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["ssh_url"])'
             cd .. || exit
             echo -e "Personal repos cloned!\n"
@@ -41,7 +41,7 @@ cd "$LOCATION"/repos || exit
                     echo -e "Cloning $ORG repos..."
                     mkdir -p "$LOCATION"/repos/"$ORG"
                     cd "$LOCATION"/repos/"$ORG" || exit
-                    curl -u "$USERNAME":"$TOKEN" -s "https://api.github.com/orgs/$ORG/repos?page=$PAGE&per_page=$PER_PAGE" |
+                    curl -s -u "$USERNAME":"$TOKEN" "https://api.github.com/orgs/$ORG/repos?page=$PAGE&per_page=$PER_PAGE" |
                     python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["ssh_url"])'
                     cd .. || exit
                     echo -e "$ORG repos cloned!\n"
@@ -81,13 +81,13 @@ cd "$LOCATION"/repos || exit
         echo -e "Cloning personal gists..."
         for PAGE in ${PAGES[*]} ; do
             cd "$LOCATION"/gists || exit
-            curl -u "$USERNAME":"$TOKEN" -s "https://api.github.com/users/$USERNAME/gists?page=$PAGE&per_page=$PER_PAGE" |
+            curl -s -H "Authorization: token $TOKEN" "https://api.github.com/gists?page=$PAGE&per_page=$PER_PAGE" |
             python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["html_url"])'
             echo -e "Personal gists cloned!\n"
         done
 
         # Pull any changes from each gist in the archive
-        if [[ "$PULL_ON" == "enable" ]] ; then
+        if [[ "$GISTS_ON" == "enable" && "$PULL_ON" == "enable" ]] ; then
             echo -e "Pulling existing gists..."
             for DIR in */ ; do
                 printf '%s\n' "$DIR"
