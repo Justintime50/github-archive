@@ -35,14 +35,14 @@ The power of GitHub Archive comes in its configuration. Maybe you only want to c
 
 ## Install
 
-This project requires that you have Python installed. Python comes built-in on macOS and Linux.
+**NOTE:** This project requires that you have Python installed. Python usually comes built-in on macOS and Linux.
 
 ```bash
 # Copy the configuration file and edit for your needs.
 cp .config.example .config
 ``` 
 
-**For Private Repos:** You must have an SSH key generated on your local machine and added to GitHub.
+**For Private Repos:** You must have an SSH key generated on your local machine and added to your GitHub account.
 
 ### Automating SSH Passphrase Prompt (Recommended)
 

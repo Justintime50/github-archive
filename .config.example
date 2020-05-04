@@ -6,7 +6,7 @@
 # Your username or organization name.
 USERNAME=""
 
-# Your password or a token if 2FA is enabled.
+# Your GitHub personal access token (allows for private repos)
 TOKEN=""
 
 # Enter "enable" to clone personal repos (clone_on must also be enabled). Default: "enable"

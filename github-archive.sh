@@ -41,7 +41,7 @@ cd "$LOCATION"/repos || exit
                     echo -e "Cloning $ORG repos..."
                     mkdir -p "$LOCATION"/repos/"$ORG"
                     cd "$LOCATION"/repos/"$ORG" || exit
-                    curl -s -u "$USERNAME":"$TOKEN" "https://api.github.com/orgs/$ORG/repos?page=$PAGE&per_page=$PER_PAGE" |
+                    curl -s -H "Authorization: token $TOKEN" "https://api.github.com/orgs/$ORG/repos?page=$PAGE&per_page=$PER_PAGE" |
                     python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["ssh_url"])'
                     cd .. || exit
                     echo -e "$ORG repos cloned!\n"
