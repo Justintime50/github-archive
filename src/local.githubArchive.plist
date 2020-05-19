@@ -5,7 +5,10 @@
 		<key>Label</key>
 		<string>local.githubArchive.plist</string>
 		<key>Program</key>
-		<string>/Users/admin/Sites/github-archive/github-archive.sh</string>
+		<array>
+			<string>/usr/local/bin/python3</string>
+			<string>/path/to/github_archive.py</string>
+		</array>
 		<key>StartCalendarInterval</key>
 		<dict>
 			<key>Hour</key>
@@ -14,8 +17,8 @@
 			<integer>0</integer>
 		</dict>
 		<key>StandardErrorPath</key>
-		<string>/Users/admin/Sites/github-archive/logs/log.err</string>
+		<string>/path/to/github-archive/logs/log.err</string>
 		<key>StandardOutPath</key>
-		<string>/Users/admin/Sites/github-archive/logs/log.out</string>
+		<string>/path/to/github-archive/logs/log.out</string>
 	</dict>
 </plist>
