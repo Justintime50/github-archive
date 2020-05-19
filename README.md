@@ -63,18 +63,18 @@ GitHub Archive will clone any repo and gist that doesn't exist locally and pull 
 ### Run Script
 
 ```bash
-python3 github-archive.py
+python3 github_archive.py
 ```
 
 ### Shell Alias
 
 ```bash
 # If using Bash insted of ZSH, use ~/.bash_profile
-echo alias github-archive="/path/to/github-archive.py" >> ~/.zshrc
+echo alias github_archive="/path/to/github_archive.py" >> ~/.zshrc
 source ~/.zshrc
 
 # Usage of alias
-github-archive
+github_archive
 ```
 
 ### Launch Agent (Recommended on macOS)
@@ -97,7 +97,7 @@ launchctl start local.githubArchive.plist
 ```bash
 crontab -e
 
-0 1 * * * /path/to/github-archive.py
+0 1 * * * /path/to/github_archive.py
 ```
 
 ## Legacy Script

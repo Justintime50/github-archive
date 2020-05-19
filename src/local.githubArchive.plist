@@ -7,7 +7,7 @@
 		<key>Program</key>
 		<array>
 			<string>/usr/local/bin/python3</string>
-			<string>/path/to/github-archive.py</string>
+			<string>/path/to/github_archive.py</string>
 		</array>
 		<key>StartCalendarInterval</key>
 		<dict>
