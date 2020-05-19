@@ -1,4 +1,13 @@
-language: bash
+language: python
+
+python:
+    - 3.6
+    - 3.7
+    - 3.8
+
+install:
+    - pip install -r requirements.txt
 
 script: 
-    - shellcheck github-archive.sh
+    - shellcheck src/legacy/github-archive.sh
+    - pylint src/github_archive.py
