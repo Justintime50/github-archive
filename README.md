@@ -2,7 +2,7 @@
 
 # GitHub Archive
 
-Powerful script to clone your entire GitHub instance or save it as an archive.
+A powerful script to concurrently clone your entire GitHub instance or save it as an archive.
 
 [![Build Status](https://travis-ci.com/Justintime50/github-archive.svg?branch=master)](https://travis-ci.com/Justintime50/github-archive)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
@@ -16,30 +16,31 @@ Powerful script to clone your entire GitHub instance or save it as an archive.
 - Clone/pull personal repos (public and private)
 - Clone/pull organization repos (public and private)
 - Clone/pull personal gists (public and private)
-- Iterate over 100's of repos and gists
-- Can be configured to run on a schedule to automate pulling changes
+- Iterate over infinite number of repos and gists concurrently
+- Great use case: Run on a schedule to automate pulling changes or keep a local backup of all your repos
 
 ### Configurable Settings
 
-The power of GitHub Archive comes in its configuration. Maybe you only want to clone/pull your personal public repos or maybe you want to go all out and include private repos from you and all organizations you belong to including your gists. Customize the location repos are saved to, how long logs are kept for and the naming format they'll use. Iterate over 100's of repos and sit back while GitHub Archive does all the work.
+The power of GitHub Archive comes in its configuration. Maybe you only want to clone/pull your personal public repos or maybe you want to go all out and include private repos from you and all organizations you belong to including your gists. Customize the location repos are saved to, how long logs are kept for. Iterate over 100's of repos concurrently and sit back while GitHub Archive does all the work.
 
 - Personal repos (on/off)
 - Organization repos (on/off)
 - Personal Gists (on/off)
 - Cloning (on/off)
 - Pulling (on/off)
-- Specify the number of repos to include (1 - ∞)
-- Log retention life & filename scheme
+- What organizations you'd like included
+- Log retention life
 - GitHub Archive location
 - Which branch to pull from
 
 ## Install
 
-**NOTE:** This project requires that you have Python installed. Python usually comes built-in on macOS and Linux.
-
 ```bash
-# Copy the configuration file and edit for your needs.
-cp .config.example .config
+# Install dependencies
+pip3 install -r requirements.txt
+
+# Copy the environment file and edit for your needs.
+cp .env.example .env
 ``` 
 
 **For Private Repos:** You must have an SSH key generated on your local machine and added to your GitHub account.
@@ -62,14 +63,14 @@ GitHub Archive will clone any repo and gist that doesn't exist locally and pull 
 ### Run Script
 
 ```bash
-./github-archive.sh
+python3 github-archive.py
 ```
 
 ### Shell Alias
 
 ```bash
 # If using Bash insted of ZSH, use ~/.bash_profile
-echo alias github-archive="/path/to/github-archive.sh" >> ~/.zshrc
+echo alias github-archive="/path/to/github-archive.py" >> ~/.zshrc
 source ~/.zshrc
 
 # Usage of alias
@@ -96,5 +97,11 @@ launchctl start local.githubArchive.plist
 ```bash
 crontab -e
 
-0 1 * * * /path/to/github-archive.sh
+0 1 * * * /path/to/github-archive.py
 ```
+
+## Legacy Script
+
+GitHub Archive was initially built with Bash partly because I was into shell scripting at the time and partly because I wanted to keep the script as dependency free as possible. Even still, the Bash script depended on Python. As Python will soon be removed from macOS by default, I decided to rewrite the script in pure Python for two reasons - 1) Once Python is no longer built-in, users would need to install Python anyway making the pure Bash script broken out of the box and 2) Rewriting allowed me to take full advantage of the power of Python. One large benefit of doing this was adding concurrency which is great for users with dozens or hundreds of repos across various organizations. Additional logging and stability improvements were also made.
+
+If you'd like to use or view the legacy script, check out the `src/legacy` folder.
