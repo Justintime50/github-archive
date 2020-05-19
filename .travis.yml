@@ -10,4 +10,4 @@ install:
 
 script: 
     - shellcheck src/legacy/github-archive.sh
-    - pylint src/github-archive.py
+    - pylint src/github_archive.py
