@@ -4,7 +4,7 @@
     <dict>
 		<key>Label</key>
 		<string>local.githubArchive.plist</string>
-		<key>Program</key>
+		<key>ProgramArguments</key>
 		<array>
 			<string>/usr/local/bin/python3</string>
 			<string>/path/to/github_archive.py</string>
