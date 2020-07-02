@@ -21,7 +21,7 @@ A powerful script to concurrently clone your entire GitHub instance or save it a
 
 ### Configurable Settings
 
-The power of GitHub Archive comes in its configuration. Maybe you only want to clone/pull your personal public repos or maybe you want to go all out and include private repos from you and all organizations you belong to including your gists. Customize the location repos are saved to, how long logs are kept for. Iterate over 100's of repos concurrently and sit back while GitHub Archive does all the work.
+The power of GitHub Archive comes in its configuration. Maybe you only want to clone/pull your personal public repos or maybe you want to go all out and include private repos from you and all organizations you belong to including your gists. Iterate over all your repos concurrently and sit back while GitHub Archive does the work.
 
 - Personal repos (on/off)
 - Organization repos (on/off)
@@ -29,21 +29,16 @@ The power of GitHub Archive comes in its configuration. Maybe you only want to c
 - Cloning (on/off)
 - Pulling (on/off)
 - What organizations you'd like included
-- Log retention life
 - GitHub Archive location
-- Which branch to pull from
+- Which branch to clone/pull from
 
 ## Install
 
 ```bash
-# Install dependencies
-pip3 install -r requirements.txt
-
-# Copy the environment file and edit for your needs.
-cp .env.example .env
+pip3 install github-archive
 ``` 
 
-**For Private Repos:** You must have an SSH key generated on your local machine and added to your GitHub account.
+**For Private Repos:** You must have an SSH key generated on your local machine and added to your GitHub account as this tool uses the `ssh_url` to clone/pull. 
 
 ### Automating SSH Passphrase Prompt (Recommended)
 
@@ -56,48 +51,46 @@ ssh-add
 
 ## Usage
 
-GitHub Archive will clone any repo and gist that doesn't exist locally and pull those that do from the master branch of each repo and latest revision of each gist that you have access to - including organizations (if configured). You can run the script once, add an alias, or have it setup with a cron or Launch Agent and run occasionally to clone/pull any changes since it was last run.
+GitHub Archive will clone any repo and gist that doesn't exist locally and pull those that do from the master branch of each repo and latest revision of each gist that you have access to - including organizations (if configured). **Merge Conflicts:** *Be aware that using GitHub Archive could lead to merge conflicts if you do not commit or stash your changes if using these repos as active development repos instead of simply an archive or one-time clone.*
 
-**Merge Conflicts:** *Be aware that using GitHub Archive could lead to merge conflicts if you continually pull the same repos you work on without stashing or committing your changes. It is recommended to be used once for example on a new machine or setup as a separate archive from your development repositories. If you use GitHub Archive to pull in nighly changes from various repos, you should be religious about stashing or committing your changes or you will receive merge conflicts and the script may not complete running.*
+By default, you only need to specify your GitHub token and GitHub Archive will clone/pull your personal repos for you. See below for customization options.
 
-### Run Script
+```
+Basic Usage:
+    GITHUB_ARCHIVE_TOKEN=123... github_archive --user-clone --user-pull
 
-```bash
-python3 github_archive.py
+Advanced Usage:
+    GITHUB_ARCHIVE_TOKEN=123... GITHUB_ARCHIVE_ORGS="org1, org2" GITHUB_ARCHIVE_LOCATION="~/custom_location" \
+    github_archive -uc -up -gc -gp -oc -op -b develop
+
+Options:
+    -uc, --user-clone   Clone personal repos (default: on)
+    -up, --user-pull    Pull personal repos (default: on)
+    -gc, --gists-clone  Clone personal gists (default: off)
+    -gp, --gists-pull   Pull personal gists (default: off)
+    -oc, --orgs-clone   Clone organization repos (default: off)
+    -op, --orgs-pull    Pull organization repos (defaulf: off)
+    -b, --branch        The branch to clone/pull from (default "master")
+    -h, --help          Show usage info on for this tool
+
+Environment variables
+    GITHUB_ARCHIVE_TOKEN - expects a string
+    GITHUB_ARCHIVE_ORGS - expects a string of comma separated orgs. eg: "org1, org2"
+    GITHUB_ARCHIVE_LOCATION - expects a string of an explicit location on your machine. eg: "~/custom_location"
 ```
 
-### Shell Alias
+## Development
+
+Install project with dev depencencies:
 
 ```bash
-# If using Bash insted of ZSH, use ~/.bash_profile
-echo alias github_archive="/path/to/github_archive.py" >> ~/.zshrc
-source ~/.zshrc
-
-# Usage of alias
-github_archive
+pip3 install -e ."[dev]"
 ```
 
-### Launch Agent (Recommended on macOS)
-
-Edit the path in the `plist` file to your script and logs as well as the time to execute, then setup the Launch Agent:
+Lint the project:
 
 ```bash
-# Copy the plist to the Launch Agent directory
-cp local.githubArchive.plist ~/Library/LaunchAgents
-
-# Use `load/unload` to add/remove the script as a Launch Agent
-launchctl load ~/Library/LaunchAgents/local.githubArchive.plist
-
-# To `start/stop` the script from running, use the following
-launchctl start local.githubArchive.plist
-```
-
-### Cron
-
-```bash
-crontab -e
-
-0 1 * * * /path/to/github_archive.py
+pylint githubarchive/*.py
 ```
 
 ## Legacy Script
