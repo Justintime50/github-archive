@@ -6,8 +6,8 @@ python:
     - 3.8
 
 install:
-    - pip install -r requirements.txt
+    - pip3 install -e ."[dev]"
 
 script: 
-    - shellcheck src/legacy/github-archive.sh
-    - pylint src/github_archive.py
+    - shellcheck legacy/github-archive.sh
+    - pylint githubarchive/*.py
