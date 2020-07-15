@@ -1,6 +1,5 @@
 """Import modules"""
-# pylint: disable=W0511,R0912,R0915
-# TODO: Restructure the code to align with what Pylint wants ^
+# pylint: disable=R0912,R0915
 import os
 from datetime import datetime
 import sys
@@ -17,17 +16,17 @@ class Archive():
     parser = argparse.ArgumentParser(
         description='A powerful script to concurrently clone your entire' +
         'GitHub instance or save it as an archive.')
-    parser.add_argument('-uc', '--user_clone', action='store_true',
+    parser.add_argument('-uc', '--user-clone', action='store_true',
                         help='Clone personal repos.')
-    parser.add_argument('-up', '--user_pull', action='store_true',
+    parser.add_argument('-up', '--user-pull', action='store_true',
                         help='Pull personal repos')
-    parser.add_argument('-gc', '--gists_clone', action='store_true',
+    parser.add_argument('-gc', '--gists-clone', action='store_true',
                         help='Clone personal gists')
-    parser.add_argument('-gp', '--gists_pull', action='store_true',
+    parser.add_argument('-gp', '--gists-pull', action='store_true',
                         help='Pull personal gists.')
-    parser.add_argument('-oc', '--orgs_clone', action='store_true',
+    parser.add_argument('-oc', '--orgs-clone', action='store_true',
                         help='Clone organization repos.')
-    parser.add_argument('-op', '--orgs_pull', action='store_true',
+    parser.add_argument('-op', '--orgs-pull', action='store_true',
                         help='Pull organization repos.')
     parser.add_argument('-b', '--branch', default='master',
                         help='Which branch to pull from.')
@@ -153,6 +152,7 @@ def main():
     preamble = f'{start_message}\n{start_time}\n'
     print(preamble)
     Archive.logs(preamble)
+    thread_list = []
 
     # Iterate over each personal repo and concurrently start cloning
     if Archive.args.user_clone is True:
@@ -164,8 +164,10 @@ def main():
                 time.sleep(Archive.BUFFER)
                 path = os.path.join(
                     Archive.LOCATION, 'repos', repo.owner.login, repo.name)
-                Thread(target=Archive.clone_repos, args=(
-                    repo, path,)).start()
+                repo_thread = Thread(target=Archive.clone_repos, args=(
+                    repo, path,))
+                thread_list.append(repo_thread)
+                repo_thread.start()
     else:
         data = '## Skipping cloning user repos... ##'
         print(data)
@@ -181,8 +183,10 @@ def main():
                 time.sleep(Archive.BUFFER)
                 path = os.path.join(
                     Archive.LOCATION, 'repos', repo.owner.login, repo.name)
-                Thread(target=Archive.pull_repos, args=(
-                    repo, path,)).start()
+                repo_thread = Thread(target=Archive.pull_repos, args=(
+                    repo, path,))
+                thread_list.append(repo_thread)
+                repo_thread.start()
     else:
         data = '## Skipping pulling user repos...## '
         print(data)
@@ -197,8 +201,10 @@ def main():
             time.sleep(Archive.BUFFER)
             path = os.path.join(
                 Archive.LOCATION, 'gists', gist.id)
-            Thread(target=Archive.clone_gists, args=(
-                gist, path,)).start()
+            repo_thread = Thread(target=Archive.clone_gists, args=(
+                gist, path,))
+            thread_list.append(repo_thread)
+            repo_thread.start()
     else:
         data = '## Skipping cloning gists... ##'
         print(data)
@@ -213,8 +219,10 @@ def main():
             time.sleep(Archive.BUFFER)
             path = os.path.join(
                 Archive.LOCATION, 'gists', gist.id)
-            Thread(target=Archive.pull_gists, args=(
-                gist, path,)).start()
+            repo_thread = Thread(target=Archive.pull_gists, args=(
+                gist, path,))
+            thread_list.append(repo_thread)
+            repo_thread.start()
     else:
         data = '## Skipping pulling gists... ##'
         print(data)
@@ -238,8 +246,10 @@ def main():
                     time.sleep(Archive.BUFFER)
                     path = os.path.join(
                         Archive.LOCATION, 'repos', repo.owner.login, repo.name)
-                    Thread(target=Archive.clone_repos, args=(
-                        repo, path,)).start()
+                    repo_thread = Thread(target=Archive.clone_repos, args=(
+                        repo, path,))
+                    thread_list.append(repo_thread)
+                    repo_thread.start()
         else:
             data = '## Skipping cloning org repos... ##'
             print(data)
@@ -257,15 +267,17 @@ def main():
                     time.sleep(Archive.BUFFER)
                     path = os.path.join(
                         Archive.LOCATION, 'repos', repo.owner.login, repo.name)
-                    Thread(target=Archive.pull_repos, args=(
-                        repo, path,)).start()
+                    repo_thread = Thread(target=Archive.pull_repos, args=(
+                        repo, path,))
+                    thread_list.append(repo_thread)
+                    repo_thread.start()
         else:
             data = '## Skipping pulling org repos... ##'
             print(data)
             Archive.logs(data)
 
-    # TODO: Use threading.wait to check if all processes are finished
-    time.sleep(6)
+    for thread in thread_list:
+        thread.join()
     execution_time = f'Execution time: {datetime.now() - start_time}.'
     finish_message = f'GitHub Archive complete! {execution_time}'
     print(finish_message)

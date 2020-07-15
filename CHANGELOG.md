@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.1.1 (2020-07-14)
+
+* Fixed the long argument names which had underscores intead of hyphens
+* Fixed a bug where threads were not waiting at the end of the script before printing the completion message
+
 ## 2.1.0 (2020-07-01)
 
 * Replaced `requirements.txt` with `setup.py`
