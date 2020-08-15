@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.1.2 (2020-8-14)
+
+* Fixed the script's entrypoint (PyPi installs work again)
+
 ## 2.1.1 (2020-07-14)
 
 * Fixed the long argument names which had underscores intead of hyphens

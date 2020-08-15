@@ -8,7 +8,7 @@ A powerful script to concurrently clone your entire GitHub instance or save it a
 [![Pypi](https://img.shields.io/pypi/v/github-archive)](https://pypi.org/project/github-archive)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 
-<img src="assets/showcase.gif">
+<img src="assets/showcase.gif" alt="Showcase">
 
 </div>
 
@@ -62,7 +62,7 @@ Basic Usage:
 
 Advanced Usage:
     GITHUB_ARCHIVE_TOKEN=123... GITHUB_ARCHIVE_ORGS="org1, org2" GITHUB_ARCHIVE_LOCATION="~/custom_location" \
-    github_archive -uc -up -gc -gp -oc -op -b develop
+    github-archive -uc -up -gc -gp -oc -op -b develop
 
 Options:
     -uc, --user-clone   Clone personal repos (default: on)

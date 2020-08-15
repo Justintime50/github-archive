@@ -10,7 +10,7 @@ REQUIREMENTS = [
 
 setuptools.setup(
     name='github-archive',
-    version='2.1.1',
+    version='2.1.2',
     description='A powerful script to concurrently clone your entire GitHub instance or save it as an archive.',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -31,7 +31,7 @@ setuptools.setup(
     },
     entry_points={
         'console_scripts': [
-            'github_archive=githubarchive.github_archive:main'
+            'github-archive=githubarchive.github_archive:main'
         ]
     },
     python_requires='>=3.6',
