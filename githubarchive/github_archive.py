@@ -11,25 +11,54 @@ from github import Github
 
 
 class Archive():
-    """All GitHub Archive methods"""
-    # Setup arguments
+    """All GitHub Archive methods
+    """
     parser = argparse.ArgumentParser(
-        description='A powerful script to concurrently clone your entire' +
-        'GitHub instance or save it as an archive.')
-    parser.add_argument('-uc', '--user-clone', action='store_true',
-                        help='Clone personal repos.')
-    parser.add_argument('-up', '--user-pull', action='store_true',
-                        help='Pull personal repos')
-    parser.add_argument('-gc', '--gists-clone', action='store_true',
-                        help='Clone personal gists')
-    parser.add_argument('-gp', '--gists-pull', action='store_true',
-                        help='Pull personal gists.')
-    parser.add_argument('-oc', '--orgs-clone', action='store_true',
-                        help='Clone organization repos.')
-    parser.add_argument('-op', '--orgs-pull', action='store_true',
-                        help='Pull organization repos.')
-    parser.add_argument('-b', '--branch', default='master',
-                        help='Which branch to pull from.')
+        description=('A powerful script to concurrently clone your entire'
+                     ' GitHub instance or save it as an archive.')
+    )
+    parser.add_argument(
+        '-uc',
+        '--user-clone',
+        action='store_true',
+        help='Clone personal repos.',
+    )
+    parser.add_argument(
+        '-up',
+        '--user-pull',
+        action='store_true',
+        help='Pull personal repos',
+    )
+    parser.add_argument(
+        '-gc',
+        '--gists-clone',
+        action='store_true',
+        help='Clone personal gists',
+    )
+    parser.add_argument(
+        '-gp',
+        '--gists-pull',
+        action='store_true',
+        help='Pull personal gists.',
+    )
+    parser.add_argument(
+        '-oc',
+        '--orgs-clone',
+        action='store_true',
+        help='Clone organization repos.',
+    )
+    parser.add_argument(
+        '-op',
+        '--orgs-pull',
+        action='store_true',
+        help='Pull organization repos.',
+    )
+    parser.add_argument(
+        '-b',
+        '--branch',
+        default='master',
+        help='Which branch to pull from.',
+    )
     args = parser.parse_args()
 
     # Environment variables
@@ -37,7 +66,8 @@ class Archive():
     ORG_LIST = os.getenv('GITHUB_ARCHIVE_ORGS', '')
     ORGS = ORG_LIST.split(', ')
     LOCATION = os.path.expanduser(
-        os.getenv('GITHUB_ARCHIVE_LOCATION', '~/github-archive'))
+        os.getenv('GITHUB_ARCHIVE_LOCATION', '~/github-archive')
+    )
 
     # Reusable variables
     USER = Github(TOKEN)
@@ -50,7 +80,8 @@ class Archive():
 
     @classmethod
     def clone_repos(cls, repo, path):
-        """Clone repos that don't exist"""
+        """Clone repos that don't exist
+        """
         if not os.path.exists(path):
             try:
                 git = subprocess.check_output(
@@ -73,7 +104,8 @@ class Archive():
 
     @classmethod
     def pull_repos(cls, repo, path):
-        """Pull changes for projects that are cloned"""
+        """Pull changes for projects that are cloned
+        """
         try:
             git = subprocess.check_output(
                 f'cd {path} && git pull --ff-only',
@@ -90,7 +122,8 @@ class Archive():
 
     @classmethod
     def clone_gists(cls, gist, path):
-        """Clone gists"""
+        """Clone gists
+        """
         if not os.path.exists(os.path.join(Archive.LOCATION, 'gists')):
             os.makedirs(os.path.join(Archive.LOCATION, 'gists'))
         if not os.path.exists(path):
@@ -114,7 +147,8 @@ class Archive():
 
     @classmethod
     def pull_gists(cls, gist, path):
-        """Pull Gists"""
+        """Pull Gists
+        """
         if not os.path.exists(os.path.join(Archive.LOCATION, 'gists')):
             os.makedirs(os.path.join(Archive.LOCATION, 'gists'))
         try:
@@ -133,7 +167,8 @@ class Archive():
 
     @classmethod
     def logs(cls, data):
-        """Write output to a log"""
+        """Write output to a log
+        """
         if not os.path.exists(Archive.LOG_PATH):
             os.makedirs(Archive.LOG_PATH)
         with open(Archive.LOG_FILE, 'a') as log:
@@ -141,7 +176,8 @@ class Archive():
 
 
 def main():
-    """Run the based on configuration script"""
+    """Run the based on configuration script
+    """
     if not os.path.exists(Archive.LOCATION):
         os.makedirs(Archive.LOCATION)
     if not Archive.TOKEN:
