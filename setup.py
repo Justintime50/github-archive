@@ -10,8 +10,8 @@ REQUIREMENTS = [
 
 setuptools.setup(
     name='github-archive',
-    version='2.1.2',
-    description='A powerful script to concurrently clone your entire GitHub instance or save it as an archive.',
+    version='3.0.0',
+    description='A powerful script to concurrently clone your entire GitHub instance or save it as an archive.',  # noqa
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='http://github.com/justintime50/github-archive',
@@ -26,7 +26,11 @@ setuptools.setup(
     install_requires=REQUIREMENTS,
     extras_require={
         'dev': [
-            'pylint >= 2.5.0',
+            'pytest >= 6.0.0',
+            'pytest-cov >= 2.10.0',
+            'coveralls >= 2.1.2',
+            'flake8 >= 3.8.0',
+            'mock >= 4.0.0',
         ]
     },
     entry_points={

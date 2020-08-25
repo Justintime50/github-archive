@@ -5,8 +5,9 @@
 A powerful script to concurrently clone your entire GitHub instance or save it as an archive.
 
 [![Build Status](https://travis-ci.com/Justintime50/github-archive.svg?branch=master)](https://travis-ci.com/Justintime50/github-archive)
-[![Pypi](https://img.shields.io/pypi/v/github-archive)](https://pypi.org/project/github-archive)
-[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+[![Coverage Status](https://coveralls.io/repos/github/Justintime50/github-archive/badge.svg?branch=master)](https://coveralls.io/github/Justintime50/github-archive?branch=master)
+[![PyPi](https://img.shields.io/pypi/v/github-archive)](https://pypi.org/project/github-archive)
+[![Licence](https://img.shields.io/github/license/justintime50/GitHub-archive)](https://opensource.org/licenses/mit-license.php)
 
 <img src="assets/showcase.gif" alt="Showcase">
 
