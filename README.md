@@ -59,10 +59,10 @@ By default, you only need to specify your GitHub token and GitHub Archive will c
 
 ```
 Basic Usage:
-    GITHUB_ARCHIVE_TOKEN=123... github_archive --user-clone --user-pull
+    GITHUB_TOKEN=123... github_archive --user-clone --user-pull
 
 Advanced Usage:
-    GITHUB_ARCHIVE_TOKEN=123... GITHUB_ARCHIVE_ORGS="org1, org2" GITHUB_ARCHIVE_LOCATION="~/custom_location" \
+    GITHUB_TOKEN=123... GITHUB_ARCHIVE_ORGS="org1, org2" GITHUB_ARCHIVE_LOCATION="~/custom_location" \
     github-archive -uc -up -gc -gp -oc -op -b develop
 
 Options:
