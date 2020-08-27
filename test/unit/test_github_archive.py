@@ -1,23 +1,17 @@
 import mock
-import argparse
+import pytest
 from githubarchive import github_archive
 
 
-@mock.patch('argparse.ArgumentParser.parse_args',
-            return_value=argparse.Namespace(
-                test='test'
-                )
-            )
-def test_cli(mock_args):
-    # TODO: Mock this better to actually test args are being passed
-    github_archive.GitHubArchiveCLI()
+@mock.patch('githubarchive.github_archive.GITHUB_TOKEN', None)
+def test_github_archive_init_no_github_token():
+    message = 'Error: GitHub GITHUB_TOKEN must be present to run github-archive.'  # noqa
+    with pytest.raises(SystemExit) as error:
+        github_archive.GitHubArchive()
+    assert message in str(error.value)
 
 
-def test_generate_log():
-    """Test generating a log and reading its contents
-    """
-    content = 'Test log content'
-    mock_open = mock.mock_open(read_data=content)
-    with mock.patch('builtins.open', mock_open):
-        result = github_archive.GitHubArchive.generate_log('test.log')
-    assert content in result
+@pytest.mark.skip('Need to mock logger')
+@mock.patch('githubarchive.github_archive.LOGGER', 'logging.getLogger(__name__)')  # noqa
+def test_github_archive_init_logger():
+    github_archive.GitHubArchive()
