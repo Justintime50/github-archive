@@ -1,14 +1,14 @@
 import os
 from datetime import datetime
-import sys
 import subprocess
 import time
 import argparse
 import logging
+import logging.handlers
 from threading import Thread
 from github import Github
 
-# Environment variables
+# Environment global variables
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 ORG_LIST = os.getenv('GITHUB_ARCHIVE_ORGS', '')
 ORGS = ORG_LIST.split(', ')
@@ -17,14 +17,19 @@ GITHUB_ARCHIVE_LOCATION = os.path.expanduser(
 )
 LOGGER = logging.getLogger(__name__)
 
-# Reusable variables
+# Reusable global variables
 USER = Github(GITHUB_TOKEN)
+# TODO: Add user/password authentication (will need to pull from non-ssh url)
 USER_REPOS = USER.get_user().get_repos()
 USER_GISTS = USER.get_user().get_gists()
 LOG_PATH = os.path.join(GITHUB_ARCHIVE_LOCATION, 'logs')
 LOG_FILE = os.path.join(LOG_PATH, 'github-archive.log')
-BUFFER = 0.1  # Buffer time in between each request - helps with rate limiting
-GIT_TIMEOUT = 180  # Number of seconds before a git operation will timeout
+LOG_MAX_BYTES = int(os.getenv('GITHUB_ARCHIVE_LOG_MAX_BYTES', 1000000))  # 1mb
+LOG_BACKUP_COUNT = int(os.getenv('GITHUB_ARCHIVE_LOG_BACKUP_COUNT', 5))
+# BUFFER = Buffer time in between each request - helps with rate limiting
+BUFFER = float(os.getenv('GITHUB_ARCHIVE_BUFFER', 0.1))
+# GIT_TIMEOUT = Number of seconds before a git operation will timeout
+GIT_TIMEOUT = int(os.getenv('GITHUB_ARCHIVE_TIMEOUT', 180))
 
 
 class GitHubArchiveCLI():
@@ -100,31 +105,39 @@ class GitHubArchiveCLI():
 
 class GitHubArchive():
     def __init__(self):
-        # Ensure everything is in order before running the tool
+        """Initialize the tool and ensure everything is
+        in order before running any logic
+        """
+        if not GITHUB_TOKEN:
+            message = 'GITHUB_TOKEN must be present to run github-archive.'
+            LOGGER.critical(message)
+            raise ValueError(message)
+        # Setup project directories
         if not os.path.exists(GITHUB_ARCHIVE_LOCATION):
             os.makedirs(os.path.join(GITHUB_ARCHIVE_LOCATION, 'repos'))
         if not os.path.exists(GITHUB_ARCHIVE_LOCATION):
             os.makedirs(os.path.join(GITHUB_ARCHIVE_LOCATION, 'gists'))
         if not os.path.exists(LOG_PATH):
             os.makedirs(LOG_PATH)
-        if not GITHUB_TOKEN:
-            sys.exit(
-                'Error: GitHub GITHUB_TOKEN must be present to run github-archive.'  # noqa
-            )
+        # Setup project logging (to console and log file)
         LOGGER.setLevel(logging.INFO)
-        handler = logging.FileHandler(LOG_FILE)
-        handler.setLevel(logging.INFO)
-        formatter = logging.Formatter("%(asctime)s - %(message)s")
+        handler = logging.handlers.RotatingFileHandler(
+            LOG_FILE,
+            maxBytes=LOG_MAX_BYTES,
+            backupCount=LOG_BACKUP_COUNT
+        )
+        formatter = logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s"
+        )
         handler.setFormatter(formatter)
-        LOGGER.addHandler(handler)
         LOGGER.addHandler(logging.StreamHandler())
-        # TODO: Add the ability for the log file to rollover when it's too big or has too many entries  # noqa
+        LOGGER.addHandler(handler)
 
-    @classmethod
+    @ classmethod
     def run(
         cls, user_clone, user_pull, gists_clone, gists_pull,
             orgs_clone, orgs_pull, branch):
-        """Run the based on configuration script
+        """Run the tool based on the arguments passed
         """
         clone = 'clone'
         pull = 'pull'
@@ -133,77 +146,71 @@ class GitHubArchive():
 
         # Iterate over each personal repo and concurrently clone it
         if user_clone is True:
-            message = '# Cloning personal repos...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Cloning personal repos...\n')
             cls.iterate_repos(clone, branch)
         else:
-            message = '# Skipping cloning user repos...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Skipping cloning user repos...\n')
 
         # Iterate over each personal repo and concurrently pull it
         if user_pull is True:
-            message = '# Pulling personal repos...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Pulling personal repos...\n')
             cls.iterate_repos(pull, branch)
         else:
-            message = '# Skipping pulling user repos...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Skipping pulling user repos...\n')
 
         # Check if org variable is set
         if ORG_LIST == '':
-            message = '# Skipping org repos, no orgs configured...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Skipping org repos, no orgs configured...\n')
 
         # Iterate over each org repo and concurrently clone it
         if orgs_clone is True:
-            message = '# Cloning org repos...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Cloning org repos...\n')
             cls.iterate_orgs(clone, branch)
         else:
-            message = '# Skipping cloning org repos...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Skipping cloning org repos...\n')
 
         # Iterate over each org repo and concurrently pull it
         if orgs_pull is True:
-            message = '# Pulling org repos...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Pulling org repos...\n')
             cls.iterate_orgs(pull, branch)
         else:
-            message = '# Skipping cloning org repos...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Skipping cloning org repos...\n')
 
         # Iterate over each gist and concurrently clone it
         if gists_clone is True:
-            message = '# Cloning gists...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Cloning gists...\n')
             cls.iterate_gists(clone)
         else:
-            message = '# Skipping cloning gists...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Skipping cloning gists...\n')
 
         # Iterate over each gist and concurrently pull it
         if gists_pull is True:
-            message = '# Pulling gists...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Pulling gists...\n')
             cls.iterate_gists(pull)
         else:
-            message = '# Skipping pulling gists...\n'
-            LOGGER.info(message)
+            LOGGER.info('# Skipping pulling gists...\n')
 
         execution_time = f'Execution time: {datetime.now() - start_time}.'
         finish_message = f'GitHub Archive complete! {execution_time}'
         LOGGER.info(finish_message)
 
-    @classmethod
-    def iterate_repos(cls, switch, branch):
+    @ classmethod
+    def iterate_repos(cls, operation, branch):
         """Iterate over each repository
         """
         thread_list = []
         for repo in USER_REPOS:
+            # We check the owner name here to ensure that we only iterate
+            # through the user's personal repos which will excludes orgs
+            # that can instead be iterated by passing the "--clone_orgs"
+            # or "--pull_orgs" flags to allow for granular usage
             if repo.owner.name == USER.get_user().name:
                 time.sleep(BUFFER)
                 path = os.path.join(
-                    GITHUB_ARCHIVE_LOCATION, 'repos', repo.owner.login, repo.name  # noqa
+                    GITHUB_ARCHIVE_LOCATION,
+                    'repos',
+                    repo.owner.login,
+                    repo.name
                 )
                 repo_thread = Thread(
                     target=cls.archive_repo,
@@ -211,7 +218,7 @@ class GitHubArchive():
                         repo,
                         branch,
                         path,
-                        switch,
+                        operation,
                     )
                 )
                 thread_list.append(repo_thread)
@@ -221,7 +228,7 @@ class GitHubArchive():
         return True
 
     @classmethod
-    def iterate_orgs(cls, switch, branch):
+    def iterate_orgs(cls, operation, branch):
         """Iterate over each organization and its repos
         """
         thread_list = []
@@ -232,7 +239,10 @@ class GitHubArchive():
             for repo in git_org:
                 time.sleep(BUFFER)
                 path = os.path.join(
-                    GITHUB_ARCHIVE_LOCATION, 'repos', repo.owner.login, repo.name  # noqa
+                    GITHUB_ARCHIVE_LOCATION,
+                    'repos',
+                    repo.owner.login,
+                    repo.name
                 )
                 repo_thread = Thread(
                     target=cls.archive_repo,
@@ -240,7 +250,7 @@ class GitHubArchive():
                         repo,
                         branch,
                         path,
-                        switch,
+                        operation,
                     )
                 )
                 thread_list.append(repo_thread)
@@ -250,7 +260,7 @@ class GitHubArchive():
         return True
 
     @classmethod
-    def iterate_gists(cls, switch):
+    def iterate_gists(cls, operation):
         """Iterate over each gist
         """
         thread_list = []
@@ -263,7 +273,7 @@ class GitHubArchive():
                 args=(
                     gist,
                     path,
-                    switch,
+                    operation,
                 )
             )
             thread_list.append(repo_thread)
@@ -273,18 +283,20 @@ class GitHubArchive():
         return True
 
     @classmethod
-    def archive_repo(cls, repo, branch, path, switch):
-        """Clone and pull repos based on the switch passed
+    def archive_repo(cls, repo, branch, path, operation):
+        """Clone and pull repos based on the operation passed
         """
-        if switch == 'clone':
+        if operation == 'clone':
             command = (
                 f'git clone --branch={branch}'
                 f' {repo.ssh_url} {path}'
             )
-        elif switch == 'pull':
+        elif operation == 'pull':
             command = f'cd {path} && git pull --rebase'
         else:
-            sys.exit(f'Could not determine what action to take with {repo}.')
+            LOGGER.error(
+                f'Could not determine what action to take with {repo}.'
+            )
 
         try:
             subprocess.run(
@@ -295,29 +307,26 @@ class GitHubArchive():
                 check=True,
                 timeout=int(GIT_TIMEOUT)
             )
-            message = f'Repo: {repo.name} {switch} success!'
-            LOGGER.info(message)
+            LOGGER.info(f'Repo: {repo.name} {operation} success!')
         except subprocess.TimeoutExpired:
-            # TODO: Why do we sys.exit here but log and keep going below?
-            sys.exit(
-                f'Error: github-archive timed out archiving {repo.name}.'
-            )
+            LOGGER.error(f'Git operation timed out archiving {repo.name}.')
         except subprocess.CalledProcessError as error:
-            # TODO: If it cannot clone due to the folder being there, show a better error  # noqa
-            data = f'Failed to {switch} {repo.name}\n{error}'
-            LOGGER.error(data)
+            # TODO: If we cannot clone due to the project already being clone, show a better error  # noqa
+            LOGGER.error(f'Failed to {operation} {repo.name}\n{error}')
         return True
 
     @classmethod
-    def archive_gist(cls, gist, path, switch):
-        """Clone and pull gists based on the switch passed
+    def archive_gist(cls, gist, path, operation):
+        """Clone and pull gists based on the operation passed
         """
-        if switch == 'clone':
+        if operation == 'clone':
             command = f'git clone {gist.html_url} {path}'
-        elif switch == 'pull':
+        elif operation == 'pull':
             command = f'cd {path} && git pull --rebase'
         else:
-            sys.exit(f'Could not determine what action to take with {gist}.')
+            LOGGER.warning(
+                f'Could not determine what action to take with {gist}.'
+            )
 
         try:
             subprocess.run(
@@ -328,14 +337,14 @@ class GitHubArchive():
                 check=True,
                 timeout=int(GIT_TIMEOUT)
             )
-            message = f'Gist: {gist.id} {switch} success!'
-            LOGGER.info(message)
+            LOGGER.info(f'Gist: {gist.id} {operation} success!')
         except subprocess.TimeoutExpired:
-            # TODO: Why do we sys.exit here but log and keep going below?
-            sys.exit(f'Error: github-archive timed out archiving {gist.id}.')
+            LOGGER.error(
+                f'Error: github-archive timed out archiving {gist.id}.'
+            )
         except subprocess.CalledProcessError as error:
-            message = f'Failed to {switch} {gist.id}\n{error}'
-            LOGGER.error(message)
+            # TODO: If we cannot clone due to the project already being clone, show a better error  # noqa
+            LOGGER.error(f'Failed to {operation} {gist.id}\n{error}')
         return True
 
 
