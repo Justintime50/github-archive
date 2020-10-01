@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 3.0.0 (2020-10-01)
+
+* Refactored the entire codebase to be more pythonic, simpler, DRY, and documented (closes #15)
+* Better error handling by raising errors where applicable and switching from a homegrown logger to the built-in Python logger (closes #12)
+* Added unit tests and test coverage (closes #14)
+* Added various additional configuration options
+* Automated releasing on PyPi via Travis
+* Various bug fixes throughout
+* Better documentation on exactly what is possible with this tool
+* Added a Makefile
+* Adjusted most of the command and option names to be more uniform and explicit
+
 ## 2.1.2 (2020-8-14)
 
 * Fixed the script's entrypoint (PyPi installs work again)
