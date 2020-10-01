@@ -10,9 +10,9 @@ install:
 
 script:
     - shellcheck legacy/github-archive.sh
-    - flake8 githubarchive/*.py
+    - flake8 github_archive/*.py
     - flake8 test/*.py
-    - pytest --cov=githubarchive
+    - pytest --cov=github_archive
 
 deploy:
     provider: pypi

@@ -5,7 +5,6 @@ with open("README.md", "r") as fh:
 
 REQUIREMENTS = [
     'PyGithub >= 1.51',
-    'python-dotenv >= 0.10.0'
 ]
 
 setuptools.setup(
@@ -35,7 +34,7 @@ setuptools.setup(
     },
     entry_points={
         'console_scripts': [
-            'github-archive=githubarchive.github_archive:main'
+            'github-archive=github_archive.cli:main'
         ]
     },
     python_requires='>=3.6',

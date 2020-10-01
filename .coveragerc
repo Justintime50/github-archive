@@ -1,5 +1,7 @@
 [report]
 exclude_lines =
     if __name__ == '__main__':
-    main()
-    GitHubArchiveCLI()
+    CLI()
+
+[run]
+omit = github_archive/cli.py

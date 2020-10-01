@@ -23,11 +23,15 @@ clean:
 
 ## lint - Lint the project
 lint:
-	venv/bin/flake8 githubarchive/*.py
+	venv/bin/flake8 github_archive/*.py
 	venv/bin/flake8 test/*.py
 
 ## test - Test the project
 test:
 	venv/bin/pytest
 
-.PHONY: help install clean lint test 
+## coverage - Test the project and generate an HTML coverage report
+coverage:
+	venv/bin/pytest --cov=github_archive --cov-branch --cov-report=html
+
+.PHONY: help install clean lint test coverage
