@@ -73,5 +73,9 @@ class CLI():
         )
 
 
-if __name__ == '__main__':
+def main():
     CLI()._run()
+
+
+if __name__ == '__main__':
+    main()
