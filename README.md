@@ -29,7 +29,7 @@ The power of GitHub Archive comes in its configuration. Maybe you only want to c
 
 * Personal repos cloning/pulling
 * Organization repos cloning/pulling
-* Personal Gists cloning/pulling
+* Gists cloning/pulling
 * List of organizations to include
 * Which branch to clone/pull from
 * A host of environment variables to tweak GitHub Archive even further to meet your needs
@@ -60,7 +60,7 @@ ssh-add
 
 **SSH Key:** You must have an SSH key generated on your local machine and added to your GitHub account as this tool uses the `ssh_url` to clone/pull. 
 
-**Merge Conflicts:** *Be aware that using GitHub Archive could lead to merge conflicts if you do not commit or stash your changes if using these repos as active development repos instead of simply an archive or one-time clone.*
+**Merge Conflicts:** Be aware that using GitHub Archive could lead to merge conflicts if you do not commit or stash your changes if using these repos as active development repos instead of simply an archive or one-time clone.
 
 ```
 Basic Usage:
@@ -81,7 +81,7 @@ Options:
     -b BRANCH, --branch BRANCH
                             Which branch to pull from.
 
-Environment Variables
+Environment Variables:
     GITHUB_TOKEN                    expects a string of your GitHub Token
     GITHUB_ARCHIVE_ORGS             expects a string of comma separated orgs. eg: "org1, org2"
     GITHUB_ARCHIVE_LOCATION         expects a string of an explicit location on your machine (eg: "~/custom_location"). Default: ~/github-archive
