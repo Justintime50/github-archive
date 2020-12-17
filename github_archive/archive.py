@@ -8,16 +8,13 @@ from github import Github
 from github_archive.logger import Logger
 
 
-# Environment global variables
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 ORG_LIST = os.getenv('GITHUB_ARCHIVE_ORGS', '')
-ORGS = ORG_LIST.split(', ')
+ORGS = ORG_LIST.split(',')
 GITHUB_ARCHIVE_LOCATION = os.path.expanduser(
     os.getenv('GITHUB_ARCHIVE_LOCATION', '~/github-archive')
 )
 LOGGER = logging.getLogger(__name__)
-
-# Reusable global variables
 USER = Github(GITHUB_TOKEN).get_user()
 # TODO: Add user/password authentication (will need to pull from non-ssh url)
 # BUFFER is the time in between each request - helps with rate limiting
@@ -27,11 +24,12 @@ GIT_TIMEOUT = int(os.getenv('GITHUB_ARCHIVE_TIMEOUT', 180))
 
 
 class GithubArchive():
-    @classmethod
-    def run(cls, user_clone, user_pull, gists_clone, gists_pull, orgs_clone, orgs_pull, branch):
+    @staticmethod
+    def run(user_clone=False, user_pull=False, gists_clone=False, gists_pull=False, orgs_clone=False,
+            orgs_pull=False, branch=None):
         """Run the tool based on the arguments passed
         """
-        cls.initialize_project()
+        GithubArchive.initialize_project()
         Logger._setup_logging(LOGGER)
         clone = 'clone'
         pull = 'pull'
@@ -39,55 +37,55 @@ class GithubArchive():
         start_time = datetime.now()
 
         if user_clone or user_pull:
-            repos = cls.get_repos()
+            repos = GithubArchive.get_repos()
 
         # Iterate over each personal repo and concurrently clone it
         if user_clone is True:
             LOGGER.info('# Cloning personal repos...\n')
-            cls.determine_repo_context(repos, 'user', clone, branch)
+            GithubArchive.determine_repo_context(repos, 'user', clone, branch)
         else:
             LOGGER.info('# Skipping cloning user repos...\n')
 
         # Iterate over each personal repo and concurrently pull it
         if user_pull is True:
             LOGGER.info('# Pulling personal repos...\n')
-            cls.determine_repo_context(repos, 'user', pull, branch)
+            GithubArchive.determine_repo_context(repos, 'user', pull, branch)
         else:
             LOGGER.info('# Skipping pulling user repos...\n')
 
         # Check if org list is populated
         if ORG_LIST != '':
             if orgs_clone or orgs_pull:
-                org_repos = cls.get_all_org_repos()
+                org_repos = GithubArchive.get_all_org_repos()
             # Iterate over each org repo and concurrently clone it
             if orgs_clone is True:
                 LOGGER.info('# Cloning org repos...\n')
-                cls.determine_repo_context(org_repos, 'orgs', clone, branch)
+                GithubArchive.determine_repo_context(org_repos, 'orgs', clone, branch)
             else:
                 LOGGER.info('# Skipping cloning org repos...\n')
             # Iterate over each org repo and concurrently pull it
             if orgs_pull is True:
                 LOGGER.info('# Pulling org repos...\n')
-                cls.determine_repo_context(org_repos, 'orgs', pull, branch)
+                GithubArchive.determine_repo_context(org_repos, 'orgs', pull, branch)
             else:
                 LOGGER.info('# Skipping cloning org repos...\n')
         else:
             LOGGER.info('# Skipping org repos, no orgs configured...\n')
 
         if gists_clone or gists_pull:
-            gists = cls.get_gists()
+            gists = GithubArchive.get_gists()
 
         # Iterate over each gist and concurrently clone it
         if gists_clone is True:
             LOGGER.info('# Cloning gists...\n')
-            cls.iterate_gists(gists, clone)
+            GithubArchive.iterate_gists(gists, clone)
         else:
             LOGGER.info('# Skipping cloning gists...\n')
 
         # Iterate over each gist and concurrently pull it
         if gists_pull is True:
             LOGGER.info('# Pulling gists...\n')
-            cls.iterate_gists(gists, pull)
+            GithubArchive.iterate_gists(gists, pull)
         else:
             LOGGER.info('# Skipping pulling gists...\n')
 
@@ -95,8 +93,8 @@ class GithubArchive():
         finish_message = f'GitHub Archive complete! {execution_time}\n'
         LOGGER.info(finish_message)
 
-    @classmethod
-    def initialize_project(cls):
+    @staticmethod
+    def initialize_project():
         """Initialize the tool and ensure everything is
         in order before running any logic
         """
@@ -109,15 +107,15 @@ class GithubArchive():
         if not os.path.exists(GITHUB_ARCHIVE_LOCATION):
             os.makedirs(os.path.join(GITHUB_ARCHIVE_LOCATION, 'gists'))
 
-    @classmethod
-    def get_repos(cls):
+    @staticmethod
+    def get_repos():
         """Retrieve repos of a given user
         """
         repos = USER.get_repos()
         return repos
 
-    @classmethod
-    def get_all_org_repos(cls):
+    @staticmethod
+    def get_all_org_repos():
         """Retrieve repos of all orgs in the orgs list
         """
         all_org_repos = []
@@ -125,30 +123,30 @@ class GithubArchive():
             all_org_repos.append(Github(GITHUB_TOKEN).get_organization(org.strip()).get_repos())
         return all_org_repos
 
-    @classmethod
-    def get_gists(cls):
+    @staticmethod
+    def get_gists():
         """Retrieve gists of a given user
         """
         gists = USER.get_gists()
         return gists
 
-    @classmethod
-    def determine_repo_context(cls, repos, context, operation, branch):
+    @staticmethod
+    def determine_repo_context(repos, context, operation, branch=None):
         """Determine if a repo is from a user or org
         and route the logic accordingly
         """
         if context == 'orgs':
             for single_org_repos in repos:
-                cls.iterate_repos(single_org_repos, context, operation, branch)
+                GithubArchive.iterate_repos(single_org_repos, context, operation, branch)
         elif context == 'user':
-            cls.iterate_repos(repos, context, operation, branch)
+            GithubArchive.iterate_repos(repos, context, operation, branch)
         else:
             message = f'Could not determine what action to take with {context}.'
             LOGGER.error(message)
             raise ValueError(message)
 
-    @classmethod
-    def iterate_repos(cls, repos, context, operation, branch):
+    @staticmethod
+    def iterate_repos(repos, context, operation, branch=None):
         """Iterate over each repository
         """
         thread_list = []
@@ -163,12 +161,12 @@ class GithubArchive():
                 time.sleep(BUFFER)
                 path = os.path.join(GITHUB_ARCHIVE_LOCATION, 'repos', repo.owner.login, repo.name)
                 repo_thread = Thread(
-                    target=cls.archive_repo,
+                    target=GithubArchive.archive_repo,
                     args=(
                         repo,
-                        branch,
                         path,
                         operation,
+                        branch,
                     )
                 )
                 thread_list.append(repo_thread)
@@ -176,8 +174,8 @@ class GithubArchive():
         for thread in thread_list:
             thread.join()
 
-    @classmethod
-    def iterate_gists(cls, gists, operation):
+    @staticmethod
+    def iterate_gists(gists, operation):
         """Iterate over each gist
         """
         thread_list = []
@@ -185,7 +183,7 @@ class GithubArchive():
             time.sleep(BUFFER)
             path = os.path.join(GITHUB_ARCHIVE_LOCATION, 'gists', gist.id)
             repo_thread = Thread(
-                target=cls.archive_gist,
+                target=GithubArchive.archive_gist,
                 args=(
                     gist,
                     path,
@@ -197,15 +195,16 @@ class GithubArchive():
         for thread in thread_list:
             thread.join()
 
-    @classmethod
-    def archive_repo(cls, repo, branch, path, operation):
+    @staticmethod
+    def archive_repo(repo, path, operation, branch=None):
         """Clone and pull repos based on the operation passed
         """
+        branch_flag = f'--branch={branch}' if branch else ''  # Only switch default branch if the user explicitly asks
         if os.path.exists(path) and operation == 'clone':
             LOGGER.info(f'Repo: {repo.name} already cloned, skipping clone operation.')
         else:
             if operation == 'clone':
-                command = (f'git clone --branch={branch} {repo.ssh_url} {path}')
+                command = (f'git clone {branch_flag} {repo.ssh_url} {path}')
             elif operation == 'pull':
                 command = f'cd {path} && git pull --rebase'
             else:
@@ -228,8 +227,8 @@ class GithubArchive():
             except subprocess.CalledProcessError as error:
                 LOGGER.error(f'Failed to {operation} {repo.name}\n{error}')
 
-    @classmethod
-    def archive_gist(cls, gist, path, operation):
+    @staticmethod
+    def archive_gist(gist, path, operation):
         """Clone and pull gists based on the operation passed
         """
         if os.path.exists(path) and operation == 'clone':

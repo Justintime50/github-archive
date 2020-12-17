@@ -12,8 +12,8 @@ LOG_BACKUP_COUNT = int(os.getenv('GITHUB_ARCHIVE_LOG_BACKUP_COUNT', 5))
 
 
 class Logger():
-    @classmethod
-    def _setup_logging(cls, logger):
+    @staticmethod
+    def _setup_logging(logger):
         """Setup project logging (to console and log file)
         """
         if not os.path.exists(LOG_PATH):

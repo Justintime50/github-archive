@@ -1,10 +1,18 @@
 # CHANGELOG
 
+## v3.1.0 (2020-12-16)
+
+* Changed all classmethods to staticmethods
+* Corrected a bug where org names may not have had whitespace stripped properly
+* CLI arguments now have an explicit default of `False`, this shouldn't change behavior from previous versions
+* CLI default argument for `branch` has been changed from `master` to `None` and is handled via logic now. If no branch is specified, the default repo branch will be used instead of blindly assuming that `master` is the default branch (closes #18)
+* Revamped the entire test suite to use conftest, simplified boilerplate, etc
+
 ## v3.0.1 (2020-10-01)
 
 * Fixed broken entrypoint after shifting code around
 
-## 3.0.0 (2020-10-01)
+## v3.0.0 (2020-10-01)
 
 * Refactored the entire codebase to be more pythonic, simpler, DRY, and documented (closes #15)
 * Better error handling by raising errors where applicable and switching from a homegrown logger to the built-in Python logger (closes #12)
@@ -16,16 +24,16 @@
 * Added a Makefile
 * Adjusted most of the command and option names to be more uniform and explicit
 
-## 2.1.2 (2020-8-14)
+## v2.1.2 (2020-8-14)
 
 * Fixed the script's entrypoint (PyPi installs work again)
 
-## 2.1.1 (2020-07-14)
+## v2.1.1 (2020-07-14)
 
 * Fixed the long argument names which had underscores intead of hyphens
 * Fixed a bug where threads were not waiting at the end of the script before printing the completion message
 
-## 2.1.0 (2020-07-01)
+## v2.1.0 (2020-07-01)
 
 * Replaced `requirements.txt` with `setup.py`
 * Removed Launch Agent
@@ -36,11 +44,11 @@
 * Removed log deletion functionality
 * Published to Pypi
 
-## 2.0.1 (2020-05-30)
+## v2.0.1 (2020-05-30)
 
 * Fixed the Python program line in the launch agent plist
 
-## 2.0.0 (2020-05-18)
+## v2.0.0 (2020-05-18)
 
 * Rewrote the script in Python
 * Added concurrency to clone/pull changes incredibly fast for large amounts of repos and gists
@@ -48,14 +56,14 @@
 * Uniform log naming, better logging details
 * Added changelog
 
-## 1.1.0 (2020)
+## v1.1.0 (2020)
 
 * Added more customization options
 * Allowed organization and gists to be cloned/pulled
 * Allowed private repos to be cloned/pulled
 * Bug fixes
 
-## 1.0.0 (2019)
+## v1.0.0 (2019)
 
 * Wrote the script in Bash with Python as dependency
 * Added some customization options

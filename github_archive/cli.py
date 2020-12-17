@@ -15,6 +15,7 @@ class CLI():
             '--user_clone',
             action='store_true',
             required=False,
+            default=False,
             help='Clone personal repos.',
         )
         parser.add_argument(
@@ -22,6 +23,7 @@ class CLI():
             '--user_pull',
             action='store_true',
             required=False,
+            default=False,
             help='Pull personal repos',
         )
         parser.add_argument(
@@ -29,6 +31,7 @@ class CLI():
             '--gists_clone',
             action='store_true',
             required=False,
+            default=False,
             help='Clone personal gists',
         )
         parser.add_argument(
@@ -36,6 +39,7 @@ class CLI():
             '--gists_pull',
             action='store_true',
             required=False,
+            default=False,
             help='Pull personal gists.',
         )
         parser.add_argument(
@@ -43,6 +47,7 @@ class CLI():
             '--orgs_clone',
             action='store_true',
             required=False,
+            default=False,
             help='Clone organization repos.',
         )
         parser.add_argument(
@@ -50,14 +55,15 @@ class CLI():
             '--orgs_pull',
             action='store_true',
             required=False,
+            default=False,
             help='Pull organization repos.',
         )
         parser.add_argument(
             '-b',
             '--branch',
-            default='master',
             required=False,
-            help='Which branch to pull from.',
+            default=None,
+            help='Which branch to pull from. If no branch is specified, the default repo branch will be used.',
         )
         parser.parse_args(namespace=self)
 
