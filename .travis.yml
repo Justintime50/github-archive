@@ -11,7 +11,7 @@ install:
 script:
     - shellcheck legacy/github-archive.sh
     - flake8 github_archive/*.py
-    - flake8 test/*.py
+    - flake8 test/unit/*.py
     - pytest --cov=github_archive
 
 deploy:

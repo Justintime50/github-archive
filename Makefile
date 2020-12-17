@@ -24,7 +24,7 @@ clean:
 ## lint - Lint the project
 lint:
 	venv/bin/flake8 github_archive/*.py
-	venv/bin/flake8 test/*.py
+	venv/bin/flake8 test/unit/*.py
 
 ## test - Test the project
 test:
