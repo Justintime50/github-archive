@@ -79,7 +79,7 @@ Options:
     -oc, --orgs_clone     Clone organization repos.
     -op, --orgs_pull      Pull organization repos.
     -b BRANCH, --branch BRANCH
-                            Which branch to pull from.
+                            Which branch to pull from. If no branch is specified, the default repo branch will be used.
 
 Environment Variables:
     GITHUB_TOKEN                    expects a string of your GitHub Token
