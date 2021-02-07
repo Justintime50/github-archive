@@ -32,6 +32,6 @@ test:
 
 ## coverage - Test the project and generate an HTML coverage report
 coverage:
-	venv/bin/pytest --cov=github_archive --cov-branch --cov-report=html
+	venv/bin/pytest --cov=github_archive --cov-branch --cov-report=html --cov-report=term-missing
 
 .PHONY: help install clean lint test coverage
