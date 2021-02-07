@@ -1,0 +1,39 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install Dependencies
+        run: make install
+      - name: Run linting
+        run: make lint
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pythonversion: ["3.6", "3.7", "3.8", "3.9"]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.pythonversion }}
+      - name: Install Dependencies
+        run: make install
+      - name: Run tests
+        run: make coverage
+      - name: Coveralls
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: venv/bin/coveralls --service=github
