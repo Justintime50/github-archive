@@ -1,4 +1,5 @@
 import argparse
+
 from github_archive import GithubArchive
 
 
@@ -7,8 +8,9 @@ class CLI():
         """Setup the CLI arguments
         """
         parser = argparse.ArgumentParser(
-            description=('A powerful script to concurrently clone your entire'
-                         ' GitHub instance or save it as an archive.')
+            description=(
+                'A powerful script to concurrently clone your entire GitHub instance or save it as an archive.'
+            )
         )
         parser.add_argument(
             '-uc',
@@ -58,13 +60,6 @@ class CLI():
             default=False,
             help='Pull organization repos.',
         )
-        parser.add_argument(
-            '-b',
-            '--branch',
-            required=False,
-            default=None,
-            help='Which branch to pull from. If no branch is specified, the default repo branch will be used.',
-        )
         parser.parse_args(namespace=self)
 
     def _run(self):
@@ -75,7 +70,6 @@ class CLI():
             gists_pull=self.gists_pull,
             orgs_clone=self.orgs_clone,
             orgs_pull=self.orgs_pull,
-            branch=self.branch,
         )
 
 
