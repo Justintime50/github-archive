@@ -1,12 +1,13 @@
+import logging
 import os
-from datetime import datetime
 import subprocess
 import time
-import logging
+from datetime import datetime
 from threading import Thread
-from github import Github
-from github_archive.logger import Logger
 
+from github import Github
+
+from github_archive.logger import Logger
 
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 ORG_LIST = os.getenv('GITHUB_ARCHIVE_ORGS', '')
@@ -26,7 +27,7 @@ GIT_TIMEOUT = int(os.getenv('GITHUB_ARCHIVE_TIMEOUT', 180))
 class GithubArchive():
     @staticmethod
     def run(user_clone=False, user_pull=False, gists_clone=False, gists_pull=False, orgs_clone=False,
-            orgs_pull=False, branch=None):
+            orgs_pull=False):
         """Run the tool based on the arguments passed
         """
         GithubArchive.initialize_project()
@@ -42,14 +43,14 @@ class GithubArchive():
         # Iterate over each personal repo and concurrently clone it
         if user_clone is True:
             LOGGER.info('# Cloning personal repos...\n')
-            GithubArchive.determine_repo_context(repos, 'user', clone, branch)
+            GithubArchive.determine_repo_context(repos, 'user', clone)
         else:
             LOGGER.info('# Skipping cloning user repos...\n')
 
         # Iterate over each personal repo and concurrently pull it
         if user_pull is True:
             LOGGER.info('# Pulling personal repos...\n')
-            GithubArchive.determine_repo_context(repos, 'user', pull, branch)
+            GithubArchive.determine_repo_context(repos, 'user', pull)
         else:
             LOGGER.info('# Skipping pulling user repos...\n')
 
@@ -60,13 +61,13 @@ class GithubArchive():
             # Iterate over each org repo and concurrently clone it
             if orgs_clone is True:
                 LOGGER.info('# Cloning org repos...\n')
-                GithubArchive.determine_repo_context(org_repos, 'orgs', clone, branch)
+                GithubArchive.determine_repo_context(org_repos, 'orgs', clone)
             else:
                 LOGGER.info('# Skipping cloning org repos...\n')
             # Iterate over each org repo and concurrently pull it
             if orgs_pull is True:
                 LOGGER.info('# Pulling org repos...\n')
-                GithubArchive.determine_repo_context(org_repos, 'orgs', pull, branch)
+                GithubArchive.determine_repo_context(org_repos, 'orgs', pull)
             else:
                 LOGGER.info('# Skipping cloning org repos...\n')
         else:
@@ -131,22 +132,22 @@ class GithubArchive():
         return gists
 
     @staticmethod
-    def determine_repo_context(repos, context, operation, branch=None):
+    def determine_repo_context(repos, context, operation):
         """Determine if a repo is from a user or org
         and route the logic accordingly
         """
         if context == 'orgs':
             for single_org_repos in repos:
-                GithubArchive.iterate_repos(single_org_repos, context, operation, branch)
+                GithubArchive.iterate_repos(single_org_repos, context, operation)
         elif context == 'user':
-            GithubArchive.iterate_repos(repos, context, operation, branch)
+            GithubArchive.iterate_repos(repos, context, operation)
         else:
             message = f'Could not determine what action to take with {context}.'
             LOGGER.error(message)
             raise ValueError(message)
 
     @staticmethod
-    def iterate_repos(repos, context, operation, branch=None):
+    def iterate_repos(repos, context, operation):
         """Iterate over each repository
         """
         thread_list = []
@@ -166,7 +167,6 @@ class GithubArchive():
                         repo,
                         path,
                         operation,
-                        branch,
                     )
                 )
                 thread_list.append(repo_thread)
@@ -196,15 +196,14 @@ class GithubArchive():
             thread.join()
 
     @staticmethod
-    def archive_repo(repo, path, operation, branch=None):
+    def archive_repo(repo, path, operation):
         """Clone and pull repos based on the operation passed
         """
-        branch_flag = f'--branch={branch}' if branch else ''  # Only switch default branch if the user explicitly asks
         if os.path.exists(path) and operation == 'clone':
             LOGGER.info(f'Repo: {repo.name} already cloned, skipping clone operation.')
         else:
             if operation == 'clone':
-                command = (f'git clone {branch_flag} {repo.ssh_url} {path}')
+                command = (f'git clone {repo.ssh_url} {path}')
             elif operation == 'pull':
                 command = f'cd {path} && git pull --rebase'
             else:

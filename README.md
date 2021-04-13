@@ -13,7 +13,7 @@ A powerful script to concurrently clone your entire GitHub instance or save it a
 
 </div>
 
-GitHub Archive will clone any repo and gist that doesn't exist locally and pull those that do from your desired branch of each repo and latest revision of each gist that you have access to - including organizations (if configured).
+GitHub Archive will clone any repo and gist that doesn't exist locally and pull those that do from the main branch of each repo and latest revision of each gist that you have access to - including organizations (if configured).
 
 ## What Can it Do?
 
@@ -31,7 +31,6 @@ The power of GitHub Archive comes in its configuration. Maybe you only want to c
 * Organization repos cloning/pulling
 * Gists cloning/pulling
 * List of organizations to include
-* Which branch to clone/pull from
 * A host of environment variables to tweak GitHub Archive even further to meet your needs
 
 ## Install
@@ -68,7 +67,7 @@ Basic Usage:
 
 Advanced Usage:
     GITHUB_TOKEN=123... GITHUB_ARCHIVE_ORGS="org1, org2" GITHUB_ARCHIVE_LOCATION="~/custom_location" \
-    github-archive -uc -up -gc -gp -oc -op -b develop
+    github-archive -uc -up -gc -gp -oc -op
 
 Options:
     -h, --help            show this help message and exit
@@ -78,8 +77,6 @@ Options:
     -gp, --gists_pull     Pull personal gists.
     -oc, --orgs_clone     Clone organization repos.
     -op, --orgs_pull      Pull organization repos.
-    -b BRANCH, --branch BRANCH
-                            Which branch to pull from. If no branch is specified, the default repo branch will be used.
 
 Environment Variables:
     GITHUB_TOKEN                    expects a string of your GitHub Token
