@@ -28,7 +28,7 @@
 * Added a Makefile
 * Adjusted most of the command and option names to be more uniform and explicit
 
-## v2.1.2 (2020-8-14)
+## v2.1.2 (2020-08-14)
 
 * Fixed the script's entrypoint (PyPi installs work again)
 
@@ -41,7 +41,7 @@
 
 * Replaced `requirements.txt` with `setup.py`
 * Removed Launch Agent
-* Set the default git pull behavior as `--ff-only` to avoid git message (closes #)
+* Set the default git pull behavior as `--ff-only` to avoid git message (closes #9)
 * Increased default timeout for git operations from `120` seconds to `180` seconds
 * Replaced the majority of environment variables with command line args making customization easier as "feature flags"
 * Various bug fixes and minor improvements
