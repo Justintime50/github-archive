@@ -17,7 +17,7 @@ DEV_REQUIREMENTS = [
 
 setuptools.setup(
     name='github-archive',
-    version='3.1.0',
+    version='3.1.1',
     description='A powerful script to concurrently clone your entire GitHub instance or save it as an archive.',  # noqa
     long_description=long_description,
     long_description_content_type="text/markdown",
