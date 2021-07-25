@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## NEXT RELEASE
+## v3.1.1 (2021-07-24)
 
 * Removed `branch` flag and functionality as it was causing issues and inconsistencies when cloning/pulling and branches didn't match up. This became especially prevelant when repos started changing from `master` to `main`
 
