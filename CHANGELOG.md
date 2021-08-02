@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## NEXT RELEASE
+
+* Cleaned up some of the noise in logs by removing the `skipping` messages when a flag is not passed
+* Various code refactors
+
 ## v3.1.1 (2021-07-24)
 
 * Removed `branch` flag and functionality as it was causing issues and inconsistencies when cloning/pulling and branches didn't match up. This became especially prevelant when repos started changing from `master` to `main`
