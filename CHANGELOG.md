@@ -2,8 +2,9 @@
 
 ## NEXT RELEASE
 
-* Cleaned up some of the noise in logs by removing the `skipping` messages when a flag is not passed
-* Various code refactors
+* Removed verbose logging of skipped actions (relegated them to the debugging logger). Added additional debug logging and user-readable logging related to API calls 
+* Adds proper validation of the `GITHUB_ARCHIVE_ORGS` variable on startup
+* Various code refactor, bug fixes, and optimizations
 
 ## v3.1.1 (2021-07-24)
 
