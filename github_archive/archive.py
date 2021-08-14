@@ -15,6 +15,8 @@ GITHUB_LOGIN = Github(GITHUB_TOKEN)
 AUTHENTICATED_GITHUB_USER = GITHUB_LOGIN.get_user()
 ORG_LIST = os.getenv('GITHUB_ARCHIVE_ORGS', '')
 ORGS = ORG_LIST.split(',')
+USER_LIST = os.getenv('GITHUB_ARCHIVE_USERS', '')
+USERS = USER_LIST.split(',')
 
 GIT_TIMEOUT = int(os.getenv('GITHUB_ARCHIVE_TIMEOUT', 180))
 GITHUB_ARCHIVE_LOCATION = os.path.expanduser(os.getenv('GITHUB_ARCHIVE_LOCATION', '~/github-archive'))
@@ -25,23 +27,36 @@ SUBPROCESS_BUFFER = float(
 LOGGER = logging.getLogger(__name__)
 CLONE_OPERATION = 'clone'
 ORG_CONTEXT = 'orgs'
+PERSONAL_CONTEXT = 'personal'
 PULL_OPERATION = 'pull'
 USER_CONTEXT = 'user'
 
 
 class GithubArchive:
     @staticmethod
-    def run(user_clone=False, user_pull=False, gists_clone=False, gists_pull=False, orgs_clone=False, orgs_pull=False):
+    def run(
+        personal_clone=False,
+        personal_pull=False,
+        users_clone=False,
+        users_pull=False,
+        gists_clone=False,
+        gists_pull=False,
+        orgs_clone=False,
+        orgs_pull=False,
+    ):
         """Run the tool based on the arguments passed."""
-        GithubArchive.initialize_project(orgs_clone, orgs_pull)
+        GithubArchive.initialize_project(users_clone, users_pull, orgs_clone, orgs_pull)
         Logger._setup_logging(LOGGER)
         LOGGER.info('# GitHub Archive started...\n')
         start_time = datetime.now()
 
         # Make API calls
-        if user_clone or user_pull:
+        if personal_clone or personal_pull:
             LOGGER.info('# Making API call to GitHub for personal repos...\n')
-            repos = GithubArchive.get_personal_repos()
+            personal_repos = GithubArchive.get_personal_repos()
+        if users_clone or users_pull:
+            LOGGER.info('# Making API calls to GitHub for user repos...\n')
+            user_repos = GithubArchive.get_all_user_repos()
         if orgs_clone or orgs_pull:
             LOGGER.info('# Making API calls to GitHub for org repos...\n')
             org_repos = GithubArchive.get_all_org_repos()
@@ -50,12 +65,19 @@ class GithubArchive:
             gists = GithubArchive.get_gists()
 
         # Git operations
-        if user_clone is True:
+        if personal_clone is True:
             LOGGER.info('# Cloning missing personal repos...\n')
-            GithubArchive.iterate_repos_to_archive(repos, USER_CONTEXT, CLONE_OPERATION)
-        if user_pull is True:
+            GithubArchive.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+        if personal_pull is True:
             LOGGER.info('# Pulling personal repos...\n')
-            GithubArchive.iterate_repos_to_archive(repos, USER_CONTEXT, PULL_OPERATION)
+            GithubArchive.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
+
+        if users_clone is True:
+            LOGGER.info('# Cloning missing user repos...\n')
+            GithubArchive.iterate_repos_to_archive(user_repos, USER_CONTEXT, CLONE_OPERATION)
+        if users_pull is True:
+            LOGGER.info('# Pulling user repos...\n')
+            GithubArchive.iterate_repos_to_archive(user_repos, USER_CONTEXT, PULL_OPERATION)
 
         if orgs_clone is True:
             LOGGER.info('# Cloning missing org repos...\n')
@@ -76,10 +98,15 @@ class GithubArchive:
         LOGGER.info(finish_message)
 
     @staticmethod
-    def initialize_project(orgs_clone, orgs_pull):
+    def initialize_project(users_clone, users_pull, orgs_clone, orgs_pull):
         """Initialize the tool and ensure everything is in order before running any logic."""
         if not GITHUB_TOKEN:
             message = 'GITHUB_TOKEN must be present to run github-archive.'
+            LOGGER.critical(message)
+            raise ValueError(message)
+
+        if not USER_LIST and (users_clone or users_pull):
+            message = 'GITHUB_ARCHIVE_USERS must be present when passing user flags.'
             LOGGER.critical(message)
             raise ValueError(message)
 
@@ -103,15 +130,32 @@ class GithubArchive:
         return repos
 
     @staticmethod
+    def get_all_user_repos():
+        """Retrieve repos of all users in the users list provided and return a single list
+        including every repo from each user flattened.
+        """
+        all_user_repos = []
+        for user in USERS:
+            formatted_user_name = user.strip()
+            user_repos = GITHUB_LOGIN.get_user(formatted_user_name).get_repos()
+            all_user_repos.append(user_repos)
+            LOGGER.debug(f'{formatted_user_name} repos retrieved!')
+
+        flattened_user_repos_list = [repo for user_repos in all_user_repos for repo in user_repos]
+
+        return flattened_user_repos_list
+
+    @staticmethod
     def get_all_org_repos():
         """Retrieve repos of all orgs in the orgs list provided and return a single list
         including every repo from each org flattened.
         """
         all_org_repos = []
         for org in ORGS:
-            org_repos = Github(GITHUB_TOKEN).get_organization(org.strip()).get_repos()
+            formatted_org_name = org.strip()
+            org_repos = GITHUB_LOGIN.get_organization(formatted_org_name).get_repos()
             all_org_repos.append(org_repos)
-            LOGGER.debug(f'{org.strip()} repos retrieved!')
+            LOGGER.debug(f'{formatted_org_name} repos retrieved!')
 
         flattened_org_repos_list = [repo for org_repos in all_org_repos for repo in org_repos]
 
@@ -131,10 +175,14 @@ class GithubArchive:
         thread_list = []
         for repo in repos:
             # We check the owner name here to ensure that we only iterate
-            # through the user's personal repos which will exclude orgs
-            # that can instead be iterated by passing the "--clone_orgs"
-            # or "--pull_orgs" flags to allow for more granular control.
-            if repo.owner.name != AUTHENTICATED_GITHUB_USER.name and context == USER_CONTEXT:
+            # through the user's personal repos which will exclude orgs.
+            #
+            # This is important because PyGithub will include a user's org repos
+            # in the list of repos for an authenticated user out of the box.
+            #
+            # Instead, the user can pass the "--clone_orgs" or "--pull_orgs"
+            # flags to allow for more granular control over which repos they get.
+            if repo.owner.name != AUTHENTICATED_GITHUB_USER.name and context == PERSONAL_CONTEXT:
                 continue
             else:
                 time.sleep(SUBPROCESS_BUFFER)
@@ -176,6 +224,9 @@ class GithubArchive:
     def archive_repo(repo, repo_path, operation):
         """Clone and pull repos based on the operation passed"""
         if os.path.exists(repo_path) and operation == CLONE_OPERATION:
+            # TODO: There is a bug here if a repo times out or has another error but the folder got created
+            # where the repo won't finish getting cloned and therefore can't reliably get pulled in the future.
+            # Look into a better way to assert this was successful before skipping.
             LOGGER.debug(f'Repo: {repo.name} already cloned, skipping clone operation.')
         else:
             commands = {
@@ -204,6 +255,9 @@ class GithubArchive:
     def archive_gist(gist, gist_path, operation):
         """Clone and pull gists based on the operation passed"""
         if os.path.exists(gist_path) and operation == CLONE_OPERATION:
+            # TODO: There is a bug here if a repo times out or has another error but the folder got created
+            # where the repo won't finish getting cloned and therefore can't reliably get pulled in the future.
+            # Look into a better way to assert this was successful before skipping.
             LOGGER.debug(f'Gist: {gist.id} already cloned, skipping clone operation.')
         else:
             commands = {
