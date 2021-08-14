@@ -3,10 +3,9 @@ import argparse
 from github_archive import GithubArchive
 
 
-class CLI():
+class CLI:
     def __init__(self):
-        """Setup the CLI arguments
-        """
+        """Setup the CLI arguments"""
         parser = argparse.ArgumentParser(
             description=(
                 'A powerful script to concurrently clone your entire GitHub instance or save it as an archive.'
