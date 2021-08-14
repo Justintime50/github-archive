@@ -11,7 +11,7 @@ from github_archive.logger import Logger
 
 # TODO: Add user/password authentication (will need to pull from non-ssh url)
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-USER = Github(GITHUB_TOKEN).get_user()
+AUTHENTICATED_GITHUB_USER = Github(GITHUB_TOKEN).get_user()
 ORG_LIST = os.getenv('GITHUB_ARCHIVE_ORGS', '')
 ORGS = ORG_LIST.split(',')
 
@@ -40,7 +40,7 @@ class GithubArchive:
         # Make API calls
         if user_clone or user_pull:
             LOGGER.info('# Making API call to GitHub for personal repos...\n')
-            repos = GithubArchive.get_repos()
+            repos = GithubArchive.get_personal_repos()
         if orgs_clone or orgs_pull:
             LOGGER.info('# Making API calls to GitHub for org repos...\n')
             org_repos = GithubArchive.get_all_org_repos()
@@ -94,10 +94,10 @@ class GithubArchive:
             os.makedirs(os.path.join(GITHUB_ARCHIVE_LOCATION, 'gists'))
 
     @staticmethod
-    def get_repos():
+    def get_personal_repos():
         """Retrieve all repos of the authenticated user."""
-        repos = USER.get_repos()
-        LOGGER.debug('User repos retrieved!')
+        repos = AUTHENTICATED_GITHUB_USER.get_repos()
+        LOGGER.debug('Personal repos retrieved!')
 
         return repos
 
@@ -119,7 +119,7 @@ class GithubArchive:
     @staticmethod
     def get_gists():
         """Retrieve all gists of the authenticated user."""
-        gists = USER.get_gists()
+        gists = AUTHENTICATED_GITHUB_USER.get_gists()
         LOGGER.debug('User gists retrieved!')
 
         return gists
@@ -133,7 +133,7 @@ class GithubArchive:
             # through the user's personal repos which will exclude orgs
             # that can instead be iterated by passing the "--clone_orgs"
             # or "--pull_orgs" flags to allow for more granular control.
-            if repo.owner.name != USER.name and context == USER_CONTEXT:
+            if repo.owner.name != AUTHENTICATED_GITHUB_USER.name and context == USER_CONTEXT:
                 continue
             else:
                 time.sleep(SUBPROCESS_BUFFER)

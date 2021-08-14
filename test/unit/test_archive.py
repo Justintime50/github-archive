@@ -38,7 +38,7 @@ def test_initialize_project_missing_org_list(mock_logger):
 
 
 @mock.patch('github_archive.archive.GITHUB_TOKEN', GITHUB_TOKEN)
-@mock.patch('github_archive.archive.GithubArchive.get_repos')
+@mock.patch('github_archive.archive.GithubArchive.get_personal_repos')
 @mock.patch('github_archive.archive.GithubArchive.iterate_gists_to_archive')
 @mock.patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
 @mock.patch('github_archive.archive.LOGGER')
@@ -58,7 +58,7 @@ def test_run_user_clone_true(mock_logger, mock_iterate_repos, mock_iterate_gists
 
 
 @mock.patch('github_archive.archive.GITHUB_TOKEN', GITHUB_TOKEN)
-@mock.patch('github_archive.archive.GithubArchive.get_repos')
+@mock.patch('github_archive.archive.GithubArchive.get_personal_repos')
 @mock.patch('github_archive.archive.GithubArchive.iterate_gists_to_archive')
 @mock.patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
 @mock.patch('github_archive.archive.LOGGER')
@@ -176,9 +176,9 @@ def test_run_gists_pull_true(mock_logger, mock_iterate_repos, mock_iterate_gists
     mock_logger.info.call_count == 3
 
 
-@mock.patch('github_archive.archive.USER.get_repos')
+@mock.patch('github_archive.archive.AUTHENTICATED_GITHUB_USER.get_repos')
 def test_get_repos(mock_get_repos):
-    GithubArchive.get_repos()
+    GithubArchive.get_personal_repos()
     mock_get_repos.assert_called_once()
 
 
@@ -189,14 +189,14 @@ def test_get_all_org_repos(mock_get_organization):
     mock_get_organization.assert_called_once()
 
 
-@mock.patch('github_archive.archive.USER.get_gists')
+@mock.patch('github_archive.archive.AUTHENTICATED_GITHUB_USER.get_gists')
 def test_get_gists(mock_get_gists):
     GithubArchive.get_gists()
     mock_get_gists.assert_called_once()
 
 
 @mock.patch('github_archive.archive.GithubArchive.archive_repo')
-@mock.patch('github_archive.archive.USER')
+@mock.patch('github_archive.archive.AUTHENTICATED_GITHUB_USER')
 def test_iterate_repos_matching_owner_name(mock_user, mock_archive_repo, mock_object):
     mock_user.name = 'Mock Name'
     repos = [mock_object]
@@ -205,7 +205,7 @@ def test_iterate_repos_matching_owner_name(mock_user, mock_archive_repo, mock_ob
 
 
 @mock.patch('github_archive.archive.GithubArchive.archive_repo')
-@mock.patch('github_archive.archive.USER')
+@mock.patch('github_archive.archive.AUTHENTICATED_GITHUB_USER')
 def test_iterate_repos_not_matching_owner_name(mock_user, mock_archive_repo, mock_object):
     mock_user.name = 'Mock Name Does Not Match'
     repos = [mock_object]
@@ -214,7 +214,7 @@ def test_iterate_repos_not_matching_owner_name(mock_user, mock_archive_repo, moc
 
 
 @mock.patch('github_archive.archive.GithubArchive.archive_repo')
-@mock.patch('github_archive.archive.USER')
+@mock.patch('github_archive.archive.AUTHENTICATED_GITHUB_USER')
 def test_iterate_org_repos_success(mock_user, mock_archive_repo, mock_object):
     mock_user.name = 'Mock Name'
     repos = [mock_object]
@@ -223,7 +223,7 @@ def test_iterate_org_repos_success(mock_user, mock_archive_repo, mock_object):
 
 
 @mock.patch('github_archive.archive.GithubArchive.archive_gist')
-@mock.patch('github_archive.archive.USER')
+@mock.patch('github_archive.archive.AUTHENTICATED_GITHUB_USER')
 def test_iterate_gists_success(mock_user, mock_archive_gist, mock_object):
     gists = [mock_object]
     GithubArchive.iterate_gists_to_archive(gists, CLONE_OPERATION)
