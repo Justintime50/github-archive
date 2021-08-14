@@ -12,20 +12,36 @@ class CLI:
             )
         )
         parser.add_argument(
-            '-uc',
-            '--user_clone',
+            '-pc',
+            '--personal_clone',
             action='store_true',
             required=False,
             default=False,
             help='Clone personal repos.',
         )
         parser.add_argument(
-            '-up',
-            '--user_pull',
+            '-pp',
+            '--personal_pull',
             action='store_true',
             required=False,
             default=False,
             help='Pull personal repos',
+        )
+        parser.add_argument(
+            '-uc',
+            '--users_clone',
+            action='store_true',
+            required=False,
+            default=False,
+            help='Clone user repos.',
+        )
+        parser.add_argument(
+            '-up',
+            '--users_pull',
+            action='store_true',
+            required=False,
+            default=False,
+            help='Pull user repos.',
         )
         parser.add_argument(
             '-gc',
@@ -33,7 +49,7 @@ class CLI:
             action='store_true',
             required=False,
             default=False,
-            help='Clone personal gists',
+            help='Clone personal gists.',
         )
         parser.add_argument(
             '-gp',
@@ -63,8 +79,10 @@ class CLI:
 
     def _run(self):
         GithubArchive.run(
-            user_clone=self.user_clone,
-            user_pull=self.user_pull,
+            personal_clone=self.personal_clone,
+            personal_pull=self.personal_pull,
+            users_clone=self.users_clone,
+            users_pull=self.users_pull,
             gists_clone=self.gists_clone,
             gists_pull=self.gists_pull,
             orgs_clone=self.orgs_clone,
