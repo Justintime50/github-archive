@@ -181,10 +181,11 @@ class GithubArchive:
                 CLONE_OPERATION: f'git clone {repo.ssh_url} {repo_path}',
                 PULL_OPERATION: f'cd {repo_path} && git pull --rebase',
             }
+            git_command = commands[operation]
 
             try:
                 subprocess.run(
-                    commands[operation],
+                    git_command,
                     stdin=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                     shell=True,
@@ -208,10 +209,11 @@ class GithubArchive:
                 CLONE_OPERATION: f'git clone {gist.html_url} {gist_path}',
                 PULL_OPERATION: f'cd {gist_path} && git pull --rebase',
             }
+            git_command = commands[operation]
 
             try:
                 subprocess.run(
-                    commands[operation],
+                    git_command,
                     stdin=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                     shell=True,
