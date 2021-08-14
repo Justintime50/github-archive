@@ -11,7 +11,8 @@ from github_archive.logger import Logger
 
 # TODO: Add user/password authentication (will need to pull from non-ssh url)
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-AUTHENTICATED_GITHUB_USER = Github(GITHUB_TOKEN).get_user()
+GITHUB_LOGIN = Github(GITHUB_TOKEN)
+AUTHENTICATED_GITHUB_USER = GITHUB_LOGIN.get_user()
 ORG_LIST = os.getenv('GITHUB_ARCHIVE_ORGS', '')
 ORGS = ORG_LIST.split(',')
 
