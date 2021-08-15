@@ -5,6 +5,7 @@
 ### Breaking Changes
 
 * The `--user_clone` and `--user_pull` flags are now titled `--personal_clone` and `--personal_pull` as the new `--user_clone` and `--user_pull` flags are used for a list of specified users
+* Removes the `GITHUB_ARCHIVE_BUFFER` environment variable in favor of the new `--threads` flag
 
 ### Features
 
