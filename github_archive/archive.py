@@ -278,6 +278,7 @@ class GithubArchive:
             git_command = commands[operation]
 
             try:
+                thread_limiter.acquire()
                 subprocess.run(
                     git_command,
                     stdin=subprocess.DEVNULL,
