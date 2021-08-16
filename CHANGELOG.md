@@ -5,16 +5,19 @@
 ### Breaking Changes
 
 * The `--user_clone` and `--user_pull` flags are now titled `--personal_clone` and `--personal_pull` as the new `--user_clone` and `--user_pull` flags are used for a list of specified users
+* Removes the `GITHUB_ARCHIVE_BUFFER` environment variable in favor of the new `--threads` flag
 
 ### Features
 
 * Adds the ability to specify a list of users via `GITHUB_ARCHIVE_USERS` to clone and pull repos for via the `--users_clone` and `--users_pull` flags (closes #20)
+* Added the `--threads` flag which can specify the number of concurrent threads to run at once (closes #22)
 
 ### Fixes
 
 * Removed verbose logging of skipped actions (relegated them to the debugging logger). Added additional debug logging and user-readable logging related to API calls 
 * Adds proper validation of the `GITHUB_ARCHIVE_ORGS` variable on startup
 * Various code refactor, bug fixes, and optimizations
+* Bumped the default git operation timeout from 180 seconds to 300 seconds for larger repos (closes #22)
 
 ## v3.1.1 (2021-07-24)
 

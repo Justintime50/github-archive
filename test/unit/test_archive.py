@@ -1,13 +1,20 @@
 import subprocess
+from threading import BoundedSemaphore
 
 import mock
 import pytest
 from github_archive import GithubArchive
-from github_archive.archive import CLONE_OPERATION, ORG_CONTEXT, PERSONAL_CONTEXT, PULL_OPERATION
+from github_archive.archive import CLONE_OPERATION, DEFAULT_NUM_THREADS, ORG_CONTEXT, PERSONAL_CONTEXT, PULL_OPERATION
 
 GITHUB_TOKEN = '123'
 ORG_LIST = 'org1, org2'
 USER_LIST = 'user1, user2'
+
+
+def test_thread_limiter():
+    thread_limiter = BoundedSemaphore(DEFAULT_NUM_THREADS)
+
+    return thread_limiter
 
 
 @mock.patch('github_archive.archive.GITHUB_TOKEN', None)
@@ -278,7 +285,7 @@ def test_get_gists(mock_get_gists):
 def test_iterate_repos_matching_owner_name(mock_user, mock_archive_repo, mock_object):
     mock_user.name = 'Mock Name'
     repos = [mock_object]
-    GithubArchive.iterate_repos_to_archive(repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+    GithubArchive.iterate_repos_to_archive(DEFAULT_NUM_THREADS, repos, PERSONAL_CONTEXT, CLONE_OPERATION)
     mock_archive_repo.assert_called()
 
 
@@ -287,7 +294,7 @@ def test_iterate_repos_matching_owner_name(mock_user, mock_archive_repo, mock_ob
 def test_iterate_repos_not_matching_owner_name(mock_user, mock_archive_repo, mock_object):
     mock_user.name = 'Mock Name Does Not Match'
     repos = [mock_object]
-    GithubArchive.iterate_repos_to_archive(repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+    GithubArchive.iterate_repos_to_archive(DEFAULT_NUM_THREADS, repos, PERSONAL_CONTEXT, CLONE_OPERATION)
     mock_archive_repo.assert_not_called()
 
 
@@ -296,7 +303,7 @@ def test_iterate_repos_not_matching_owner_name(mock_user, mock_archive_repo, moc
 def test_iterate_org_repos_success(mock_user, mock_archive_repo, mock_object):
     mock_user.name = 'Mock Name'
     repos = [mock_object]
-    GithubArchive.iterate_repos_to_archive(repos, ORG_CONTEXT, CLONE_OPERATION)
+    GithubArchive.iterate_repos_to_archive(DEFAULT_NUM_THREADS, repos, ORG_CONTEXT, CLONE_OPERATION)
     mock_archive_repo.assert_called()
 
 
@@ -304,7 +311,7 @@ def test_iterate_org_repos_success(mock_user, mock_archive_repo, mock_object):
 @mock.patch('github_archive.archive.AUTHENTICATED_GITHUB_USER')
 def test_iterate_gists_success(mock_user, mock_archive_gist, mock_object):
     gists = [mock_object]
-    GithubArchive.iterate_gists_to_archive(gists, CLONE_OPERATION)
+    GithubArchive.iterate_gists_to_archive(DEFAULT_NUM_THREADS, gists, CLONE_OPERATION)
     mock_archive_gist.assert_called()
 
 
@@ -313,7 +320,7 @@ def test_iterate_gists_success(mock_user, mock_archive_gist, mock_object):
 def test_archive_repo_success(mock_logger, mock_subprocess, mock_object):
     operation = CLONE_OPERATION
     message = f'Repo: {mock_object.name} {operation} success!'
-    GithubArchive.archive_repo(mock_object, 'mock/path', operation)
+    GithubArchive.archive_repo(test_thread_limiter(), mock_object, 'mock/path', operation)
     mock_logger.info.assert_called_once_with(message)
 
 
@@ -323,7 +330,7 @@ def test_archive_repo_success(mock_logger, mock_subprocess, mock_object):
 def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_object):
     operation = CLONE_OPERATION
     message = f'Repo: {mock_object.name} already cloned, skipping clone operation.'
-    GithubArchive.archive_repo(mock_object, 'mock/path', operation)
+    GithubArchive.archive_repo(test_thread_limiter(), mock_object, 'mock/path', operation)
     mock_logger.debug.assert_called_once_with(message)
 
 
@@ -332,7 +339,7 @@ def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_path_exist
 def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_object):
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_object.name}.'
-    GithubArchive.archive_repo(mock_object, 'mock/path', operation)
+    GithubArchive.archive_repo(test_thread_limiter(), mock_object, 'mock/path', operation)
     mock_logger.error.assert_called_with(message)
 
 
@@ -340,7 +347,7 @@ def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_objec
 @mock.patch('github_archive.archive.LOGGER')
 def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_object):
     operation = PULL_OPERATION
-    GithubArchive.archive_repo(mock_object, 'mock/path', operation)
+    GithubArchive.archive_repo(test_thread_limiter(), mock_object, 'mock/path', operation)
     mock_logger.error.assert_called()
 
 
@@ -349,7 +356,7 @@ def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_ob
 def test_archive_gist_success(mock_logger, mock_subprocess, mock_object):
     operation = CLONE_OPERATION
     message = f'Gist: {mock_object.id} {operation} success!'
-    GithubArchive.archive_gist(mock_object, 'mock/path', operation)
+    GithubArchive.archive_gist(test_thread_limiter(), mock_object, 'mock/path', operation)
     mock_logger.info.assert_called_once_with(message)
 
 
@@ -359,7 +366,7 @@ def test_archive_gist_success(mock_logger, mock_subprocess, mock_object):
 def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_object):
     operation = CLONE_OPERATION
     message = f'Gist: {mock_object.id} already cloned, skipping clone operation.'
-    GithubArchive.archive_gist(mock_object, 'mock/path', operation)
+    GithubArchive.archive_gist(test_thread_limiter(), mock_object, 'mock/path', operation)
     mock_logger.debug.assert_called_once_with(message)
 
 
@@ -368,7 +375,7 @@ def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exist
 def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_object):
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_object.id}.'
-    GithubArchive.archive_gist(mock_object, 'mock/path', operation)
+    GithubArchive.archive_gist(test_thread_limiter(), mock_object, 'mock/path', operation)
     mock_logger.error.assert_called_with(message)
 
 
@@ -376,5 +383,5 @@ def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_objec
 @mock.patch('github_archive.archive.LOGGER')
 def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_object):
     operation = PULL_OPERATION
-    GithubArchive.archive_gist(mock_object, 'mock/path', operation)
+    GithubArchive.archive_gist(test_thread_limiter(), mock_object, 'mock/path', operation)
     mock_logger.error.assert_called()

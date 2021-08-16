@@ -1,6 +1,7 @@
 import argparse
 
 from github_archive import GithubArchive
+from github_archive.archive import DEFAULT_NUM_THREADS
 
 
 class CLI:
@@ -75,6 +76,14 @@ class CLI:
             default=False,
             help='Pull organization repos.',
         )
+        parser.add_argument(
+            '-t',
+            '--threads',
+            required=False,
+            type=int,
+            default=DEFAULT_NUM_THREADS,
+            help='The number of concurrent threads to run.',
+        )
         parser.parse_args(namespace=self)
 
     def _run(self):
@@ -87,6 +96,7 @@ class CLI:
             gists_pull=self.gists_pull,
             orgs_clone=self.orgs_clone,
             orgs_pull=self.orgs_pull,
+            num_of_threads=self.threads,
         )
 
 

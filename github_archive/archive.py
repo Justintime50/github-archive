@@ -1,15 +1,13 @@
 import logging
 import os
 import subprocess
-import time
 from datetime import datetime
-from threading import Thread
+from threading import BoundedSemaphore, Thread
 
 from github import Github
 
 from github_archive.logger import Logger
 
-# TODO: Add user/password authentication (will need to pull from non-ssh url)
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 GITHUB_LOGIN = Github(GITHUB_TOKEN)
 AUTHENTICATED_GITHUB_USER = GITHUB_LOGIN.get_user()
@@ -18,11 +16,9 @@ ORGS = ORG_LIST.split(',')
 USER_LIST = os.getenv('GITHUB_ARCHIVE_USERS', '')
 USERS = USER_LIST.split(',')
 
-GIT_TIMEOUT = int(os.getenv('GITHUB_ARCHIVE_TIMEOUT', 180))
+GIT_TIMEOUT = int(os.getenv('GITHUB_ARCHIVE_TIMEOUT', 300))
 GITHUB_ARCHIVE_LOCATION = os.path.expanduser(os.getenv('GITHUB_ARCHIVE_LOCATION', '~/github-archive'))
-SUBPROCESS_BUFFER = float(
-    os.getenv('GITHUB_ARCHIVE_BUFFER', 0.1)
-)  # TODO: This can most likely be removed once we limit the number of open threads at once
+DEFAULT_NUM_THREADS = 10
 
 LOGGER = logging.getLogger(__name__)
 CLONE_OPERATION = 'clone'
@@ -43,6 +39,7 @@ class GithubArchive:
         gists_pull=False,
         orgs_clone=False,
         orgs_pull=False,
+        num_of_threads=DEFAULT_NUM_THREADS,
     ):
         """Run the tool based on the arguments passed."""
         GithubArchive.initialize_project(users_clone, users_pull, orgs_clone, orgs_pull)
@@ -51,6 +48,9 @@ class GithubArchive:
         start_time = datetime.now()
 
         # Make API calls
+        # TODO: If we decide to remove the `personal` flag here, we need a new way to get private repos
+        # for the authenticated user. We could do this by making a separate API call to the get_user endpoint
+        # of the users passing the API key based on the name in the `users` list and the authed user.
         if personal_clone or personal_pull:
             LOGGER.info('# Making API call to GitHub for personal repos...\n')
             personal_repos = GithubArchive.get_personal_repos()
@@ -65,33 +65,35 @@ class GithubArchive:
             gists = GithubArchive.get_gists()
 
         # Git operations
+        # TODO: Rework a class that can share all these values so we don't need to pass
+        # along all these variables across the app.
         if personal_clone is True:
             LOGGER.info('# Cloning missing personal repos...\n')
-            GithubArchive.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+            GithubArchive.iterate_repos_to_archive(num_of_threads, personal_repos, PERSONAL_CONTEXT, CLONE_OPERATION)
         if personal_pull is True:
             LOGGER.info('# Pulling personal repos...\n')
-            GithubArchive.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
+            GithubArchive.iterate_repos_to_archive(num_of_threads, personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
 
         if users_clone is True:
             LOGGER.info('# Cloning missing user repos...\n')
-            GithubArchive.iterate_repos_to_archive(user_repos, USER_CONTEXT, CLONE_OPERATION)
+            GithubArchive.iterate_repos_to_archive(num_of_threads, user_repos, USER_CONTEXT, CLONE_OPERATION)
         if users_pull is True:
             LOGGER.info('# Pulling user repos...\n')
-            GithubArchive.iterate_repos_to_archive(user_repos, USER_CONTEXT, PULL_OPERATION)
+            GithubArchive.iterate_repos_to_archive(num_of_threads, user_repos, USER_CONTEXT, PULL_OPERATION)
 
         if orgs_clone is True:
             LOGGER.info('# Cloning missing org repos...\n')
-            GithubArchive.iterate_repos_to_archive(org_repos, ORG_CONTEXT, CLONE_OPERATION)
+            GithubArchive.iterate_repos_to_archive(num_of_threads, org_repos, ORG_CONTEXT, CLONE_OPERATION)
         if orgs_pull is True:
             LOGGER.info('# Pulling org repos...\n')
-            GithubArchive.iterate_repos_to_archive(org_repos, ORG_CONTEXT, PULL_OPERATION)
+            GithubArchive.iterate_repos_to_archive(num_of_threads, org_repos, ORG_CONTEXT, PULL_OPERATION)
 
         if gists_clone is True:
             LOGGER.info('# Cloning missing gists...\n')
-            GithubArchive.iterate_gists_to_archive(gists, CLONE_OPERATION)
+            GithubArchive.iterate_gists_to_archive(num_of_threads, gists, CLONE_OPERATION)
         if gists_pull is True:
             LOGGER.info('# Pulling gists...\n')
-            GithubArchive.iterate_gists_to_archive(gists, PULL_OPERATION)
+            GithubArchive.iterate_gists_to_archive(num_of_threads, gists, PULL_OPERATION)
 
         execution_time = f'Execution time: {datetime.now() - start_time}.'
         finish_message = f'GitHub Archive complete! {execution_time}\n'
@@ -170,7 +172,7 @@ class GithubArchive:
         return gists
 
     @staticmethod
-    def iterate_repos_to_archive(repos, context, operation):
+    def iterate_repos_to_archive(num_of_threads, repos, context, operation):
         """Iterate over each repository and start a thread if it can be archived."""
         thread_list = []
         for repo in repos:
@@ -185,11 +187,12 @@ class GithubArchive:
             if repo.owner.name != AUTHENTICATED_GITHUB_USER.name and context == PERSONAL_CONTEXT:
                 continue
             else:
-                time.sleep(SUBPROCESS_BUFFER)
+                thread_limiter = BoundedSemaphore(num_of_threads)
                 repo_path = os.path.join(GITHUB_ARCHIVE_LOCATION, 'repos', repo.owner.login, repo.name)
                 repo_thread = Thread(
                     target=GithubArchive.archive_repo,
                     args=(
+                        thread_limiter,
                         repo,
                         repo_path,
                         operation,
@@ -201,15 +204,16 @@ class GithubArchive:
             thread.join()
 
     @staticmethod
-    def iterate_gists_to_archive(gists, operation):
+    def iterate_gists_to_archive(num_of_threads, gists, operation):
         """Iterate over each gist and start a thread if it can be archived."""
+        thread_limiter = BoundedSemaphore(num_of_threads)
         thread_list = []
         for gist in gists:
-            time.sleep(SUBPROCESS_BUFFER)
             gist_path = os.path.join(GITHUB_ARCHIVE_LOCATION, 'gists', gist.id)
             gist_thread = Thread(
                 target=GithubArchive.archive_gist,
                 args=(
+                    thread_limiter,
                     gist,
                     gist_path,
                     operation,
@@ -221,12 +225,14 @@ class GithubArchive:
             thread.join()
 
     @staticmethod
-    def archive_repo(repo, repo_path, operation):
+    def archive_repo(thread_limiter, repo, repo_path, operation):
         """Clone and pull repos based on the operation passed"""
         if os.path.exists(repo_path) and operation == CLONE_OPERATION:
             # TODO: There is a bug here if a repo times out or has another error but the folder got created
             # where the repo won't finish getting cloned and therefore can't reliably get pulled in the future.
             # Look into a better way to assert this was successful before skipping.
+            # TODO: Move the debug line into the exception block and delete the failed folder so that on a future
+            # run, the app will attempt to re-clone the project
             LOGGER.debug(f'Repo: {repo.name} already cloned, skipping clone operation.')
         else:
             commands = {
@@ -236,6 +242,7 @@ class GithubArchive:
             git_command = commands[operation]
 
             try:
+                thread_limiter.acquire()
                 subprocess.run(
                     git_command,
                     stdin=subprocess.DEVNULL,
@@ -250,14 +257,18 @@ class GithubArchive:
                 LOGGER.error(f'Git operation timed out archiving {repo.name}.')
             except subprocess.CalledProcessError as error:
                 LOGGER.error(f'Failed to {operation} {repo.name}\n{error}')
+            finally:
+                thread_limiter.release()
 
     @staticmethod
-    def archive_gist(gist, gist_path, operation):
+    def archive_gist(thread_limiter, gist, gist_path, operation):
         """Clone and pull gists based on the operation passed"""
         if os.path.exists(gist_path) and operation == CLONE_OPERATION:
             # TODO: There is a bug here if a repo times out or has another error but the folder got created
             # where the repo won't finish getting cloned and therefore can't reliably get pulled in the future.
             # Look into a better way to assert this was successful before skipping.
+            # TODO: Move the debug line into the exception block and delete the failed folder so that on a future
+            # run, the app will attempt to re-clone the project
             LOGGER.debug(f'Gist: {gist.id} already cloned, skipping clone operation.')
         else:
             commands = {
@@ -267,6 +278,7 @@ class GithubArchive:
             git_command = commands[operation]
 
             try:
+                thread_limiter.acquire()
                 subprocess.run(
                     git_command,
                     stdin=subprocess.DEVNULL,
@@ -281,3 +293,5 @@ class GithubArchive:
                 LOGGER.error(f'Git operation timed out archiving {gist.id}.')
             except subprocess.CalledProcessError as error:
                 LOGGER.error(f'Failed to {operation} {gist.id}\n{error}')
+            finally:
+                thread_limiter.release()

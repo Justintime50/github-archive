@@ -81,14 +81,14 @@ Options:
     -gp, --gists_pull     Pull personal gists.
     -oc, --orgs_clone     Clone organization repos.
     -op, --orgs_pull      Pull organization repos.
+    -t, --threads         The number of concurrent threads to run. (default is 10)
 
 Environment Variables:
     GITHUB_TOKEN                    expects a string of your GitHub Token
     GITHUB_ARCHIVE_USERS            expects a string of comma separated GitHub usernames. eg: "user1, user2"
     GITHUB_ARCHIVE_ORGS             expects a string of comma separated GitHub organizations. eg: "org1, org2"
     GITHUB_ARCHIVE_LOCATION         expects a string of an explicit location on your machine (eg: "~/custom_location"). Default: ~/github-archive
-    GITHUB_ARCHIVE_BUFFER           expects a float for the buffer inbetween requests. Default: 0.1
-    GITHUB_ARCHIVE_TIMEOUT          expects an int for the number of seconds before a git operation times out. Default: 180
+    GITHUB_ARCHIVE_TIMEOUT          expects an int for the number of seconds before a git operation times out. Default: 300
     GITHUB_ARCHIVE_LOG_MAX_BYTES    expects an int of the max bytes that a log will grow to. Once the log exceeds this number, it will rollover to another log. Default: 200000
     GITHUB_ARCHIVE_LOG_BACKUP_COUNT expects an int of the number of logs to rollover once a single log exceeds the max bytes size. Default: 5
 ```
