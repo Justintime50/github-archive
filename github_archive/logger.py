@@ -2,11 +2,14 @@ import logging
 import logging.handlers
 import os
 
-GITHUB_ARCHIVE_LOCATION = os.path.expanduser(os.getenv('GITHUB_ARCHIVE_LOCATION', '~/github-archive'))
-LOG_PATH = os.path.join(GITHUB_ARCHIVE_LOCATION, 'logs')
+from github_archive.constants import DEFAULT_LOCATION
+
+LOG_PATH = os.path.join(DEFAULT_LOCATION, 'logs')
 LOG_FILE = os.path.join(LOG_PATH, 'github-archive.log')
-LOG_MAX_BYTES = int(os.getenv('GITHUB_ARCHIVE_LOG_MAX_BYTES', 200000))
-LOG_BACKUP_COUNT = int(os.getenv('GITHUB_ARCHIVE_LOG_BACKUP_COUNT', 5))
+
+# 200kb * 5 files = 1mb of logs
+LOG_MAX_BYTES = 200000  # 200kb
+LOG_BACKUP_COUNT = 5
 
 
 class Logger:

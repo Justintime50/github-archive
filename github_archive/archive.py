@@ -35,27 +35,23 @@ class GithubArchive:
         self.view = view
         self.clone = clone
         self.pull = pull
-        self.users = users.split(',') if users else ''
-        self.orgs = orgs.split(',') if orgs else ''
-        self.gists = gists.split(',') if gists else ''
+        self.users = users.lower().split(',') if users else ''
+        self.orgs = orgs.lower().split(',') if orgs else ''
+        self.gists = gists.lower().split(',') if gists else ''
         self.timeout = timeout
         self.threads = threads
         self.token = token
         self.location = location
+        self.github_instance = Github(self.token) if self.token else Github()
+        self.authenticated_user = self.github_instance.get_user() if self.token else None
 
     @property
-    def github_instance(self):
-        if self.token:
-            github_instance = Github(self.token)
-            # TODO: If we decide to remove the `personal` flag here, we need a new way to get private repos
-            # for the authenticated user. We could do this by making a separate API call to the get_user endpoint
-            # of the users passing the API key based on the name in the `users` list and the authed user.
+    def authenticated_username(self):
+        return self.authenticated_user.login.lower()
 
-            # authenticated_github_user = github_instance.get_user()  # TODO: Move this
-        else:
-            github_instance = Github()
-
-        return github_instance
+    @property
+    def authenticated_user_in_users(self):
+        return self.authenticated_user.login.lower() in self.users
 
     def run(self):
         """Run the tool based on the arguments passed via the CLI."""
@@ -64,33 +60,28 @@ class GithubArchive:
         LOGGER.info('# GitHub Archive started...\n')
         start_time = datetime.now()
 
-        # Make API calls
-        # TODO: Add check here for personal repos (eg: authed user == name in users list)
-        # if self.users and authed_user_in_list:
-        #     LOGGER.info('# Making API call to GitHub for personal repos...\n')
-        #     personal_repos = self.get_personal_repos()
+        # Personal (includes personal authenticated items)
+        if self.token and self.authenticated_user_in_users and self.users:
+            LOGGER.info('# Making API call to GitHub for personal repos...\n')
+            personal_repos = self.get_personal_repos()
 
-        # TODO: Consolidate these crazy if statements
-        if self.users:
+            if self.view:
+                LOGGER.info('# Viewing user repos...\n')
+                self.view_repos(personal_repos)
+            if self.clone:
+                LOGGER.info('# Cloning missing personal repos...\n')
+                self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+            if self.pull:
+                LOGGER.info('# Pulling changes to personal repos...\n')
+                self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
+
+            self.users.remove(self.authenticated_username)
+
+        # Users (can include personal non-authenticated items)
+        if self.users and len(self.users) > 0:
             LOGGER.info('# Making API calls to GitHub for user repos...\n')
             user_repos = self.get_all_user_repos()
-        if self.orgs:
-            LOGGER.info('# Making API calls to GitHub for org repos...\n')
-            org_repos = self.get_all_org_repos()
-        if self.gists:
-            LOGGER.info('# Making API call to GitHub for gists...\n')
-            gists = self.get_gists()
 
-        # Git operations
-        # TODO: Consolidate these crazy if statements
-        # if self.users and self.clone and authed_user_in_list:
-        #     LOGGER.info('# Cloning missing personal repos...\n')
-        #     self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, CLONE_OPERATION)
-        # if self.users and self.pull and authed_user_in_list:
-        #     LOGGER.info('# Pulling changes to personal repos...\n')
-        #     self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
-
-        if self.users:
             if self.view:
                 LOGGER.info('# Viewing user repos...\n')
                 self.view_repos(user_repos)
@@ -101,7 +92,11 @@ class GithubArchive:
                 LOGGER.info('# Pulling changes to user repos...\n')
                 self.iterate_repos_to_archive(user_repos, USER_CONTEXT, PULL_OPERATION)
 
+        # Orgs
         if self.orgs:
+            LOGGER.info('# Making API calls to GitHub for org repos...\n')
+            org_repos = self.get_all_org_repos()
+
             if self.view:
                 LOGGER.info('# Viewing org repos...\n')
                 self.view_repos(org_repos)
@@ -112,7 +107,11 @@ class GithubArchive:
                 LOGGER.info('# Pulling changes to org repos...\n')
                 self.iterate_repos_to_archive(org_repos, ORG_CONTEXT, PULL_OPERATION)
 
+        # Gists
         if self.gists:
+            LOGGER.info('# Making API call to GitHub for gists...\n')
+            gists = self.get_gists()
+
             if self.view:
                 LOGGER.info('# Viewing gists...\n')
                 self.view_gists(gists)
@@ -147,12 +146,12 @@ class GithubArchive:
             LOGGER.critical(message)
             raise ValueError(message)
 
-    # def get_personal_repos(self, authenticated_github_user):
-    #     """Retrieve all repos of the authenticated user."""
-    #     repos = authenticated_github_user.get_repos()
-    #     LOGGER.debug('Personal repos retrieved!')
+    def get_personal_repos(self):
+        """Retrieve all repos of the authenticated user."""
+        repos = self.authenticated_user.get_repos()
+        LOGGER.debug('Personal repos retrieved!')
 
-    #     return repos
+        return repos
 
     def get_all_user_repos(self):
         """Retrieve repos of all users in the users list provided and return a single list
@@ -169,21 +168,20 @@ class GithubArchive:
 
         return flattened_user_repos_list
 
-    # @staticmethod
-    # def get_all_org_repos():
-    #     """Retrieve repos of all orgs in the orgs list provided and return a single list
-    #     including every repo from each org flattened.
-    #     """
-    #     all_org_repos = []
-    #     for org in ORGS:
-    #         formatted_org_name = org.strip()
-    #         org_repos = GITHUB_LOGIN.get_organization(formatted_org_name).get_repos()
-    #         all_org_repos.append(org_repos)
-    #         LOGGER.debug(f'{formatted_org_name} repos retrieved!')
+    def get_all_org_repos(self):
+        """Retrieve repos of all orgs in the orgs list provided and return a single list
+        including every repo from each org flattened.
+        """
+        all_org_repos = []
+        for org in self.orgs:
+            formatted_org_name = org.strip()
+            org_repos = self.github_instance.get_organization(formatted_org_name).get_repos()
+            all_org_repos.append(org_repos)
+            LOGGER.debug(f'{formatted_org_name} repos retrieved!')
 
-    #     flattened_org_repos_list = [repo for org_repos in all_org_repos for repo in org_repos]
+        flattened_org_repos_list = [repo for org_repos in all_org_repos for repo in org_repos]
 
-    #     return flattened_org_repos_list
+        return flattened_org_repos_list
 
     def get_gists(self):
         """Retrieve all gists of the authenticated user."""
@@ -200,8 +198,11 @@ class GithubArchive:
 
     def iterate_repos_to_archive(self, repos, context, operation):
         """Iterate over each repository and start a thread if it can be archived."""
+        thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []
+
         for repo in repos:
+            repo_owner_username = repo.owner.login.lower()
             # We check the owner name here to ensure that we only iterate
             # through the user's personal repos which will exclude orgs.
             #
@@ -210,13 +211,10 @@ class GithubArchive:
             #
             # Instead, the user can pass the "--clone_orgs" or "--pull_orgs"
             # flags to allow for more granular control over which repos they get.
-            # TODO: This self.github_instance.name only works if you are authed, fix so non-authed users can get through this path
-            # TODO: Do we want to have the .get_user bit here?
-            if repo.owner.name != self.github_instance.get_user().name and context == PERSONAL_CONTEXT:
+            if self.token and repo_owner_username != self.authenticated_username and context == PERSONAL_CONTEXT:
                 continue
             else:
-                thread_limiter = BoundedSemaphore(self.threads)
-                repo_path = os.path.join(self.location, 'repos', repo.owner.login, repo.name)
+                repo_path = os.path.join(self.location, 'repos', repo_owner_username, repo.name)
                 repo_thread = Thread(
                     target=self.archive_repo,
                     args=(
@@ -235,6 +233,7 @@ class GithubArchive:
         """Iterate over each gist and start a thread if it can be archived."""
         thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []
+
         for gist in gists:
             gist_path = os.path.join(self.location, 'gists', gist.id)
             gist_thread = Thread(

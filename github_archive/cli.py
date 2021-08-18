@@ -1,14 +1,14 @@
 import argparse
 
 from github_archive import GithubArchive
-from github_archive.constants import DEFAULT_NUM_THREADS, DEFAULT_TIMEOUT, DEFAULT_LOCATION
+from github_archive.constants import DEFAULT_LOCATION, DEFAULT_NUM_THREADS, DEFAULT_TIMEOUT
 
 
 class GithubArchiveCli:
     def __init__(self):
         parser = argparse.ArgumentParser(
             description=(
-                'A powerful script to concurrently clone your entire GitHub instance or save it as an archive.'
+                'A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.'
             )
         )
         parser.add_argument(
@@ -17,7 +17,7 @@ class GithubArchiveCli:
             action='store_true',
             required=False,
             default=False,
-            help='Pass this flag to view git assets.',
+            help='Pass this flag to view git assets (dry run).',
         )
         parser.add_argument(
             '-c',
