@@ -2,11 +2,6 @@ import logging
 import logging.handlers
 import os
 
-from github_archive.constants import DEFAULT_LOCATION
-
-LOG_PATH = os.path.join(DEFAULT_LOCATION, 'logs')
-LOG_FILE = os.path.join(LOG_PATH, 'github-archive.log')
-
 # 200kb * 5 files = 1mb of logs
 LOG_MAX_BYTES = 200000  # 200kb
 LOG_BACKUP_COUNT = 5
@@ -14,13 +9,17 @@ LOG_BACKUP_COUNT = 5
 
 class Logger:
     @staticmethod
-    def _setup_logging(logger):
+    def setup_logging(logger, location):
         """Setup project logging (to console and log file)"""
-        if not os.path.exists(LOG_PATH):
-            os.makedirs(LOG_PATH)
+        log_path = os.path.join(location, 'logs')
+        log_file = os.path.join(log_path, 'github-archive.log')
+
+        if not os.path.exists(log_path):
+            os.makedirs(log_path)
+
         logger.setLevel(logging.INFO)
         handler = logging.handlers.RotatingFileHandler(
-            LOG_FILE,
+            log_file,
             maxBytes=LOG_MAX_BYTES,
             backupCount=LOG_BACKUP_COUNT,
         )

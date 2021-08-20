@@ -3,11 +3,14 @@ import pytest
 
 
 @pytest.fixture
-def mock_object():
-    """This can be used for repos and/or gists"""
-    mock_object = mock.MagicMock()
-    mock_object.id = '123'
-    mock_object.name = 'Mock Name'
-    mock_object.owner.name = 'Mock Name'
+def mock_git_asset():
+    """This can be used for repos and/or gists, it contains shared data
+    for either git asset for easier testing.
+    """
+    mock_git_asset = mock.MagicMock()
+    mock_git_asset.id = '123'
+    mock_git_asset.name = 'mock-asset-name'
+    mock_git_asset.owner.name = 'Mock User Name'
+    mock_git_asset.owner.login = 'mock_username'
 
-    return mock_object
+    return mock_git_asset

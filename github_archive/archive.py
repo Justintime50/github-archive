@@ -56,7 +56,7 @@ class GithubArchive:
     def run(self):
         """Run the tool based on the arguments passed via the CLI."""
         self.initialize_project()
-        Logger._setup_logging(LOGGER)
+        Logger.setup_logging(LOGGER, self.location)
         LOGGER.info('# GitHub Archive started...\n')
         start_time = datetime.now()
 
@@ -110,7 +110,7 @@ class GithubArchive:
         # Gists
         if self.gists:
             LOGGER.info('# Making API call to GitHub for gists...\n')
-            gists = self.get_gists()
+            gists = self.get_all_gists()
 
             if self.view:
                 LOGGER.info('# Viewing gists...\n')
@@ -183,7 +183,7 @@ class GithubArchive:
 
         return flattened_org_repos_list
 
-    def get_gists(self):
+    def get_all_gists(self):
         """Retrieve all gists of the authenticated user."""
         all_user_gists = []
         for user in self.gists:
