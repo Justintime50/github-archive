@@ -196,7 +196,7 @@ class GithubArchive:
 
         for item in cli_list:
             formatted_item_name = item.strip()
-            git_assets = context_manager[context][1](item)
+            git_assets = sorted(context_manager[context][1](item), key=lambda item: item.name)
             all_git_assets.append(git_assets)
             LOGGER.debug(f'{formatted_item_name} {git_asset_string} retrieved!')
 
@@ -204,7 +204,6 @@ class GithubArchive:
             git_asset for sublist_git_assets in all_git_assets for git_asset in sublist_git_assets
         ]
 
-        # TODO: This only sorts by owner and does not sort individual owners sub lists
         final_sorted_list = sorted(flattened_git_asset_list, key=lambda item: item.owner.login)
 
         return final_sorted_list
