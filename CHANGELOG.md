@@ -6,8 +6,7 @@
 
 * The `--user_clone` and `--user_pull` flags are now titled `--personal_clone` and `--personal_pull` as the new `--user_clone` and `--user_pull` flags are used for a list of specified users
 * Removes the `GITHUB_ARCHIVE_BUFFER` environment variable in favor of the new `--threads` flag
-* Reworks the entire app config to use CLI flags solely instead of a mix of CLI flags and env variables (closes #30)
-  * TODO: Add a list of the changes here
+* Reworks the entire app config to use CLI flags solely instead of a mix of CLI flags and env variables, see the README for new usage instructions or run `github-archive --help` (closes #30)
 * Repos or gists that fail to clone or pull will now be completely removed so that they can be retried from scratch on the next run of the tool. This was an especially important change for bad clones as the tool would previously leave an empty initialized git folder even if the clone failed which would not possess the actual git repo yet. In this state, you could not properly pull new changes because the content of the repo hadn't properly been cloned yet
 
 ### Features
