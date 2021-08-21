@@ -60,6 +60,14 @@ class GithubArchiveCli:
             help='Pass a comma separated list of users to get gists for.',
         )
         parser.add_argument(
+            '-s',
+            '--stars',
+            type=str,
+            required=False,
+            default=None,
+            help='Pass a comma separated list of users to get starred repos for.',
+        )
+        parser.add_argument(
             '-to',
             '--timeout',
             type=int,
@@ -81,7 +89,10 @@ class GithubArchiveCli:
             type=str,
             required=False,
             default=None,
-            help='Provide your GitHub token to authenticate with the GitHub API and gain access to private repos and gists.',  # noqa
+            help=(
+                'Provide your GitHub token to authenticate with the GitHub API and gain access to private repos and'
+                ' gists.'
+            ),
         )
         parser.add_argument(
             '-l',
@@ -101,6 +112,7 @@ class GithubArchiveCli:
             users=self.users,
             orgs=self.orgs,
             gists=self.gists,
+            stars=self.stars,
             timeout=self.timeout,
             threads=self.threads,
             token=self.token,

@@ -14,6 +14,7 @@
 * Adds the ability to specify a list of users via `GITHUB_ARCHIVE_USERS` to clone and pull repos for via the `--users_clone` and `--users_pull` flags (closes #20)
 * Added the `--threads` flag which can specify the number of concurrent threads to run at once (closes #22)
 * Adds a new `--view` flag which allows you to "dry run" the application, seeing the entire list of repos and gists based on the input provided (closes #25)
+* Adds a new `--stars` flag which you can pass a comma separated list of users to and GitHub Archive will retrieve all of their starred repos which you can then view, clone, or pull (closes #26)
 
 ### Fixes
 

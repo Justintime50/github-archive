@@ -11,10 +11,14 @@ from github_archive.constants import DEFAULT_LOCATION, DEFAULT_NUM_THREADS, DEFA
 from github_archive.logger import Logger
 
 LOGGER = logging.getLogger(__name__)
+
 CLONE_OPERATION = 'clone'
-ORG_CONTEXT = 'orgs'
-PERSONAL_CONTEXT = 'personal'
 PULL_OPERATION = 'pull'
+
+GIST_CONTEXT = 'gist'
+ORG_CONTEXT = 'org'
+PERSONAL_CONTEXT = 'personal'
+STAR_CONTEXT = 'star'
 USER_CONTEXT = 'user'
 
 
@@ -27,6 +31,7 @@ class GithubArchive:
         users=None,
         orgs=None,
         gists=None,
+        stars=None,
         timeout=DEFAULT_TIMEOUT,
         threads=DEFAULT_NUM_THREADS,
         token=None,
@@ -39,6 +44,7 @@ class GithubArchive:
         self.users = users.lower().split(',') if users else ''
         self.orgs = orgs.lower().split(',') if orgs else ''
         self.gists = gists.lower().split(',') if gists else ''
+        self.stars = stars.lower().split(',') if stars else ''
         self.timeout = timeout
         self.threads = threads
         self.token = token
@@ -77,7 +83,7 @@ class GithubArchive:
         # Users (can include personal non-authenticated items)
         if self.users and len(self.users) > 0:
             LOGGER.info('# Making API calls to GitHub for user repos...\n')
-            user_repos = self.get_all_user_repos()
+            user_repos = self.get_all_git_assets(USER_CONTEXT)
 
             if self.view:
                 LOGGER.info('# Viewing user repos...\n')
@@ -92,7 +98,7 @@ class GithubArchive:
         # Orgs
         if self.orgs:
             LOGGER.info('# Making API calls to GitHub for org repos...\n')
-            org_repos = self.get_all_org_repos()
+            org_repos = self.get_all_git_assets(ORG_CONTEXT)
 
             if self.view:
                 LOGGER.info('# Viewing org repos...\n')
@@ -107,7 +113,7 @@ class GithubArchive:
         # Gists
         if self.gists:
             LOGGER.info('# Making API call to GitHub for gists...\n')
-            gists = self.get_all_gists()
+            gists = self.get_all_git_assets(GIST_CONTEXT)
 
             if self.view:
                 LOGGER.info('# Viewing gists...\n')
@@ -118,6 +124,21 @@ class GithubArchive:
             if self.pull:
                 LOGGER.info('# Pulling changes to gists...\n')
                 self.iterate_gists_to_archive(gists, PULL_OPERATION)
+
+        # Stars
+        if self.stars:
+            LOGGER.info('# Making API call to GitHub for starred repos...\n')
+            starred_repos = self.get_all_git_assets(STAR_CONTEXT)
+
+            if self.view:
+                LOGGER.info('# Viewing stars...\n')
+                self.view_repos(starred_repos)
+            if self.clone:
+                LOGGER.info('# Cloning missing starred repos...\n')
+                self.iterate_repos_to_archive(starred_repos, CLONE_OPERATION)
+            if self.pull:
+                LOGGER.info('# Pulling changes to starred repos...\n')
+                self.iterate_repos_to_archive(starred_repos, PULL_OPERATION)
 
         execution_time = f'Execution time: {datetime.now() - start_time}.'
         finish_message = f'GitHub Archive complete! {execution_time}\n'
@@ -134,11 +155,11 @@ class GithubArchive:
             os.makedirs(os.path.join(self.location, 'repos'))
             os.makedirs(os.path.join(self.location, 'gists'))
 
-        if (self.users or self.orgs or self.gists) and not (self.view or self.clone or self.pull):
+        if (self.users or self.orgs or self.gists or self.stars) and not (self.view or self.clone or self.pull):
             message = 'A git operation must be specified when a list of users or orgs is provided.'
             LOGGER.critical(message)
             raise ValueError(message)
-        elif not (self.users or self.orgs or self.gists) and (self.view or self.clone or self.pull):
+        elif not (self.users or self.orgs or self.gists or self.stars) and (self.view or self.clone or self.pull):
             message = 'A list must be provided when a git operation is specified.'
             LOGGER.critical(message)
             raise ValueError(message)
@@ -153,48 +174,40 @@ class GithubArchive:
 
         return repos
 
-    def get_all_user_repos(self):
-        """Retrieve repos of all users in the users list provided and return a single list
-        including every repo from each user flattened.
+    def get_all_git_assets(self, context):
+        """Retrieve a list of lists via API of git assets (repos, gists) of the
+        specified owner(s) (users, orgs). Return a sorted, flat, sorted list of git assets.
         """
-        all_user_repos = []
-        for user in self.users:
-            formatted_user_name = user.strip()
-            user_repos = self.github_instance.get_user(formatted_user_name).get_repos()
-            all_user_repos.append(user_repos)
-            LOGGER.debug(f'{formatted_user_name} repos retrieved!')
+        get_user_repos = lambda item: self.github_instance.get_user(item).get_repos()  # noqa
+        get_org_repos = lambda item: self.github_instance.get_organization(item).get_repos()  # noqa
+        get_user_gists = lambda item: self.github_instance.get_user(item).get_gists()  # noqa
+        get_starred_repos = lambda item: self.github_instance.get_user(item).get_starred()  # noqa
 
-        flattened_user_repos_list = [repo for user_repos in all_user_repos for repo in user_repos]
+        context_manager = {
+            USER_CONTEXT: [self.users, get_user_repos, 'repos'],
+            ORG_CONTEXT: [self.orgs, get_org_repos, 'repos'],
+            GIST_CONTEXT: [self.gists, get_user_gists, 'gists'],
+            STAR_CONTEXT: [self.stars, get_starred_repos, 'starred repos'],
+        }
 
-        return flattened_user_repos_list
+        all_git_assets = []
+        cli_list = context_manager[context][0]
+        git_asset_string = context_manager[context][2]
 
-    def get_all_org_repos(self):
-        """Retrieve repos of all orgs in the orgs list provided and return a single list
-        including every repo from each org flattened.
-        """
-        all_org_repos = []
-        for org in self.orgs:
-            formatted_org_name = org.strip()
-            org_repos = self.github_instance.get_organization(formatted_org_name).get_repos()
-            all_org_repos.append(org_repos)
-            LOGGER.debug(f'{formatted_org_name} repos retrieved!')
+        for item in cli_list:
+            formatted_item_name = item.strip()
+            git_assets = context_manager[context][1](item)
+            all_git_assets.append(git_assets)
+            LOGGER.debug(f'{formatted_item_name} {git_asset_string} retrieved!')
 
-        flattened_org_repos_list = [repo for org_repos in all_org_repos for repo in org_repos]
+        flattened_git_asset_list = [
+            git_asset for sublist_git_assets in all_git_assets for git_asset in sublist_git_assets
+        ]
 
-        return flattened_org_repos_list
+        # TODO: This only sorts by owner and does not sort individual owners sub lists
+        final_sorted_list = sorted(flattened_git_asset_list, key=lambda item: item.owner.login)
 
-    def get_all_gists(self):
-        """Retrieve all gists of the authenticated user."""
-        all_user_gists = []
-        for user in self.gists:
-            formatted_user_name = user.strip()
-            user_gists = self.github_instance.get_user(formatted_user_name).get_gists()
-            all_user_gists.append(user_gists)
-            LOGGER.debug(f'{formatted_user_name} gists retrieved!')
-
-        flattened_user_repos_list = [gist for user_gists in all_user_gists for gist in user_gists]
-
-        return flattened_user_repos_list
+        return final_sorted_list
 
     def iterate_repos_to_archive(self, repos, context, operation):
         """Iterate over each repository and start a thread if it can be archived."""
@@ -264,7 +277,9 @@ class GithubArchive:
 
     def archive_repo(self, thread_limiter, repo, repo_path, operation):
         """Clone and pull repos based on the operation passed"""
-        if os.path.exists(repo_path) and operation == CLONE_OPERATION:
+        if (os.path.exists(repo_path) and operation == CLONE_OPERATION) or (
+            not os.path.exists(repo_path) and operation == PULL_OPERATION
+        ):
             pass
         else:
             commands = {
@@ -284,7 +299,7 @@ class GithubArchive:
                     check=True,
                     timeout=self.timeout,
                 )
-                LOGGER.info(f'Repo: {repo.name} {operation} success!')
+                LOGGER.info(f'Repo: {repo.owner.login}/{repo.name} {operation} success!')
             except subprocess.TimeoutExpired:
                 LOGGER.error(f'Git operation timed out archiving {repo.name}.')
                 if os.path.exists(repo_path):
@@ -298,7 +313,9 @@ class GithubArchive:
 
     def archive_gist(self, thread_limiter, gist, gist_path, operation):
         """Clone and pull gists based on the operation passed"""
-        if os.path.exists(gist_path) and operation == CLONE_OPERATION:
+        if (os.path.exists(gist_path) and operation == CLONE_OPERATION) or (
+            not os.path.exists(gist_path) and operation == PULL_OPERATION
+        ):
             pass
         else:
             commands = {
@@ -318,7 +335,7 @@ class GithubArchive:
                     check=True,
                     timeout=self.timeout,
                 )
-                LOGGER.info(f'Gist: {gist.id} {operation} success!')
+                LOGGER.info(f'Gist: {gist.owner.login}/{gist.id} {operation} success!')
             except subprocess.TimeoutExpired:
                 LOGGER.error(f'Git operation timed out archiving {gist.id}.')
                 if os.path.exists(gist_path):
