@@ -1,24 +1,14 @@
 import logging
 import os
+import shutil
 import subprocess
 from datetime import datetime
 from threading import BoundedSemaphore, Thread
 
 from github import Github
 
+from github_archive.constants import DEFAULT_LOCATION, DEFAULT_NUM_THREADS, DEFAULT_TIMEOUT
 from github_archive.logger import Logger
-
-GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
-GITHUB_LOGIN = Github(GITHUB_TOKEN)
-AUTHENTICATED_GITHUB_USER = GITHUB_LOGIN.get_user()
-ORG_LIST = os.getenv('GITHUB_ARCHIVE_ORGS', '')
-ORGS = ORG_LIST.split(',')
-USER_LIST = os.getenv('GITHUB_ARCHIVE_USERS', '')
-USERS = USER_LIST.split(',')
-
-GIT_TIMEOUT = int(os.getenv('GITHUB_ARCHIVE_TIMEOUT', 300))
-GITHUB_ARCHIVE_LOCATION = os.path.expanduser(os.getenv('GITHUB_ARCHIVE_LOCATION', '~/github-archive'))
-DEFAULT_NUM_THREADS = 10
 
 LOGGER = logging.getLogger(__name__)
 CLONE_OPERATION = 'clone'
@@ -29,117 +19,148 @@ USER_CONTEXT = 'user'
 
 
 class GithubArchive:
-    @staticmethod
-    def run(
-        personal_clone=False,
-        personal_pull=False,
-        users_clone=False,
-        users_pull=False,
-        gists_clone=False,
-        gists_pull=False,
-        orgs_clone=False,
-        orgs_pull=False,
-        num_of_threads=DEFAULT_NUM_THREADS,
+    def __init__(
+        self,
+        view=False,
+        clone=False,
+        pull=False,
+        users=None,
+        orgs=None,
+        gists=None,
+        timeout=DEFAULT_TIMEOUT,
+        threads=DEFAULT_NUM_THREADS,
+        token=None,
+        location=DEFAULT_LOCATION,
     ):
-        """Run the tool based on the arguments passed."""
-        GithubArchive.initialize_project(users_clone, users_pull, orgs_clone, orgs_pull)
-        Logger._setup_logging(LOGGER)
+        # Parameter variables
+        self.view = view
+        self.clone = clone
+        self.pull = pull
+        self.users = users.lower().split(',') if users else ''
+        self.orgs = orgs.lower().split(',') if orgs else ''
+        self.gists = gists.lower().split(',') if gists else ''
+        self.timeout = timeout
+        self.threads = threads
+        self.token = token
+        self.location = location
+        # Internal variables
+        self.github_instance = Github(self.token) if self.token else Github()
+        self.authenticated_user = self.github_instance.get_user() if self.token else None
+        self.authenticated_username = self.authenticated_user.login.lower() if self.token else None
+
+    def run(self):
+        """Run the tool based on the arguments passed via the CLI."""
+        self.initialize_project()
+        Logger.setup_logging(LOGGER, self.location)
         LOGGER.info('# GitHub Archive started...\n')
         start_time = datetime.now()
 
-        # Make API calls
-        # TODO: If we decide to remove the `personal` flag here, we need a new way to get private repos
-        # for the authenticated user. We could do this by making a separate API call to the get_user endpoint
-        # of the users passing the API key based on the name in the `users` list and the authed user.
-        if personal_clone or personal_pull:
+        # Personal (includes personal authenticated items)
+        if self.token and self.authenticated_user_in_users and self.users:
             LOGGER.info('# Making API call to GitHub for personal repos...\n')
-            personal_repos = GithubArchive.get_personal_repos()
-        if users_clone or users_pull:
+            personal_repos = self.get_personal_repos()
+
+            if self.view:
+                LOGGER.info('# Viewing user repos...\n')
+                self.view_repos(personal_repos)
+            if self.clone:
+                LOGGER.info('# Cloning missing personal repos...\n')
+                self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+            if self.pull:
+                LOGGER.info('# Pulling changes to personal repos...\n')
+                self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
+
+            # We remove the authenticated user from the list so that we don't double pull their
+            # repos for the `users` logic.
+            self.users.remove(self.authenticated_username)
+
+        # Users (can include personal non-authenticated items)
+        if self.users and len(self.users) > 0:
             LOGGER.info('# Making API calls to GitHub for user repos...\n')
-            user_repos = GithubArchive.get_all_user_repos()
-        if orgs_clone or orgs_pull:
+            user_repos = self.get_all_user_repos()
+
+            if self.view:
+                LOGGER.info('# Viewing user repos...\n')
+                self.view_repos(user_repos)
+            if self.clone:
+                LOGGER.info('# Cloning missing user repos...\n')
+                self.iterate_repos_to_archive(user_repos, USER_CONTEXT, CLONE_OPERATION)
+            if self.pull:
+                LOGGER.info('# Pulling changes to user repos...\n')
+                self.iterate_repos_to_archive(user_repos, USER_CONTEXT, PULL_OPERATION)
+
+        # Orgs
+        if self.orgs:
             LOGGER.info('# Making API calls to GitHub for org repos...\n')
-            org_repos = GithubArchive.get_all_org_repos()
-        if gists_clone or gists_pull:
-            LOGGER.info('# Making API call to GitHub for personal gists...\n')
-            gists = GithubArchive.get_gists()
+            org_repos = self.get_all_org_repos()
 
-        # Git operations
-        # TODO: Rework a class that can share all these values so we don't need to pass
-        # along all these variables across the app.
-        if personal_clone is True:
-            LOGGER.info('# Cloning missing personal repos...\n')
-            GithubArchive.iterate_repos_to_archive(num_of_threads, personal_repos, PERSONAL_CONTEXT, CLONE_OPERATION)
-        if personal_pull is True:
-            LOGGER.info('# Pulling personal repos...\n')
-            GithubArchive.iterate_repos_to_archive(num_of_threads, personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
+            if self.view:
+                LOGGER.info('# Viewing org repos...\n')
+                self.view_repos(org_repos)
+            if self.clone:
+                LOGGER.info('# Cloning missing org repos...\n')
+                self.iterate_repos_to_archive(org_repos, ORG_CONTEXT, CLONE_OPERATION)
+            if self.pull:
+                LOGGER.info('# Pulling changes to org repos...\n')
+                self.iterate_repos_to_archive(org_repos, ORG_CONTEXT, PULL_OPERATION)
 
-        if users_clone is True:
-            LOGGER.info('# Cloning missing user repos...\n')
-            GithubArchive.iterate_repos_to_archive(num_of_threads, user_repos, USER_CONTEXT, CLONE_OPERATION)
-        if users_pull is True:
-            LOGGER.info('# Pulling user repos...\n')
-            GithubArchive.iterate_repos_to_archive(num_of_threads, user_repos, USER_CONTEXT, PULL_OPERATION)
+        # Gists
+        if self.gists:
+            LOGGER.info('# Making API call to GitHub for gists...\n')
+            gists = self.get_all_gists()
 
-        if orgs_clone is True:
-            LOGGER.info('# Cloning missing org repos...\n')
-            GithubArchive.iterate_repos_to_archive(num_of_threads, org_repos, ORG_CONTEXT, CLONE_OPERATION)
-        if orgs_pull is True:
-            LOGGER.info('# Pulling org repos...\n')
-            GithubArchive.iterate_repos_to_archive(num_of_threads, org_repos, ORG_CONTEXT, PULL_OPERATION)
-
-        if gists_clone is True:
-            LOGGER.info('# Cloning missing gists...\n')
-            GithubArchive.iterate_gists_to_archive(num_of_threads, gists, CLONE_OPERATION)
-        if gists_pull is True:
-            LOGGER.info('# Pulling gists...\n')
-            GithubArchive.iterate_gists_to_archive(num_of_threads, gists, PULL_OPERATION)
+            if self.view:
+                LOGGER.info('# Viewing gists...\n')
+                self.view_gists(gists)
+            if self.clone:
+                LOGGER.info('# Cloning missing gists...\n')
+                self.iterate_gists_to_archive(gists, CLONE_OPERATION)
+            if self.pull:
+                LOGGER.info('# Pulling changes to gists...\n')
+                self.iterate_gists_to_archive(gists, PULL_OPERATION)
 
         execution_time = f'Execution time: {datetime.now() - start_time}.'
         finish_message = f'GitHub Archive complete! {execution_time}\n'
         LOGGER.info(finish_message)
 
-    @staticmethod
-    def initialize_project(users_clone, users_pull, orgs_clone, orgs_pull):
-        """Initialize the tool and ensure everything is in order before running any logic."""
-        if not GITHUB_TOKEN:
-            message = 'GITHUB_TOKEN must be present to run github-archive.'
+    def initialize_project(self):
+        """Initialize the tool and ensure everything is in order before running any logic.
+
+        This function ensures the minimum set of requirements are passed in to run the tool:
+        1. a git operation
+        2. a list of assets to run operations on
+        """
+        if not os.path.exists(self.location):
+            os.makedirs(os.path.join(self.location, 'repos'))
+            os.makedirs(os.path.join(self.location, 'gists'))
+
+        if (self.users or self.orgs or self.gists) and not (self.view or self.clone or self.pull):
+            message = 'A git operation must be specified when a list of users or orgs is provided.'
+            LOGGER.critical(message)
+            raise ValueError(message)
+        elif not (self.users or self.orgs or self.gists) and (self.view or self.clone or self.pull):
+            message = 'A list must be provided when a git operation is specified.'
             LOGGER.critical(message)
             raise ValueError(message)
 
-        if not USER_LIST and (users_clone or users_pull):
-            message = 'GITHUB_ARCHIVE_USERS must be present when passing user flags.'
-            LOGGER.critical(message)
-            raise ValueError(message)
+    def authenticated_user_in_users(self):
+        return self.authenticated_user.login.lower() in self.users
 
-        if not ORG_LIST and (orgs_clone or orgs_pull):
-            message = 'GITHUB_ARCHIVE_ORGS must be present when passing org flags.'
-            LOGGER.critical(message)
-            raise ValueError(message)
-
-        if not os.path.exists(GITHUB_ARCHIVE_LOCATION):
-            os.makedirs(os.path.join(GITHUB_ARCHIVE_LOCATION, 'repos'))
-
-        if not os.path.exists(GITHUB_ARCHIVE_LOCATION):
-            os.makedirs(os.path.join(GITHUB_ARCHIVE_LOCATION, 'gists'))
-
-    @staticmethod
-    def get_personal_repos():
+    def get_personal_repos(self):
         """Retrieve all repos of the authenticated user."""
-        repos = AUTHENTICATED_GITHUB_USER.get_repos()
+        repos = self.authenticated_user.get_repos()
         LOGGER.debug('Personal repos retrieved!')
 
         return repos
 
-    @staticmethod
-    def get_all_user_repos():
+    def get_all_user_repos(self):
         """Retrieve repos of all users in the users list provided and return a single list
         including every repo from each user flattened.
         """
         all_user_repos = []
-        for user in USERS:
+        for user in self.users:
             formatted_user_name = user.strip()
-            user_repos = GITHUB_LOGIN.get_user(formatted_user_name).get_repos()
+            user_repos = self.github_instance.get_user(formatted_user_name).get_repos()
             all_user_repos.append(user_repos)
             LOGGER.debug(f'{formatted_user_name} repos retrieved!')
 
@@ -147,15 +168,14 @@ class GithubArchive:
 
         return flattened_user_repos_list
 
-    @staticmethod
-    def get_all_org_repos():
+    def get_all_org_repos(self):
         """Retrieve repos of all orgs in the orgs list provided and return a single list
         including every repo from each org flattened.
         """
         all_org_repos = []
-        for org in ORGS:
+        for org in self.orgs:
             formatted_org_name = org.strip()
-            org_repos = GITHUB_LOGIN.get_organization(formatted_org_name).get_repos()
+            org_repos = self.github_instance.get_organization(formatted_org_name).get_repos()
             all_org_repos.append(org_repos)
             LOGGER.debug(f'{formatted_org_name} repos retrieved!')
 
@@ -163,19 +183,26 @@ class GithubArchive:
 
         return flattened_org_repos_list
 
-    @staticmethod
-    def get_gists():
+    def get_all_gists(self):
         """Retrieve all gists of the authenticated user."""
-        gists = AUTHENTICATED_GITHUB_USER.get_gists()
-        LOGGER.debug('User gists retrieved!')
+        all_user_gists = []
+        for user in self.gists:
+            formatted_user_name = user.strip()
+            user_gists = self.github_instance.get_user(formatted_user_name).get_gists()
+            all_user_gists.append(user_gists)
+            LOGGER.debug(f'{formatted_user_name} gists retrieved!')
 
-        return gists
+        flattened_user_repos_list = [gist for user_gists in all_user_gists for gist in user_gists]
 
-    @staticmethod
-    def iterate_repos_to_archive(num_of_threads, repos, context, operation):
+        return flattened_user_repos_list
+
+    def iterate_repos_to_archive(self, repos, context, operation):
         """Iterate over each repository and start a thread if it can be archived."""
+        thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []
+
         for repo in repos:
+            repo_owner_username = repo.owner.login.lower()
             # We check the owner name here to ensure that we only iterate
             # through the user's personal repos which will exclude orgs.
             #
@@ -184,13 +211,12 @@ class GithubArchive:
             #
             # Instead, the user can pass the "--clone_orgs" or "--pull_orgs"
             # flags to allow for more granular control over which repos they get.
-            if repo.owner.name != AUTHENTICATED_GITHUB_USER.name and context == PERSONAL_CONTEXT:
+            if self.token and repo_owner_username != self.authenticated_username and context == PERSONAL_CONTEXT:
                 continue
             else:
-                thread_limiter = BoundedSemaphore(num_of_threads)
-                repo_path = os.path.join(GITHUB_ARCHIVE_LOCATION, 'repos', repo.owner.login, repo.name)
+                repo_path = os.path.join(self.location, 'repos', repo_owner_username, repo.name)
                 repo_thread = Thread(
-                    target=GithubArchive.archive_repo,
+                    target=self.archive_repo,
                     args=(
                         thread_limiter,
                         repo,
@@ -203,15 +229,15 @@ class GithubArchive:
         for thread in thread_list:
             thread.join()
 
-    @staticmethod
-    def iterate_gists_to_archive(num_of_threads, gists, operation):
+    def iterate_gists_to_archive(self, gists, operation):
         """Iterate over each gist and start a thread if it can be archived."""
-        thread_limiter = BoundedSemaphore(num_of_threads)
+        thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []
+
         for gist in gists:
-            gist_path = os.path.join(GITHUB_ARCHIVE_LOCATION, 'gists', gist.id)
+            gist_path = os.path.join(self.location, 'gists', gist.id)
             gist_thread = Thread(
-                target=GithubArchive.archive_gist,
+                target=self.archive_gist,
                 args=(
                     thread_limiter,
                     gist,
@@ -224,16 +250,22 @@ class GithubArchive:
         for thread in thread_list:
             thread.join()
 
-    @staticmethod
-    def archive_repo(thread_limiter, repo, repo_path, operation):
+    def view_repos(self, repos):
+        """View a list of repos that will be cloned/pulled."""
+        for repo in repos:
+            repo_name = f'{repo.owner.login}/{repo.name}'
+            LOGGER.info(repo_name)
+
+    def view_gists(self, gists):
+        """View a list of gists that will be cloned/pulled."""
+        for gist in gists:
+            gist_id = f'{gist.owner.login}/{gist.id}'
+            LOGGER.info(gist_id)
+
+    def archive_repo(self, thread_limiter, repo, repo_path, operation):
         """Clone and pull repos based on the operation passed"""
         if os.path.exists(repo_path) and operation == CLONE_OPERATION:
-            # TODO: There is a bug here if a repo times out or has another error but the folder got created
-            # where the repo won't finish getting cloned and therefore can't reliably get pulled in the future.
-            # Look into a better way to assert this was successful before skipping.
-            # TODO: Move the debug line into the exception block and delete the failed folder so that on a future
-            # run, the app will attempt to re-clone the project
-            LOGGER.debug(f'Repo: {repo.name} already cloned, skipping clone operation.')
+            pass
         else:
             commands = {
                 CLONE_OPERATION: f'git clone {repo.ssh_url} {repo_path}',
@@ -245,31 +277,29 @@ class GithubArchive:
                 thread_limiter.acquire()
                 subprocess.run(
                     git_command,
+                    stdout=subprocess.DEVNULL,
                     stdin=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                     shell=True,
                     check=True,
-                    timeout=GIT_TIMEOUT,
+                    timeout=self.timeout,
                 )
-                # TODO: If the response of pulling is `Already up to date.`, skip outputting to the logger
                 LOGGER.info(f'Repo: {repo.name} {operation} success!')
             except subprocess.TimeoutExpired:
                 LOGGER.error(f'Git operation timed out archiving {repo.name}.')
+                if os.path.exists(repo_path):
+                    shutil.rmtree(repo_path)
             except subprocess.CalledProcessError as error:
                 LOGGER.error(f'Failed to {operation} {repo.name}\n{error}')
+                if os.path.exists(repo_path):
+                    shutil.rmtree(repo_path)
             finally:
                 thread_limiter.release()
 
-    @staticmethod
-    def archive_gist(thread_limiter, gist, gist_path, operation):
+    def archive_gist(self, thread_limiter, gist, gist_path, operation):
         """Clone and pull gists based on the operation passed"""
         if os.path.exists(gist_path) and operation == CLONE_OPERATION:
-            # TODO: There is a bug here if a repo times out or has another error but the folder got created
-            # where the repo won't finish getting cloned and therefore can't reliably get pulled in the future.
-            # Look into a better way to assert this was successful before skipping.
-            # TODO: Move the debug line into the exception block and delete the failed folder so that on a future
-            # run, the app will attempt to re-clone the project
-            LOGGER.debug(f'Gist: {gist.id} already cloned, skipping clone operation.')
+            pass
         else:
             commands = {
                 CLONE_OPERATION: f'git clone {gist.html_url} {gist_path}',
@@ -281,17 +311,21 @@ class GithubArchive:
                 thread_limiter.acquire()
                 subprocess.run(
                     git_command,
+                    stdout=subprocess.DEVNULL,
                     stdin=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                     shell=True,
                     check=True,
-                    timeout=GIT_TIMEOUT,
+                    timeout=self.timeout,
                 )
-                # TODO: If the response of pulling is `Already up to date.`, skip outputting to the logger
                 LOGGER.info(f'Gist: {gist.id} {operation} success!')
             except subprocess.TimeoutExpired:
                 LOGGER.error(f'Git operation timed out archiving {gist.id}.')
+                if os.path.exists(gist_path):
+                    shutil.rmtree(gist_path)
             except subprocess.CalledProcessError as error:
                 LOGGER.error(f'Failed to {operation} {gist.id}\n{error}')
+                if os.path.exists(gist_path):
+                    shutil.rmtree(gist_path)
             finally:
                 thread_limiter.release()
