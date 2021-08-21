@@ -32,6 +32,7 @@ class GithubArchive:
         token=None,
         location=DEFAULT_LOCATION,
     ):
+        # Parameter variables
         self.view = view
         self.clone = clone
         self.pull = pull
@@ -42,16 +43,10 @@ class GithubArchive:
         self.threads = threads
         self.token = token
         self.location = location
+        # Internal variables
         self.github_instance = Github(self.token) if self.token else Github()
         self.authenticated_user = self.github_instance.get_user() if self.token else None
-
-    @property
-    def authenticated_username(self):
-        return self.authenticated_user.login.lower()
-
-    @property
-    def authenticated_user_in_users(self):
-        return self.authenticated_user.login.lower() in self.users
+        self.authenticated_username = self.authenticated_user.login.lower() if self.token else None
 
     def run(self):
         """Run the tool based on the arguments passed via the CLI."""
@@ -75,6 +70,8 @@ class GithubArchive:
                 LOGGER.info('# Pulling changes to personal repos...\n')
                 self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
 
+            # We remove the authenticated user from the list so that we don't double pull their
+            # repos for the `users` logic.
             self.users.remove(self.authenticated_username)
 
         # Users (can include personal non-authenticated items)
@@ -145,6 +142,9 @@ class GithubArchive:
             message = 'A list must be provided when a git operation is specified.'
             LOGGER.critical(message)
             raise ValueError(message)
+
+    def authenticated_user_in_users(self):
+        return self.authenticated_user.login.lower() in self.users
 
     def get_personal_repos(self):
         """Retrieve all repos of the authenticated user."""
