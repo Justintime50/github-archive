@@ -77,6 +77,8 @@ Options:
     -o ORGS, --orgs ORGS  Pass a comma separated list of orgs to get repos for.
     -g GISTS, --gists GISTS
                             Pass a comma separated list of users to get gists for.
+    -s STARS, --stars STARS
+                            Pass a comma separated list of users to get starred repos for.
     -to TIMEOUT, --timeout TIMEOUT
                             The number of seconds before a git operation times out.
     -th THREADS, --threads THREADS
