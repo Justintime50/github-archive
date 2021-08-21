@@ -6,15 +6,18 @@
 
 * The `--user_clone` and `--user_pull` flags are now titled `--personal_clone` and `--personal_pull` as the new `--user_clone` and `--user_pull` flags are used for a list of specified users
 * Removes the `GITHUB_ARCHIVE_BUFFER` environment variable in favor of the new `--threads` flag
+* Reworks the entire app config to use CLI flags solely instead of a mix of CLI flags and env variables, see the README for new usage instructions or run `github-archive --help` (closes #30)
+* Repos or gists that fail to clone or pull will now be completely removed so that they can be retried from scratch on the next run of the tool. This was an especially important change for bad clones as the tool would previously leave an empty initialized git folder even if the clone failed which would not possess the actual git repo yet. In this state, you could not properly pull new changes because the content of the repo hadn't properly been cloned yet
 
 ### Features
 
 * Adds the ability to specify a list of users via `GITHUB_ARCHIVE_USERS` to clone and pull repos for via the `--users_clone` and `--users_pull` flags (closes #20)
 * Added the `--threads` flag which can specify the number of concurrent threads to run at once (closes #22)
+* Adds a new `--view` flag which allows you to "dry run" the application, seeing the entire list of repos and gists based on the input provided (closes #25)
 
 ### Fixes
 
-* Removed verbose logging of skipped actions (relegated them to the debugging logger). Added additional debug logging and user-readable logging related to API calls 
+* Removed verbose logging of skipped actions and "Already up to date" messages. Added additional logging related to API calls
 * Adds proper validation of the `GITHUB_ARCHIVE_ORGS` variable on startup
 * Various code refactor, bug fixes, and optimizations
 * Bumped the default git operation timeout from 180 seconds to 300 seconds for larger repos (closes #22)

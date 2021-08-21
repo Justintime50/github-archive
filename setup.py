@@ -18,7 +18,7 @@ DEV_REQUIREMENTS = [
 setuptools.setup(
     name='github-archive',
     version='3.1.1',
-    description='A powerful script to concurrently clone your entire GitHub instance or save it as an archive.',  # noqa
+    description='A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.',  # noqa
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='http://github.com/justintime50/github-archive',
@@ -32,11 +32,11 @@ setuptools.setup(
     ],
     install_requires=REQUIREMENTS,
     extras_require={
-        'dev': DEV_REQUIREMENTS
+        'dev': DEV_REQUIREMENTS,
     },
     entry_points={
         'console_scripts': [
-            'github-archive=github_archive.cli:main'
+            'github-archive=github_archive.cli:main',
         ]
     },
     python_requires='>=3.6',

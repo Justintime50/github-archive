@@ -2,7 +2,7 @@
 
 # GitHub Archive
 
-A powerful script to concurrently clone your entire GitHub instance or save it as an archive.
+A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.
 
 [![Build Status](https://github.com/Justintime50/github-archive/workflows/build/badge.svg)](https://github.com/Justintime50/github-archive/actions)
 [![Coverage Status](https://coveralls.io/repos/github/Justintime50/github-archive/badge.svg?branch=main)](https://coveralls.io/github/Justintime50/github-archive?branch=main)
@@ -64,33 +64,27 @@ ssh-add
 **Access**: GitHub Archive can only clone or pull repos that the authenticated user has access to. That means that private repos from another user or orgs that you don't have access to will not be able to be cloned or pulled.
 
 ```
-Basic Usage:
-    GITHUB_TOKEN=123... github-archive --personal-clone --personal-pull
-
-Advanced Usage:
-    GITHUB_TOKEN=123... GITHUB_ARCHIVE_ORGS="org1, org2" GITHUB_ARCHIVE_LOCATION="~/custom_location" \
-    github-archive -pc -pp -uc -up -gc -gp -oc -op
+Usage:
+    github-archive --users justintime50 --clone
 
 Options:
     -h, --help            show this help message and exit
-    -pc, --personal_clone Clone personal repos.
-    -pp, --personal_pull  Pull personal repos
-    -uc, --user_clone     Clone user repos.
-    -up, --user_pull      Pull user repos.
-    -gc, --gists_clone    Clone personal gists.
-    -gp, --gists_pull     Pull personal gists.
-    -oc, --orgs_clone     Clone organization repos.
-    -op, --orgs_pull      Pull organization repos.
-    -t, --threads         The number of concurrent threads to run. (default is 10)
-
-Environment Variables:
-    GITHUB_TOKEN                    expects a string of your GitHub Token
-    GITHUB_ARCHIVE_USERS            expects a string of comma separated GitHub usernames. eg: "user1, user2"
-    GITHUB_ARCHIVE_ORGS             expects a string of comma separated GitHub organizations. eg: "org1, org2"
-    GITHUB_ARCHIVE_LOCATION         expects a string of an explicit location on your machine (eg: "~/custom_location"). Default: ~/github-archive
-    GITHUB_ARCHIVE_TIMEOUT          expects an int for the number of seconds before a git operation times out. Default: 300
-    GITHUB_ARCHIVE_LOG_MAX_BYTES    expects an int of the max bytes that a log will grow to. Once the log exceeds this number, it will rollover to another log. Default: 200000
-    GITHUB_ARCHIVE_LOG_BACKUP_COUNT expects an int of the number of logs to rollover once a single log exceeds the max bytes size. Default: 5
+    -v, --view            Pass this flag to view git assets (dry run).
+    -c, --clone           Pass this flag to clone git assets.
+    -p, --pull            Pass this flag to pull git assets.
+    -u USERS, --users USERS
+                            Pass a comma separated list of users to get repos for.
+    -o ORGS, --orgs ORGS  Pass a comma separated list of orgs to get repos for.
+    -g GISTS, --gists GISTS
+                            Pass a comma separated list of users to get gists for.
+    -to TIMEOUT, --timeout TIMEOUT
+                            The number of seconds before a git operation times out.
+    -th THREADS, --threads THREADS
+                            The number of concurrent threads to run.
+    -t TOKEN, --token TOKEN
+                            Provide your GitHub token to authenticate with the GitHub API and gain access to private repos and gists.
+    -l LOCATION, --location LOCATION
+                            The location where you want your GitHub Archive to be stored.
 ```
 
 ## Development
@@ -108,7 +102,3 @@ make coverage
 # Run the tool locally
 venv/bin/python github_archive/cli.py --help
 ```
-
-## Legacy Script
-
-This tool was initially built in Bash and later re-written in Python. If you'd like to use or view the legacy script, check out the separate [Legacy README](legacy/README.md).
