@@ -28,6 +28,7 @@ class GithubArchive:
         view=False,
         clone=False,
         pull=False,
+        forks=False,
         users=None,
         orgs=None,
         gists=None,
@@ -41,6 +42,7 @@ class GithubArchive:
         self.view = view
         self.clone = clone
         self.pull = pull
+        self.forks = forks
         self.users = users.lower().split(',') if users else ''
         self.orgs = orgs.lower().split(',') if orgs else ''
         self.gists = gists.lower().split(',') if gists else ''
@@ -64,7 +66,7 @@ class GithubArchive:
         # Personal (includes personal authenticated items)
         if self.token and self.authenticated_user_in_users and self.users:
             LOGGER.info('# Making API call to GitHub for personal repos...\n')
-            personal_repos = self.get_personal_repos()
+            personal_repos = self.get_all_git_assets(PERSONAL_CONTEXT)
 
             if self.view:
                 LOGGER.info('# Viewing user repos...\n')
@@ -80,7 +82,7 @@ class GithubArchive:
             # repos for the `users` logic.
             self.users.remove(self.authenticated_username)
 
-        # Users (can include personal non-authenticated items)
+        # Users (can include personal non-authenticated items, excludes personal authenticated calls)
         if self.users and len(self.users) > 0:
             LOGGER.info('# Making API calls to GitHub for user repos...\n')
             user_repos = self.get_all_git_assets(USER_CONTEXT)
@@ -167,44 +169,41 @@ class GithubArchive:
     def authenticated_user_in_users(self):
         return self.authenticated_user.login.lower() in self.users
 
-    def get_personal_repos(self):
-        """Retrieve all repos of the authenticated user."""
-        repos = self.authenticated_user.get_repos()
-        LOGGER.debug('Personal repos retrieved!')
-
-        return repos
-
     def get_all_git_assets(self, context):
         """Retrieve a list of lists via API of git assets (repos, gists) of the
         specified owner(s) (users, orgs). Return a sorted, flat, sorted list of git assets.
         """
-        get_user_repos = lambda item: self.github_instance.get_user(item).get_repos()  # noqa
-        get_org_repos = lambda item: self.github_instance.get_organization(item).get_repos()  # noqa
-        get_user_gists = lambda item: self.github_instance.get_user(item).get_gists()  # noqa
-        get_starred_repos = lambda item: self.github_instance.get_user(item).get_starred()  # noqa
+        get_org_repos = lambda owner: self.github_instance.get_organization(owner).get_repos()  # noqa
+        get_personal_repos = lambda owner: self.authenticated_user.get_repos(affiliation='owner')  # noqa
+        get_starred_repos = lambda owner: self.github_instance.get_user(owner).get_starred()  # noqa
+        get_user_gists = lambda owner: self.github_instance.get_user(owner).get_gists()  # noqa
+        get_user_repos = lambda owner: self.github_instance.get_user(owner).get_repos()  # noqa
 
         context_manager = {
-            USER_CONTEXT: [self.users, get_user_repos, 'repos'],
-            ORG_CONTEXT: [self.orgs, get_org_repos, 'repos'],
             GIST_CONTEXT: [self.gists, get_user_gists, 'gists'],
+            ORG_CONTEXT: [self.orgs, get_org_repos, 'repos'],
+            PERSONAL_CONTEXT: [self.users, get_personal_repos, 'repos'],
             STAR_CONTEXT: [self.stars, get_starred_repos, 'starred repos'],
+            USER_CONTEXT: [self.users, get_user_repos, 'repos'],
         }
 
         all_git_assets = []
-        cli_list = context_manager[context][0]
+        owner_list = context_manager[context][0]
         git_asset_string = context_manager[context][2]
 
-        for item in cli_list:
-            formatted_item_name = item.strip()
-            git_assets = sorted(context_manager[context][1](item), key=lambda item: item.name)
-            all_git_assets.append(git_assets)
-            LOGGER.debug(f'{formatted_item_name} {git_asset_string} retrieved!')
+        for owner in owner_list:
+            formatted_owner_name = owner.strip()
+            git_assets = context_manager[context][1](owner)
+            LOGGER.debug(f'{formatted_owner_name} {git_asset_string} retrieved!')
 
-        flattened_git_asset_list = [
-            git_asset for sublist_git_assets in all_git_assets for git_asset in sublist_git_assets
-        ]
+            for item in git_assets:
+                if self.forks or (self.forks is False and item.fork is False):
+                    all_git_assets.append(item)
+                else:
+                    # Do not include this forked asset
+                    pass
 
-        final_sorted_list = sorted(flattened_git_asset_list, key=lambda item: item.owner.login)
+        final_sorted_list = sorted(all_git_assets, key=lambda item: item.owner.login)
 
         return final_sorted_list
 
@@ -215,29 +214,18 @@ class GithubArchive:
 
         for repo in repos:
             repo_owner_username = repo.owner.login.lower()
-            # We check the owner name here to ensure that we only iterate
-            # through the user's personal repos which will exclude orgs.
-            #
-            # This is important because PyGithub will include a user's org repos
-            # in the list of repos for an authenticated user out of the box.
-            #
-            # Instead, the user can pass the "--clone_orgs" or "--pull_orgs"
-            # flags to allow for more granular control over which repos they get.
-            if self.token and repo_owner_username != self.authenticated_username and context == PERSONAL_CONTEXT:
-                continue
-            else:
-                repo_path = os.path.join(self.location, 'repos', repo_owner_username, repo.name)
-                repo_thread = Thread(
-                    target=self.archive_repo,
-                    args=(
-                        thread_limiter,
-                        repo,
-                        repo_path,
-                        operation,
-                    ),
-                )
-                thread_list.append(repo_thread)
-                repo_thread.start()
+            repo_path = os.path.join(self.location, 'repos', repo_owner_username, repo.name)
+            repo_thread = Thread(
+                target=self.archive_repo,
+                args=(
+                    thread_limiter,
+                    repo,
+                    repo_path,
+                    operation,
+                ),
+            )
+            thread_list.append(repo_thread)
+            repo_thread.start()
         for thread in thread_list:
             thread.join()
 

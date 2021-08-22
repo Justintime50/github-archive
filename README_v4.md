@@ -72,6 +72,7 @@ Options:
     -v, --view            Pass this flag to view git assets (dry run).
     -c, --clone           Pass this flag to clone git assets.
     -p, --pull            Pass this flag to pull git assets.
+    -f, --forks           Pass this flag to include forked git assets.
     -u USERS, --users USERS
                             Pass a comma separated list of users to get repos for.
     -o ORGS, --orgs ORGS  Pass a comma separated list of orgs to get repos for.
