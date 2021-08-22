@@ -36,6 +36,14 @@ class GithubArchiveCli:
             help='Pass this flag to pull git assets.',
         )
         parser.add_argument(
+            '-f',
+            '--forks',
+            action='store_true',
+            required=False,
+            default=False,
+            help='Pass this flag to include forked git assets.',
+        )
+        parser.add_argument(
             '-u',
             '--users',
             type=str,
@@ -109,6 +117,7 @@ class GithubArchiveCli:
             view=self.view,
             clone=self.clone,
             pull=self.pull,
+            forks=self.forks,
             users=self.users,
             orgs=self.orgs,
             gists=self.gists,
