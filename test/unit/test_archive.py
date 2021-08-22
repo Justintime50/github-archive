@@ -28,8 +28,8 @@ def mock_thread_limiter():
 @mock.patch('github_archive.archive.Github.get_user')
 @mock.patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
 @mock.patch('github_archive.archive.GithubArchive.view_repos')
-@mock.patch('github_archive.archive.GithubArchive.get_personal_repos')
-def test_run_token_view(mock_get_personal_repos, mock_view_repos, mock_authed_user_in_users, mock_get_user):
+@mock.patch('github_archive.archive.GithubArchive.get_all_git_assets')
+def test_run_token_view(mock_get_all_git_assets, mock_view_repos, mock_authed_user_in_users, mock_get_user):
     github_archive = GithubArchive(
         token='123',
         users='justintime50',
@@ -39,7 +39,7 @@ def test_run_token_view(mock_get_personal_repos, mock_view_repos, mock_authed_us
     github_archive.authenticated_username = 'justintime50'
     github_archive.run()
 
-    mock_get_personal_repos.assert_called_once()
+    mock_get_all_git_assets.assert_called_once()
     mock_view_repos.assert_called_once()
     assert github_archive.users == []  # Assert the authed user gets removed from list
 
@@ -47,9 +47,9 @@ def test_run_token_view(mock_get_personal_repos, mock_view_repos, mock_authed_us
 @mock.patch('github_archive.archive.Github.get_user')
 @mock.patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
 @mock.patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
-@mock.patch('github_archive.archive.GithubArchive.get_personal_repos')
+@mock.patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_token_clone(
-    mock_get_personal_repos, mock_iterate_repos_to_archive, mock_authed_user_in_users, mock_get_user
+    mock_get_all_git_assets, mock_iterate_repos_to_archive, mock_authed_user_in_users, mock_get_user
 ):
     github_archive = GithubArchive(
         token='123',
@@ -60,7 +60,7 @@ def test_run_token_clone(
     github_archive.authenticated_username = 'justintime50'
     github_archive.run()
 
-    mock_get_personal_repos.assert_called_once()
+    mock_get_all_git_assets.assert_called_once()
     mock_iterate_repos_to_archive.assert_called_once()
     assert github_archive.users == []  # Assert the authed user gets removed from list
 
@@ -68,9 +68,9 @@ def test_run_token_clone(
 @mock.patch('github_archive.archive.Github.get_user')
 @mock.patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
 @mock.patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
-@mock.patch('github_archive.archive.GithubArchive.get_personal_repos')
+@mock.patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_token_pull(
-    mock_get_personal_repos, mock_iterate_repos_to_archive, mock_authed_user_in_users, mock_get_user
+    mock_get_all_git_assets, mock_iterate_repos_to_archive, mock_authed_user_in_users, mock_get_user
 ):
     github_archive = GithubArchive(
         token='123',
@@ -81,7 +81,7 @@ def test_run_token_pull(
     github_archive.authenticated_username = 'justintime50'
     github_archive.run()
 
-    mock_get_personal_repos.assert_called_once()
+    mock_get_all_git_assets.assert_called_once()
     mock_iterate_repos_to_archive.assert_called_once()
     assert github_archive.users == []  # Assert the authed user gets removed from list
 
@@ -275,11 +275,10 @@ def test_authenticated_user_in_users(mock_get_user):
 
 
 @mock.patch('github_archive.archive.Github.get_user')
-def test_get_personal_repos(mock_get_user):
+def test_get_all_git_assets(mock_get_user):
     GithubArchive(
-        token='123',
         users='justintime50',
-    ).get_personal_repos()
+    ).get_all_git_assets(USER_CONTEXT)
 
     mock_get_user.assert_called_once()
 
@@ -334,7 +333,7 @@ def test_iterate_repos_not_matching_authed_username(mock_archive_repo, mock_gith
         users='mock_username',
     ).iterate_repos_to_archive(repos, PERSONAL_CONTEXT, CLONE_OPERATION)
 
-    mock_archive_repo.assert_called()
+    mock_archive_repo.assert_called_once()
 
 
 @mock.patch('github_archive.archive.Github')
@@ -343,10 +342,10 @@ def test_iterate_repos_matching_authed_username(mock_archive_repo, mock_github_i
     repos = [mock_git_asset]
     GithubArchive(
         token='123',
-        users='mock_username',
+        users='mock_username',  # matches the username of the git asset
     ).iterate_repos_to_archive(repos, PERSONAL_CONTEXT, CLONE_OPERATION)
 
-    mock_archive_repo.assert_not_called()
+    mock_archive_repo.assert_called_once()
 
 
 @mock.patch('github_archive.archive.Github')
