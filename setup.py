@@ -10,15 +10,16 @@ REQUIREMENTS = [
 DEV_REQUIREMENTS = [
     'coveralls == 3.*',
     'flake8',
-    'mock == 4.*',
     'pytest == 6.*',
     'pytest-cov == 2.*',
 ]
 
 setuptools.setup(
     name='github-archive',
-    version='3.1.1',
-    description='A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.',  # noqa
+    version='4.0.0',
+    description=(
+        'A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.'
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='http://github.com/justintime50/github-archive',
@@ -39,5 +40,5 @@ setuptools.setup(
             'github-archive=github_archive.cli:main',
         ]
     },
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 )
