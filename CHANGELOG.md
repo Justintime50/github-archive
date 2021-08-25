@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v4.0.0 (TODO)
+## v4.0.0 (2021-08-24)
 
 ### Breaking Changes
 
