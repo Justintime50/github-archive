@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pythonversion: ["3.6", "3.7", "3.8", "3.9"]
+        pythonversion: ["3.7", "3.8", "3.9"]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
