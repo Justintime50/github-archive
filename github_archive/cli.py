@@ -110,6 +110,14 @@ class GithubArchiveCli:
             default=DEFAULT_LOCATION,
             help='The location where you want your GitHub Archive to be stored.',
         )
+        parser.add_argument(
+            '-ht',
+            '--https',
+            action='store_true',
+            required=False,
+            default=False,
+            help='Use HTTPS URLs instead of SSH.'
+        )
         parser.parse_args(namespace=self)
 
     def run(self):
@@ -126,6 +134,7 @@ class GithubArchiveCli:
             threads=self.threads,
             token=self.token,
             location=self.location,
+            use_https=self.https
         )
         github_archive.run()
 

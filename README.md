@@ -59,6 +59,7 @@ Options:
                             Provide your GitHub token to authenticate with the GitHub API and gain access to private repos and gists.
     -l LOCATION, --location LOCATION
                             The location where you want your GitHub Archive to be stored.
+    -ht, --https           Use HTTPS URLs instead of SSH.
 ```
 
 ### Automating SSH Passphrase Prompt (Recommended)
