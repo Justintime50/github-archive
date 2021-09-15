@@ -116,7 +116,7 @@ class GithubArchiveCli:
             action='store_true',
             required=False,
             default=False,
-            help='Use HTTPS URLs instead of SSH.'
+            help='Use HTTPS URLs instead of SSH.',
         )
         parser.parse_args(namespace=self)
 
@@ -134,7 +134,7 @@ class GithubArchiveCli:
             threads=self.threads,
             token=self.token,
             location=self.location,
-            use_https=self.https
+            use_https=self.https,
         )
         github_archive.run()
 

@@ -37,7 +37,7 @@ class GithubArchive:
         threads=DEFAULT_NUM_THREADS,
         token=None,
         location=DEFAULT_LOCATION,
-        use_https=False
+        use_https=False,
     ):
         # Parameter variables
         self.view = view
