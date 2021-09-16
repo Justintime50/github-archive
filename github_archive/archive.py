@@ -37,6 +37,7 @@ class GithubArchive:
         threads=DEFAULT_NUM_THREADS,
         token=None,
         location=DEFAULT_LOCATION,
+        use_https=False,
     ):
         # Parameter variables
         self.view = view
@@ -51,6 +52,7 @@ class GithubArchive:
         self.threads = threads
         self.token = token
         self.location = location
+        self.use_https = use_https
         # Internal variables
         self.github_instance = Github(self.token) if self.token else Github()
         self.authenticated_user = self.github_instance.get_user() if self.token else None
@@ -270,9 +272,13 @@ class GithubArchive:
             pass
         else:
             commands = {
-                CLONE_OPERATION: f'git clone {repo.ssh_url} {repo_path}',
                 PULL_OPERATION: f'cd {repo_path} && git pull --rebase',
             }
+
+            if self.use_https:
+                commands.update({CLONE_OPERATION: f'git clone {repo.html_url} {repo_path}'})
+            else:
+                commands.update({CLONE_OPERATION: f'git clone {repo.ssh_url} {repo_path}'})
             git_command = commands[operation]
 
             try:
