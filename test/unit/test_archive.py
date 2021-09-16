@@ -388,7 +388,7 @@ def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
 @patch('github_archive.archive.LOGGER')
 def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
-    GithubArchive().archive_repo(mock_thread_limiter(), mock_git_asset, 'assets', operation)
+    GithubArchive().archive_repo(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
 
     mock_subprocess.assert_not_called()
 
@@ -411,7 +411,7 @@ def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remov
 @patch('github_archive.archive.LOGGER')
 def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
-    GithubArchive().archive_repo(mock_thread_limiter(), mock_git_asset, 'assets', operation)
+    GithubArchive().archive_repo(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
 
     mock_logger.error.assert_called()
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
@@ -435,7 +435,7 @@ def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
 @patch('github_archive.archive.LOGGER')
 def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_git_asset):
     operation = CLONE_OPERATION
-    GithubArchive().archive_gist(mock_thread_limiter(), mock_git_asset, 'assets', operation)
+    GithubArchive().archive_gist(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
 
     mock_subprocess.assert_not_called()
 
@@ -458,7 +458,7 @@ def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remov
 @patch('github_archive.archive.LOGGER')
 def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
-    GithubArchive().archive_gist(mock_thread_limiter(), mock_git_asset, 'assets', operation)
+    GithubArchive().archive_gist(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
 
     mock_logger.error.assert_called()
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
