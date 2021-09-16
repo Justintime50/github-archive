@@ -9,7 +9,7 @@ A powerful tool to concurrently clone or pull user and org repos and gists to cr
 [![PyPi](https://img.shields.io/pypi/v/github-archive)](https://pypi.org/project/github-archive)
 [![Licence](https://img.shields.io/github/license/justintime50/GitHub-archive)](LICENSE)
 
-<img src="assets/showcase.png" alt="Showcase">
+<img src="https://raw.githubusercontent.com/justintime50/assets/main/src/github-archive/showcase.png" alt="Showcase">
 
 </div>
 
