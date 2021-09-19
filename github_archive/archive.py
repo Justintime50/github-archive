@@ -75,10 +75,10 @@ class GithubArchive:
                 self.view_repos(personal_repos)
             if self.clone:
                 LOGGER.info('# Cloning missing personal repos...\n')
-                self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+                self.iterate_repos_to_archive(personal_repos, CLONE_OPERATION)
             if self.pull:
                 LOGGER.info('# Pulling changes to personal repos...\n')
-                self.iterate_repos_to_archive(personal_repos, PERSONAL_CONTEXT, PULL_OPERATION)
+                self.iterate_repos_to_archive(personal_repos, PULL_OPERATION)
 
             # We remove the authenticated user from the list so that we don't double pull their
             # repos for the `users` logic.
@@ -94,10 +94,10 @@ class GithubArchive:
                 self.view_repos(user_repos)
             if self.clone:
                 LOGGER.info('# Cloning missing user repos...\n')
-                self.iterate_repos_to_archive(user_repos, USER_CONTEXT, CLONE_OPERATION)
+                self.iterate_repos_to_archive(user_repos, CLONE_OPERATION)
             if self.pull:
                 LOGGER.info('# Pulling changes to user repos...\n')
-                self.iterate_repos_to_archive(user_repos, USER_CONTEXT, PULL_OPERATION)
+                self.iterate_repos_to_archive(user_repos, PULL_OPERATION)
 
         # Orgs
         if self.orgs:
@@ -109,10 +109,10 @@ class GithubArchive:
                 self.view_repos(org_repos)
             if self.clone:
                 LOGGER.info('# Cloning missing org repos...\n')
-                self.iterate_repos_to_archive(org_repos, ORG_CONTEXT, CLONE_OPERATION)
+                self.iterate_repos_to_archive(org_repos, CLONE_OPERATION)
             if self.pull:
                 LOGGER.info('# Pulling changes to org repos...\n')
-                self.iterate_repos_to_archive(org_repos, ORG_CONTEXT, PULL_OPERATION)
+                self.iterate_repos_to_archive(org_repos, PULL_OPERATION)
 
         # Gists
         if self.gists:
@@ -209,7 +209,7 @@ class GithubArchive:
 
         return final_sorted_list
 
-    def iterate_repos_to_archive(self, repos, context, operation):
+    def iterate_repos_to_archive(self, repos, operation):
         """Iterate over each repository and start a thread if it can be archived."""
         thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []

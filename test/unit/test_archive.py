@@ -9,7 +9,6 @@ from github_archive.archive import (
     DEFAULT_NUM_THREADS,
     GIST_CONTEXT,
     ORG_CONTEXT,
-    PERSONAL_CONTEXT,
     PULL_OPERATION,
     USER_CONTEXT,
 )
@@ -57,7 +56,7 @@ def test_run_token_clone(
     github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once()
+    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
     assert github_archive.users == []  # Assert the authed user gets removed from list
 
 
@@ -78,7 +77,7 @@ def test_run_token_pull(
     github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once()
+    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
     assert github_archive.users == []  # Assert the authed user gets removed from list
 
 
@@ -103,7 +102,7 @@ def test_run_users_clone(mock_get_all_git_assets, mock_iterate_repos_to_archive)
     ).run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once()
+    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
 
 
 @patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
@@ -115,7 +114,7 @@ def test_run_users_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
     ).run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once()
+    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
 
 
 @patch('github_archive.archive.GithubArchive.view_repos')
@@ -139,7 +138,7 @@ def test_run_orgs_clone(mock_get_all_git_assets, mock_iterate_repos_to_archive):
     ).run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once()
+    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
 
 
 @patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
@@ -151,7 +150,7 @@ def test_run_orgs_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
     ).run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once()
+    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
 
 
 @patch('github_archive.archive.GithubArchive.view_gists')
@@ -175,7 +174,7 @@ def test_run_gists_clone(mock_get_all_git_assets, mock_iterate_gists_to_archive)
     ).run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_gists_to_archive.assert_called_once()
+    mock_iterate_gists_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
 
 
 @patch('github_archive.archive.GithubArchive.iterate_gists_to_archive')
@@ -187,7 +186,7 @@ def test_run_gists_pull(mock_get_all_git_assets, mock_iterate_gists_to_archive):
     ).run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_gists_to_archive.assert_called_once()
+    mock_iterate_gists_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
 
 
 @patch('github_archive.archive.GithubArchive.view_repos')
@@ -211,7 +210,7 @@ def test_run_stars_clone(mock_get_all_git_assets, mock_iterate_repos_to_archive)
     ).run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once()
+    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
 
 
 @patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
@@ -223,7 +222,7 @@ def test_run_stars_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
     ).run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once()
+    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
 
 
 @patch('os.path.exists', return_value=False)
@@ -327,7 +326,7 @@ def test_iterate_repos_not_matching_authed_username(mock_archive_repo, mock_gith
     repos = [mock_git_asset]
     GithubArchive(
         users='mock_username',
-    ).iterate_repos_to_archive(repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+    ).iterate_repos_to_archive(repos, CLONE_OPERATION)
 
     mock_archive_repo.assert_called_once()
 
@@ -339,7 +338,7 @@ def test_iterate_repos_matching_authed_username(mock_archive_repo, mock_github_i
     GithubArchive(
         token='123',
         users='mock_username',  # matches the username of the git asset
-    ).iterate_repos_to_archive(repos, PERSONAL_CONTEXT, CLONE_OPERATION)
+    ).iterate_repos_to_archive(repos, CLONE_OPERATION)
 
     mock_archive_repo.assert_called_once()
 
