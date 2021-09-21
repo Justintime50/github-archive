@@ -40,10 +40,8 @@ Usage:
 
 Options:
     -h, --help            show this help message and exit
-    -v, --view            Pass this flag to view git assets (dry run).
-    -c, --clone           Pass this flag to clone git assets.
-    -p, --pull            Pass this flag to pull git assets.
-    -f, --forks           Pass this flag to include forked git assets.
+    -t TOKEN, --token TOKEN
+                            Provide your GitHub token to authenticate with the GitHub API and gain access to private repos and gists.
     -u USERS, --users USERS
                             Pass a comma separated list of users to get repos for.
     -o ORGS, --orgs ORGS  Pass a comma separated list of orgs to get repos for.
@@ -51,15 +49,17 @@ Options:
                             Pass a comma separated list of users to get gists for.
     -s STARS, --stars STARS
                             Pass a comma separated list of users to get starred repos for.
+    -v, --view            Pass this flag to view git assets (dry run).
+    -c, --clone           Pass this flag to clone git assets.
+    -p, --pull            Pass this flag to pull git assets.
+    -f, --forks           Pass this flag to include forked git assets.
+    -l LOCATION, --location LOCATION
+                            The location where you want your GitHub Archive to be stored.
+    -ht, --https          Use HTTPS URLs instead of SSH.
     -to TIMEOUT, --timeout TIMEOUT
                             The number of seconds before a git operation times out.
     -th THREADS, --threads THREADS
                             The number of concurrent threads to run.
-    -t TOKEN, --token TOKEN
-                            Provide your GitHub token to authenticate with the GitHub API and gain access to private repos and gists.
-    -l LOCATION, --location LOCATION
-                            The location where you want your GitHub Archive to be stored.
-    -ht, --https           Use HTTPS URLs instead of SSH.
 ```
 
 ### Automating SSH Passphrase Prompt (Recommended)
@@ -73,11 +73,11 @@ ssh-add
 
 ### Notes
 
-**SSH Key:** You must have an SSH key generated on your local machine and added to your GitHub account as this tool uses the `ssh_url` to clone/pull. 
+**SSH Key:** By default, you must have an SSH key generated on your local machine and added to your GitHub account as this tool uses the `ssh_url` to clone/pull. If you'd like to instead use the `git_url` to clone/pull, you can pass the `--https` flag which will authenticate with your username and password.
 
 **Merge Conflicts:** Be aware that using GitHub Archive could lead to merge conflicts if you do not commit or stash your changes if using these repos as active development repos instead of simply an archive or one-time clone.
 
-**Access**: GitHub Archive can only clone or pull repos that the authenticated user has access to. This means that private repos from another user or org that you don't have access to will not be able to be cloned or pulled.
+**Access**: GitHub Archive can only clone or pull git assets that the authenticated user has access to. This means that private repos from another user or org that you don't have access to will not be able to be cloned or pulled.
 
 ## Development
 

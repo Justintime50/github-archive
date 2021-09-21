@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v4.1.0 (2021-09-19)
+
+* Adds a new `--https` flag which will authenticate via HTTPS instead of the default `SSH`
+* Fixes a bug where using the `--stars` flag would not properly run due to a missing parameter. This parameter wasn't actually being used anymore and has been removed. Tests were beefed up for this function to protect against this happening again
+
 ## v4.0.0 (2021-08-24)
 
 ### Breaking Changes

@@ -25,34 +25,35 @@ USER_CONTEXT = 'user'
 class GithubArchive:
     def __init__(
         self,
-        view=False,
-        clone=False,
-        pull=False,
-        forks=False,
+        token=None,
         users=None,
         orgs=None,
         gists=None,
         stars=None,
-        timeout=DEFAULT_TIMEOUT,
-        threads=DEFAULT_NUM_THREADS,
-        token=None,
+        view=False,
+        clone=False,
+        pull=False,
+        forks=False,
         location=DEFAULT_LOCATION,
         use_https=False,
+        timeout=DEFAULT_TIMEOUT,
+        threads=DEFAULT_NUM_THREADS,
     ):
         # Parameter variables
-        self.view = view
-        self.clone = clone
-        self.pull = pull
-        self.forks = forks
+        self.token = token
         self.users = users.lower().split(',') if users else ''
         self.orgs = orgs.lower().split(',') if orgs else ''
         self.gists = gists.lower().split(',') if gists else ''
         self.stars = stars.lower().split(',') if stars else ''
-        self.timeout = timeout
-        self.threads = threads
-        self.token = token
+        self.view = view
+        self.clone = clone
+        self.pull = pull
+        self.forks = forks
         self.location = location
         self.use_https = use_https
+        self.timeout = timeout
+        self.threads = threads
+
         # Internal variables
         self.github_instance = Github(self.token) if self.token else Github()
         self.authenticated_user = self.github_instance.get_user() if self.token else None
