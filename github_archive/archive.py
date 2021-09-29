@@ -229,6 +229,8 @@ class GithubArchive:
             )
             thread_list.append(repo_thread)
             repo_thread.start()
+
+        # Wait for the number of threads in thread_limiter to finish before moving on
         for thread in thread_list:
             thread.join()
 
@@ -250,6 +252,8 @@ class GithubArchive:
             )
             thread_list.append(gist_thread)
             gist_thread.start()
+
+        # Wait for the number of threads in thread_limiter to finish before moving on
         for thread in thread_list:
             thread.join()
 
@@ -296,12 +300,10 @@ class GithubArchive:
                 LOGGER.info(f'Repo: {repo.owner.login}/{repo.name} {operation} success!')
             except subprocess.TimeoutExpired:
                 LOGGER.error(f'Git operation timed out archiving {repo.name}.')
-                if os.path.exists(repo_path):
-                    shutil.rmtree(repo_path)
+                self.remove_failed_dir(repo_path)
             except subprocess.CalledProcessError as error:
                 LOGGER.error(f'Failed to {operation} {repo.name}\n{error}')
-                if os.path.exists(repo_path):
-                    shutil.rmtree(repo_path)
+                self.remove_failed_dir(repo_path)
             finally:
                 thread_limiter.release()
 
@@ -332,11 +334,16 @@ class GithubArchive:
                 LOGGER.info(f'Gist: {gist.owner.login}/{gist.id} {operation} success!')
             except subprocess.TimeoutExpired:
                 LOGGER.error(f'Git operation timed out archiving {gist.id}.')
-                if os.path.exists(gist_path):
-                    shutil.rmtree(gist_path)
+                self.remove_failed_dir(gist_path)
             except subprocess.CalledProcessError as error:
                 LOGGER.error(f'Failed to {operation} {gist.id}\n{error}')
-                if os.path.exists(gist_path):
-                    shutil.rmtree(gist_path)
+                self.remove_failed_dir(gist_path)
             finally:
                 thread_limiter.release()
+
+    def remove_failed_dir(self, path):
+        """Removes a directory if it fails a git operation due to
+        timing out or other errors so it can be retried on the next run.
+        """
+        if os.path.exists(path):
+            shutil.rmtree(path)
