@@ -24,13 +24,11 @@ clean:
 
 ## black - Runs the Black Python formatter against the project
 black:
-	$(VIRTUAL_BIN)/black $(PROJECT_NAME)
-	$(VIRTUAL_BIN)/black test
+	$(VIRTUAL_BIN)/black $(PROJECT_NAME)/ test/
 
 ## black-check - Checks if the project is formatted correctly against the Black rules
 black-check:
-	$(VIRTUAL_BIN)/black $(PROJECT_NAME) --check
-	$(VIRTUAL_BIN)/black test --check
+	$(VIRTUAL_BIN)/black $(PROJECT_NAME)/ test/ --check
 
 ## format - Runs all formatting tools against the project
 format: black isort lint
@@ -46,18 +44,15 @@ install:
 
 ## isort - Sorts imports throughout the project
 isort:
-	$(VIRTUAL_BIN)/isort $(PROJECT_NAME)
-	$(VIRTUAL_BIN)/isort test
+	$(VIRTUAL_BIN)/isort $(PROJECT_NAME)/ test/
 
 ## isort-check - Checks that imports throughout the project are sorted correctly
 isort-check:
-	$(VIRTUAL_BIN)/isort $(PROJECT_NAME) --check-only
-	$(VIRTUAL_BIN)/isort test --check-only
+	$(VIRTUAL_BIN)/isort $(PROJECT_NAME)/ test/ --check-only
 
 ## lint - Lint the project
 lint:
-	$(VIRTUAL_BIN)/flake8 $(PROJECT_NAME)/*.py
-	$(VIRTUAL_BIN)/flake8 test/unit/*.py
+	$(VIRTUAL_BIN)/flake8 $(PROJECT_NAME)/ test/
 
 ## test - Test the project
 test:
