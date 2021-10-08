@@ -7,7 +7,11 @@ from threading import BoundedSemaphore, Thread
 
 from github import Github
 
-from github_archive.constants import DEFAULT_LOCATION, DEFAULT_NUM_THREADS, DEFAULT_TIMEOUT
+from github_archive.constants import (
+    DEFAULT_LOCATION,
+    DEFAULT_NUM_THREADS,
+    DEFAULT_TIMEOUT,
+)
 from github_archive.logger import Logger
 
 LOGGER = logging.getLogger(__name__)

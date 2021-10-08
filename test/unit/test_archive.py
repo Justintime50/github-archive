@@ -3,6 +3,7 @@ from threading import BoundedSemaphore
 from unittest.mock import patch
 
 import pytest
+
 from github_archive import GithubArchive
 from github_archive.archive import (
     CLONE_OPERATION,

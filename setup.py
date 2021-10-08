@@ -8,8 +8,10 @@ REQUIREMENTS = [
 ]
 
 DEV_REQUIREMENTS = [
+    'black',
     'coveralls == 3.*',
     'flake8',
+    'isort',
     'pytest == 6.*',
     'pytest-cov == 2.*',
 ]
