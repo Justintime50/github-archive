@@ -27,9 +27,6 @@ pip3 install github-archive
 
 # Install locally
 make install
-
-# Get Makefile help
-make help
 ``` 
 
 ## Usage
@@ -82,14 +79,8 @@ ssh-add
 ## Development
 
 ```bash
-# Lint the project
-make lint
-
-# Run tests
-make test
-
-# Run test coverage
-make coverage
+# Get a comprehensive list of development tools
+make help
 
 # Run the tool locally
 venv/bin/python github_archive/cli.py --help
