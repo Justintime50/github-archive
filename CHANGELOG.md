@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v4.1.1 (2021-11-02)
+
+* Fixes a bug that wouldn't allow for gist cloning/pulling because of a bad "forks" check on a gist GitHub object
+* Adds a missing check to ensure that at least one CLI argument was passed (closes #40)
+* No longer invoke a shell while using the subprocess module. Git operations should now be more stable across operating systems
+
 ## v4.1.0 (2021-09-19)
 
 * Adds a new `--https` flag which will authenticate via HTTPS instead of the default `SSH`

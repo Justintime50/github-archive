@@ -229,7 +229,10 @@ def test_run_stars_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
 @patch('os.path.exists', return_value=False)
 @patch('os.makedirs')
 def test_initialize_project(mock_make_dirs, mock_dir_exist):
-    GithubArchive().initialize_project()
+    GithubArchive(
+        users='justintime50',
+        clone=True,
+    ).initialize_project()
 
     assert mock_make_dirs.call_count == 2
 
@@ -240,7 +243,9 @@ def test_initialize_project_missing_list(mock_logger):
     # Parametrize doesn't work great because we can't easily swap the param name being used
     message = 'A git operation must be specified when a list of users or orgs is provided.'
     with pytest.raises(ValueError) as error:
-        GithubArchive(users='justintime50').initialize_project()
+        GithubArchive(
+            users='justintime50',
+        ).initialize_project()
 
     mock_logger.critical.assert_called_with(message)
     assert message == str(error.value)
@@ -255,6 +260,18 @@ def test_initialize_project_missing_operation(mock_logger):
         GithubArchive(
             clone=True,
         ).initialize_project()
+
+    mock_logger.critical.assert_called_with(message)
+    assert message == str(error.value)
+
+
+@patch('github_archive.archive.LOGGER')
+def test_initialize_project_missing_all_cli_args(mock_logger):
+    # TODO: Is it possible to test all variations easily in one test?
+    # Parametrize doesn't work great because we can't easily swap the param name being used
+    message = 'At least one git operation and one list must be provided to run github-archive.'
+    with pytest.raises(ValueError) as error:
+        GithubArchive().initialize_project()
 
     mock_logger.critical.assert_called_with(message)
     assert message == str(error.value)
@@ -378,6 +395,20 @@ def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Repo: {mock_git_asset.owner.login}/{mock_git_asset.name} {operation} success!'
     GithubArchive().archive_repo(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
+
+    mock_subprocess.assert_called()
+    mock_logger.info.assert_called_once_with(message)
+
+
+@patch('subprocess.run')
+@patch('github_archive.archive.LOGGER')
+def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_asset):
+    # TODO: Mock the subprocess better to ensure it's doing what it should
+    operation = CLONE_OPERATION
+    message = f'Repo: {mock_git_asset.owner.login}/{mock_git_asset.name} {operation} success!'
+    GithubArchive(
+        use_https=True,
+    ).archive_repo(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
 
     mock_subprocess.assert_called()
     mock_logger.info.assert_called_once_with(message)

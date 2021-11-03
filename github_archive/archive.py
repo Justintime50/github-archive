@@ -172,6 +172,10 @@ class GithubArchive:
             message = 'A list must be provided when a git operation is specified.'
             LOGGER.critical(message)
             raise ValueError(message)
+        elif not (self.users or self.orgs or self.gists or self.stars or self.view or self.clone or self.pull):
+            message = 'At least one git operation and one list must be provided to run github-archive.'
+            LOGGER.critical(message)
+            raise ValueError(message)
 
     def authenticated_user_in_users(self):
         return self.authenticated_user.login.lower() in self.users
@@ -204,7 +208,10 @@ class GithubArchive:
             LOGGER.debug(f'{formatted_owner_name} {git_asset_string} retrieved!')
 
             for item in git_assets:
-                if self.forks or (self.forks is False and item.fork is False):
+                if context == GIST_CONTEXT:
+                    # Automatically add gists since we don't support forked gists
+                    all_git_assets.append(item)
+                elif self.forks or (self.forks is False and item.fork is False):
                     all_git_assets.append(item)
                 else:
                     # Do not include this forked asset
@@ -281,13 +288,13 @@ class GithubArchive:
             pass
         else:
             commands = {
-                PULL_OPERATION: f'cd {repo_path} && git pull --rebase',
+                PULL_OPERATION: ['cd', repo_path, '&&', 'git', 'pull', '--rebase'],
             }
 
             if self.use_https:
-                commands.update({CLONE_OPERATION: f'git clone {repo.html_url} {repo_path}'})
+                commands.update({CLONE_OPERATION: ['git', 'clone', repo.html_url, repo_path]})
             else:
-                commands.update({CLONE_OPERATION: f'git clone {repo.ssh_url} {repo_path}'})
+                commands.update({CLONE_OPERATION: ['git', 'clone', repo.ssh_url, repo_path]})
             git_command = commands[operation]
 
             try:
@@ -297,7 +304,6 @@ class GithubArchive:
                     stdout=subprocess.DEVNULL,
                     stdin=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
-                    shell=True,
                     check=True,
                     timeout=self.timeout,
                 )
@@ -319,8 +325,8 @@ class GithubArchive:
             pass
         else:
             commands = {
-                CLONE_OPERATION: f'git clone {gist.html_url} {gist_path}',
-                PULL_OPERATION: f'cd {gist_path} && git pull --rebase',
+                CLONE_OPERATION: ['git', 'clone', gist.html_url, gist_path],
+                PULL_OPERATION: ['cd', gist_path, '&&', 'git', 'pull', '--rebase'],
             }
             git_command = commands[operation]
 
@@ -331,7 +337,6 @@ class GithubArchive:
                     stdout=subprocess.DEVNULL,
                     stdin=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
-                    shell=True,
                     check=True,
                     timeout=self.timeout,
                 )
