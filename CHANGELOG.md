@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## NEXT RELEASE
+## v4.2.0 (2021-11-13)
 
 * Uses `woodchips` for logging and removes internal logging logic from the package
+* Refactors git commands to not change directories but instead run commands with the `-C` flag to invoke it in the directory we want
 
 ## v4.1.1 (2021-11-02)
 

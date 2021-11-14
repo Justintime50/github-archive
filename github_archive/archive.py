@@ -289,7 +289,7 @@ class GithubArchive:
             pass
         else:
             commands = {
-                PULL_OPERATION: ['cd', repo_path, '&&', 'git', 'pull', '--rebase'],
+                PULL_OPERATION: ['git', '-C', repo_path, 'pull', '--rebase'],
             }
 
             if self.use_https:
@@ -327,7 +327,7 @@ class GithubArchive:
         else:
             commands = {
                 CLONE_OPERATION: ['git', 'clone', gist.html_url, gist_path],
-                PULL_OPERATION: ['cd', gist_path, '&&', 'git', 'pull', '--rebase'],
+                PULL_OPERATION: ['git', '-C', gist_path, 'pull', '--rebase'],
             }
             git_command = commands[operation]
 
