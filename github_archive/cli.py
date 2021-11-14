@@ -93,7 +93,7 @@ class GithubArchiveCli:
         parser.add_argument(
             '-l',
             '--location',
-            type=str,  # TODO: Create a custom `path` type here
+            type=str,
             required=False,
             default=DEFAULT_LOCATION,
             help='The location where you want your GitHub Archive to be stored.',

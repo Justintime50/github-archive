@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Import config and run some config checks
+# Import the env file and run some checks
 # shellcheck disable=SC1090,SC2153
-source "${BASH_SOURCE%/*}/.config"
+source "${BASH_SOURCE%/*}/.env"
 if [[ -z "$USERNAME" ]] || [[ -z "$TOKEN" ]] || [[ -z "$PAGES" ]] || [[ -z "$DATE" ]] || [[ -z "$LOG_LIFE" ]] || [[ -z "$LOCATION" ]] || [[ -z "$BRANCH" ]] || [[ -z "$USER_ON" ]] || [[ -z "$ORGS_ON" ]] || [[ -z "$GISTS_ON" ]] || [[ -z "$PER_PAGE" ]] || [[ -z "$CLONE_ON" ]] || [[ -z "$PULL_ON" ]] ; then
     # $ORGS is the only optional variable not checked for
-    echo "ERROR: You have variables that have no values, please set them in the \".config\" file before continuing."
+    echo "ERROR: You have variables that have no values, please set them in the \".env\" file before continuing."
     exit
 fi
 if [[ "$PER_PAGE" -gt "100" ]] ; then
-    echo "ERROR: PER_PAGE cannot be over 100 per Github's API limits. Please correct in your config and run again."
+    echo "ERROR: PER_PAGE cannot be over 100 per Github's API limits. Please correct in your env and run again."
     exit
 fi
 

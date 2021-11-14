@@ -1,7 +1,5 @@
-.config
 .DS_Store
 .idea
-logs
 .env
 *.egg-info
 build

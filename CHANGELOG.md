@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## NEXT RELEASE
+
+* Uses `woodchips` for logging and removes internal logging logic from the package
+
 ## v4.1.1 (2021-11-02)
 
 * Fixes a bug that wouldn't allow for gist cloning/pulling because of a bad "forks" check on a gist GitHub object
