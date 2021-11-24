@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v4.2.1 (2021-11-23)
+
+* Bumps `woodchips` to use the new implementation
+
 ## v4.2.0 (2021-11-13)
 
 * Uses `woodchips` for logging and removes internal logging logic from the package

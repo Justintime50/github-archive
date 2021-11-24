@@ -1,3 +1,4 @@
+import logging  # Used for type hints, logging done through `woodchips`
 import os
 import shutil
 import subprocess
@@ -59,11 +60,7 @@ class GithubArchive:
         self.github_instance = Github(self.token) if self.token else Github()
         self.authenticated_user = self.github_instance.get_user() if self.token else None
         self.authenticated_username = self.authenticated_user.login.lower() if self.token else None
-        self.logger = woodchips.setup(
-            logger_name=__name__,
-            log_location=os.path.join(self.location, 'logs'),
-            log_level='INFO',
-        )
+        self.logger = self.setup_logger()
 
     def run(self):
         """Run the tool based on the arguments passed via the CLI."""
@@ -153,6 +150,23 @@ class GithubArchive:
         execution_time = f'Execution time: {datetime.now() - start_time}.'
         finish_message = f'GitHub Archive complete! {execution_time}\n'
         self.logger.info(finish_message)
+
+    def setup_logger(self) -> logging.Logger:
+        """Sets up a logger to log to console and a file.
+
+        - Logging can be called with the `logger` property
+        - Files will automatically roll over
+        """
+        logger = woodchips.Logger(
+            name=__name__,
+            level='INFO',
+        )
+        logger.log_to_console()
+        logger.log_to_file(location=os.path.join(self.location, 'logs'))
+
+        logger_instance = woodchips.get(logger.logger.name)
+
+        return logger_instance
 
     def initialize_project(self):
         """Initialize the tool and ensure everything is in order before running any logic.

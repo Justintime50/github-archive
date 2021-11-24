@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 REQUIREMENTS = [
     'PyGithub == 1.*',
-    'woodchips ~= 0.1.1',
+    'woodchips == 0.2.*',
 ]
 
 DEV_REQUIREMENTS = [
@@ -19,7 +19,7 @@ DEV_REQUIREMENTS = [
 
 setuptools.setup(
     name='github-archive',
-    version='4.2.0',
+    version='4.2.1',
     description=(
         'A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.'
     ),
@@ -43,5 +43,5 @@ setuptools.setup(
             'github-archive=github_archive.cli:main',
         ]
     },
-    python_requires='>=3.7',
+    python_requires='>=3.7, <4',
 )

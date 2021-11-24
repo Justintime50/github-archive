@@ -1,3 +1,4 @@
+import logging
 import subprocess
 from threading import BoundedSemaphore
 from unittest.mock import patch
@@ -226,7 +227,16 @@ def test_run_stars_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
     mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
 
 
-@patch('woodchips.setup')
+def test_setup_logger():
+    """Test that we setup the `woodchips` logger correctly and that it returns a logger instance."""
+    github_archive = GithubArchive()
+    logger = github_archive.setup_logger()
+
+    assert type(logger) == logging.Logger
+    assert logging.getLevelName(logger.getEffectiveLevel()) == 'INFO'
+
+
+@patch('github_archive.GithubArchive.setup_logger')
 @patch('os.path.exists', return_value=False)
 @patch('os.makedirs')
 def test_initialize_project(mock_make_dirs, mock_dir_exist, mock_logger):
@@ -238,7 +248,7 @@ def test_initialize_project(mock_make_dirs, mock_dir_exist, mock_logger):
     assert mock_make_dirs.call_count == 2
 
 
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_initialize_project_missing_list(mock_logger):
     # TODO: Is it possible to test all variations easily in one test?
     # Parametrize doesn't work great because we can't easily swap the param name being used
@@ -253,7 +263,7 @@ def test_initialize_project_missing_list(mock_logger):
     assert message == str(error.value)
 
 
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_initialize_project_missing_operation(mock_logger):
     # TODO: Is it possible to test all variations easily in one test?
     # Parametrize doesn't work great because we can't easily swap the param name being used
@@ -268,7 +278,7 @@ def test_initialize_project_missing_operation(mock_logger):
     assert message == str(error.value)
 
 
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_initialize_project_missing_all_cli_args(mock_logger):
     # TODO: Is it possible to test all variations easily in one test?
     # Parametrize doesn't work great because we can't easily swap the param name being used
@@ -376,7 +386,7 @@ def test_iterate_gists(mock_archive_gist, mock_github_instance, mock_git_asset):
     mock_archive_gist.assert_called()
 
 
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_view_repos(mock_logger, mock_git_asset):
     repos = [mock_git_asset]
     github_archive = GithubArchive()
@@ -385,7 +395,7 @@ def test_view_repos(mock_logger, mock_git_asset):
     github_archive.logger.info.assert_called_with('mock_username/mock-asset-name')
 
 
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_view_gists(mock_logger, mock_git_asset):
     gists = [mock_git_asset]
     github_archive = GithubArchive()
@@ -395,7 +405,7 @@ def test_view_gists(mock_logger, mock_git_asset):
 
 
 @patch('subprocess.run')
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
     # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
@@ -408,7 +418,7 @@ def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
 
 
 @patch('subprocess.run')
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_asset):
     # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
@@ -424,7 +434,7 @@ def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_a
 
 @patch('os.path.exists', return_value=True)
 @patch('subprocess.run')
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
     github_archive = GithubArchive()
@@ -435,7 +445,7 @@ def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_git_asset)
 
 @patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd=subprocess.run, timeout=0.1))
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_git_asset.name}.'
@@ -449,7 +459,7 @@ def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remov
 
 @patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd=subprocess.run))
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
     github_archive = GithubArchive()
@@ -461,7 +471,7 @@ def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_re
 
 
 @patch('subprocess.run')
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
     # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
@@ -475,7 +485,7 @@ def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
 
 @patch('os.path.exists', return_value=True)
 @patch('subprocess.run')
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_git_asset):
     operation = CLONE_OPERATION
     github_archive = GithubArchive()
@@ -486,7 +496,7 @@ def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exist
 
 @patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd=subprocess.run, timeout=0.1))
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_git_asset.id}.'
@@ -500,7 +510,7 @@ def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remov
 
 @patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd=subprocess.run))
-@patch('woodchips.setup')
+@patch('github_archive.GithubArchive.setup_logger')
 def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
     github_archive = GithubArchive()
