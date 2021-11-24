@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Import the env file and run some checks
-# shellcheck disable=SC1090,SC2153
+# shellcheck disable=SC1090,SC1091,SC2153
 source "${BASH_SOURCE%/*}/.env"
 if [[ -z "$USERNAME" ]] || [[ -z "$TOKEN" ]] || [[ -z "$PAGES" ]] || [[ -z "$DATE" ]] || [[ -z "$LOG_LIFE" ]] || [[ -z "$LOCATION" ]] || [[ -z "$BRANCH" ]] || [[ -z "$USER_ON" ]] || [[ -z "$ORGS_ON" ]] || [[ -z "$GISTS_ON" ]] || [[ -z "$PER_PAGE" ]] || [[ -z "$CLONE_ON" ]] || [[ -z "$PULL_ON" ]]; then
     # $ORGS is the only optional variable not checked for
