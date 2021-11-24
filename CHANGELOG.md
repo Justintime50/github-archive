@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v4.2.1 (2021-11-23)
+## NEXT RELEASE
 
 * Bumps `woodchips` to use the new implementation
 
