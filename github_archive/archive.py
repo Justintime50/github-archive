@@ -4,9 +4,10 @@ import shutil
 import subprocess
 from datetime import datetime
 from threading import BoundedSemaphore, Thread
+from typing import List
 
 import woodchips
-from github import Github
+from github import AuthenticatedUser, Gist, Github, Repository
 
 from github_archive.constants import (
     DEFAULT_LOCATION,
@@ -22,6 +23,8 @@ ORG_CONTEXT = 'org'
 PERSONAL_CONTEXT = 'personal'
 STAR_CONTEXT = 'star'
 USER_CONTEXT = 'user'
+
+LOGGER_NAME = 'github-archive'
 
 
 class GithubArchive:
@@ -60,27 +63,27 @@ class GithubArchive:
         self.github_instance = Github(self.token) if self.token else Github()
         self.authenticated_user = self.github_instance.get_user() if self.token else None
         self.authenticated_username = self.authenticated_user.login.lower() if self.token else None
-        self.logger = self.setup_logger()
 
     def run(self):
         """Run the tool based on the arguments passed via the CLI."""
         self.initialize_project()
-        self.logger.info('# GitHub Archive started...\n')
+        logger = woodchips.get(LOGGER_NAME)
+        logger.info('# GitHub Archive started...\n')
         start_time = datetime.now()
 
         # Personal (includes personal authenticated items)
         if self.token and self.authenticated_user_in_users and self.users:
-            self.logger.info('# Making API call to GitHub for personal repos...\n')
+            logger.info('# Making API call to GitHub for personal repos...\n')
             personal_repos = self.get_all_git_assets(PERSONAL_CONTEXT)
 
             if self.view:
-                self.logger.info('# Viewing user repos...\n')
+                logger.info('# Viewing user repos...\n')
                 self.view_repos(personal_repos)
             if self.clone:
-                self.logger.info('# Cloning missing personal repos...\n')
+                logger.info('# Cloning missing personal repos...\n')
                 self.iterate_repos_to_archive(personal_repos, CLONE_OPERATION)
             if self.pull:
-                self.logger.info('# Pulling changes to personal repos...\n')
+                logger.info('# Pulling changes to personal repos...\n')
                 self.iterate_repos_to_archive(personal_repos, PULL_OPERATION)
 
             # We remove the authenticated user from the list so that we don't double pull their
@@ -89,67 +92,67 @@ class GithubArchive:
 
         # Users (can include personal non-authenticated items, excludes personal authenticated calls)
         if self.users and len(self.users) > 0:
-            self.logger.info('# Making API calls to GitHub for user repos...\n')
+            logger.info('# Making API calls to GitHub for user repos...\n')
             user_repos = self.get_all_git_assets(USER_CONTEXT)
 
             if self.view:
-                self.logger.info('# Viewing user repos...\n')
+                logger.info('# Viewing user repos...\n')
                 self.view_repos(user_repos)
             if self.clone:
-                self.logger.info('# Cloning missing user repos...\n')
+                logger.info('# Cloning missing user repos...\n')
                 self.iterate_repos_to_archive(user_repos, CLONE_OPERATION)
             if self.pull:
-                self.logger.info('# Pulling changes to user repos...\n')
+                logger.info('# Pulling changes to user repos...\n')
                 self.iterate_repos_to_archive(user_repos, PULL_OPERATION)
 
         # Orgs
         if self.orgs:
-            self.logger.info('# Making API calls to GitHub for org repos...\n')
+            logger.info('# Making API calls to GitHub for org repos...\n')
             org_repos = self.get_all_git_assets(ORG_CONTEXT)
 
             if self.view:
-                self.logger.info('# Viewing org repos...\n')
+                logger.info('# Viewing org repos...\n')
                 self.view_repos(org_repos)
             if self.clone:
-                self.logger.info('# Cloning missing org repos...\n')
+                logger.info('# Cloning missing org repos...\n')
                 self.iterate_repos_to_archive(org_repos, CLONE_OPERATION)
             if self.pull:
-                self.logger.info('# Pulling changes to org repos...\n')
+                logger.info('# Pulling changes to org repos...\n')
                 self.iterate_repos_to_archive(org_repos, PULL_OPERATION)
 
         # Gists
         if self.gists:
-            self.logger.info('# Making API call to GitHub for gists...\n')
+            logger.info('# Making API call to GitHub for gists...\n')
             gists = self.get_all_git_assets(GIST_CONTEXT)
 
             if self.view:
-                self.logger.info('# Viewing gists...\n')
+                logger.info('# Viewing gists...\n')
                 self.view_gists(gists)
             if self.clone:
-                self.logger.info('# Cloning missing gists...\n')
+                logger.info('# Cloning missing gists...\n')
                 self.iterate_gists_to_archive(gists, CLONE_OPERATION)
             if self.pull:
-                self.logger.info('# Pulling changes to gists...\n')
+                logger.info('# Pulling changes to gists...\n')
                 self.iterate_gists_to_archive(gists, PULL_OPERATION)
 
         # Stars
         if self.stars:
-            self.logger.info('# Making API call to GitHub for starred repos...\n')
+            logger.info('# Making API call to GitHub for starred repos...\n')
             starred_repos = self.get_all_git_assets(STAR_CONTEXT)
 
             if self.view:
-                self.logger.info('# Viewing stars...\n')
+                logger.info('# Viewing stars...\n')
                 self.view_repos(starred_repos)
             if self.clone:
-                self.logger.info('# Cloning missing starred repos...\n')
+                logger.info('# Cloning missing starred repos...\n')
                 self.iterate_repos_to_archive(starred_repos, CLONE_OPERATION)
             if self.pull:
-                self.logger.info('# Pulling changes to starred repos...\n')
+                logger.info('# Pulling changes to starred repos...\n')
                 self.iterate_repos_to_archive(starred_repos, PULL_OPERATION)
 
         execution_time = f'Execution time: {datetime.now() - start_time}.'
         finish_message = f'GitHub Archive complete! {execution_time}\n'
-        self.logger.info(finish_message)
+        logger.info(finish_message)
 
     def setup_logger(self) -> logging.Logger:
         """Sets up a logger to log to console and a file.
@@ -158,47 +161,48 @@ class GithubArchive:
         - Files will automatically roll over
         """
         logger = woodchips.Logger(
-            name=__name__,
+            name=LOGGER_NAME,
             level='INFO',
         )
         logger.log_to_console()
         logger.log_to_file(location=os.path.join(self.location, 'logs'))
 
-        logger_instance = woodchips.get(logger.logger.name)
-
-        return logger_instance
-
     def initialize_project(self):
         """Initialize the tool and ensure everything is in order before running any logic.
 
-        This function ensures the minimum set of requirements are passed in to run the tool:
+        This function also ensures the minimum set of requirements are passed in to run the tool:
         1. a git operation
         2. a list of assets to run operations on
         """
+        self.setup_logger()
+        logger = woodchips.get(LOGGER_NAME)
+
         if not os.path.exists(self.location):
             os.makedirs(os.path.join(self.location, 'repos'))
             os.makedirs(os.path.join(self.location, 'gists'))
 
         if (self.users or self.orgs or self.gists or self.stars) and not (self.view or self.clone or self.pull):
             message = 'A git operation must be specified when a list of users or orgs is provided.'
-            self.logger.critical(message)
+            logger.critical(message)
             raise ValueError(message)
         elif not (self.users or self.orgs or self.gists or self.stars) and (self.view or self.clone or self.pull):
             message = 'A list must be provided when a git operation is specified.'
-            self.logger.critical(message)
+            logger.critical(message)
             raise ValueError(message)
         elif not (self.users or self.orgs or self.gists or self.stars or self.view or self.clone or self.pull):
             message = 'At least one git operation and one list must be provided to run github-archive.'
-            self.logger.critical(message)
+            logger.critical(message)
             raise ValueError(message)
 
-    def authenticated_user_in_users(self):
+    def authenticated_user_in_users(self) -> AuthenticatedUser.AuthenticatedUser:
         return self.authenticated_user.login.lower() in self.users
 
-    def get_all_git_assets(self, context):
+    def get_all_git_assets(self, context: str) -> List:
         """Retrieve a list of lists via API of git assets (repos, gists) of the
         specified owner(s) (users, orgs). Return a sorted, flat, sorted list of git assets.
         """
+        logger = woodchips.get(LOGGER_NAME)
+
         get_org_repos = lambda owner: self.github_instance.get_organization(owner).get_repos()  # noqa
         get_personal_repos = lambda owner: self.authenticated_user.get_repos(affiliation='owner')  # noqa
         get_starred_repos = lambda owner: self.github_instance.get_user(owner).get_starred()  # noqa
@@ -220,7 +224,7 @@ class GithubArchive:
         for owner in owner_list:
             formatted_owner_name = owner.strip()
             git_assets = context_manager[context][1](owner)
-            self.logger.debug(f'{formatted_owner_name} {git_asset_string} retrieved!')
+            logger.debug(f'{formatted_owner_name} {git_asset_string} retrieved!')
 
             for item in git_assets:
                 if context == GIST_CONTEXT:
@@ -236,7 +240,7 @@ class GithubArchive:
 
         return final_sorted_list
 
-    def iterate_repos_to_archive(self, repos, operation):
+    def iterate_repos_to_archive(self, repos: Repository.Repository, operation: str):
         """Iterate over each repository and start a thread if it can be archived."""
         thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []
@@ -260,7 +264,7 @@ class GithubArchive:
         for thread in thread_list:
             thread.join()
 
-    def iterate_gists_to_archive(self, gists, operation):
+    def iterate_gists_to_archive(self, gists: Gist.Gist, operation: str):
         """Iterate over each gist and start a thread if it can be archived."""
         thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []
@@ -283,20 +287,28 @@ class GithubArchive:
         for thread in thread_list:
             thread.join()
 
-    def view_repos(self, repos):
+    def view_repos(self, repos: List[Repository.Repository]):
         """View a list of repos that will be cloned/pulled."""
+        logger = woodchips.get(LOGGER_NAME)
+
         for repo in repos:
             repo_name = f'{repo.owner.login}/{repo.name}'
-            self.logger.info(repo_name)
+            logger.info(repo_name)
 
-    def view_gists(self, gists):
+    def view_gists(self, gists: List[Gist.Gist]):
         """View a list of gists that will be cloned/pulled."""
+        logger = woodchips.get(LOGGER_NAME)
+
         for gist in gists:
             gist_id = f'{gist.owner.login}/{gist.id}'
-            self.logger.info(gist_id)
+            logger.info(gist_id)
 
-    def archive_repo(self, thread_limiter, repo, repo_path, operation):
-        """Clone and pull repos based on the operation passed"""
+    def archive_repo(
+        self, thread_limiter: BoundedSemaphore, repo: Repository.Repository, repo_path: str, operation: str
+    ):
+        """Clone and pull repos based on the operation passed."""
+        logger = woodchips.get(LOGGER_NAME)
+
         if (os.path.exists(repo_path) and operation == CLONE_OPERATION) or (
             not os.path.exists(repo_path) and operation == PULL_OPERATION
         ):
@@ -322,18 +334,20 @@ class GithubArchive:
                     check=True,
                     timeout=self.timeout,
                 )
-                self.logger.info(f'Repo: {repo.owner.login}/{repo.name} {operation} success!')
+                logger.info(f'Repo: {repo.owner.login}/{repo.name} {operation} success!')
             except subprocess.TimeoutExpired:
-                self.logger.error(f'Git operation timed out archiving {repo.name}.')
+                logger.error(f'Git operation timed out archiving {repo.name}.')
                 self.remove_failed_dir(repo_path)
             except subprocess.CalledProcessError as error:
-                self.logger.error(f'Failed to {operation} {repo.name}\n{error}')
+                logger.error(f'Failed to {operation} {repo.name}\n{error}')
                 self.remove_failed_dir(repo_path)
             finally:
                 thread_limiter.release()
 
-    def archive_gist(self, thread_limiter, gist, gist_path, operation):
-        """Clone and pull gists based on the operation passed"""
+    def archive_gist(self, thread_limiter: BoundedSemaphore, gist: Gist.Gist, gist_path: str, operation: str):
+        """Clone and pull gists based on the operation passed."""
+        logger = woodchips.get(LOGGER_NAME)
+
         if (os.path.exists(gist_path) and operation == CLONE_OPERATION) or (
             not os.path.exists(gist_path) and operation == PULL_OPERATION
         ):
@@ -355,17 +369,17 @@ class GithubArchive:
                     check=True,
                     timeout=self.timeout,
                 )
-                self.logger.info(f'Gist: {gist.owner.login}/{gist.id} {operation} success!')
+                logger.info(f'Gist: {gist.owner.login}/{gist.id} {operation} success!')
             except subprocess.TimeoutExpired:
-                self.logger.error(f'Git operation timed out archiving {gist.id}.')
+                logger.error(f'Git operation timed out archiving {gist.id}.')
                 self.remove_failed_dir(gist_path)
             except subprocess.CalledProcessError as error:
-                self.logger.error(f'Failed to {operation} {gist.id}\n{error}')
+                logger.error(f'Failed to {operation} {gist.id}\n{error}')
                 self.remove_failed_dir(gist_path)
             finally:
                 thread_limiter.release()
 
-    def remove_failed_dir(self, path):
+    def remove_failed_dir(self, path: str):
         """Removes a directory if it fails a git operation due to
         timing out or other errors so it can be retried on the next run.
         """

@@ -1,4 +1,3 @@
-import logging
 import subprocess
 from threading import BoundedSemaphore
 from unittest.mock import patch
@@ -227,13 +226,13 @@ def test_run_stars_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
     mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
 
 
-def test_setup_logger():
+@patch('woodchips.Logger')
+def test_setup_logger(mock_logger):
     """Test that we setup the `woodchips` logger correctly and that it returns a logger instance."""
     github_archive = GithubArchive()
-    logger = github_archive.setup_logger()
+    github_archive.setup_logger()
 
-    assert type(logger) == logging.Logger
-    assert logging.getLevelName(logger.getEffectiveLevel()) == 'INFO'
+    mock_logger.assert_called_once()
 
 
 @patch('github_archive.GithubArchive.setup_logger')
@@ -245,10 +244,11 @@ def test_initialize_project(mock_make_dirs, mock_dir_exist, mock_logger):
         clone=True,
     ).initialize_project()
 
+    mock_logger.assert_called_once()
     assert mock_make_dirs.call_count == 2
 
 
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.critical')
 def test_initialize_project_missing_list(mock_logger):
     # TODO: Is it possible to test all variations easily in one test?
     # Parametrize doesn't work great because we can't easily swap the param name being used
@@ -259,11 +259,11 @@ def test_initialize_project_missing_list(mock_logger):
         )
         github_archive.initialize_project()
 
-    github_archive.logger.critical.assert_called_with(message)
+    mock_logger.assert_called_with(message)
     assert message == str(error.value)
 
 
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.critical')
 def test_initialize_project_missing_operation(mock_logger):
     # TODO: Is it possible to test all variations easily in one test?
     # Parametrize doesn't work great because we can't easily swap the param name being used
@@ -274,11 +274,11 @@ def test_initialize_project_missing_operation(mock_logger):
         )
         github_archive.initialize_project()
 
-    github_archive.logger.critical.assert_called_with(message)
+    mock_logger.assert_called_with(message)
     assert message == str(error.value)
 
 
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.critical')
 def test_initialize_project_missing_all_cli_args(mock_logger):
     # TODO: Is it possible to test all variations easily in one test?
     # Parametrize doesn't work great because we can't easily swap the param name being used
@@ -287,7 +287,7 @@ def test_initialize_project_missing_all_cli_args(mock_logger):
         github_archive = GithubArchive()
         github_archive.initialize_project()
 
-    github_archive.logger.critical.assert_called_with(message)
+    mock_logger.assert_called_with(message)
     assert message == str(error.value)
 
 
@@ -386,26 +386,26 @@ def test_iterate_gists(mock_archive_gist, mock_github_instance, mock_git_asset):
     mock_archive_gist.assert_called()
 
 
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.info')
 def test_view_repos(mock_logger, mock_git_asset):
     repos = [mock_git_asset]
     github_archive = GithubArchive()
     github_archive.view_repos(repos)
 
-    github_archive.logger.info.assert_called_with('mock_username/mock-asset-name')
+    mock_logger.assert_called_with('mock_username/mock-asset-name')
 
 
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.info')
 def test_view_gists(mock_logger, mock_git_asset):
     gists = [mock_git_asset]
     github_archive = GithubArchive()
     github_archive.view_gists(gists)
 
-    github_archive.logger.info.assert_called_with('mock_username/123')
+    mock_logger.assert_called_with('mock_username/123')
 
 
 @patch('subprocess.run')
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.info')
 def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
     # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
@@ -414,11 +414,11 @@ def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
     github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
 
     mock_subprocess.assert_called()
-    github_archive.logger.info.assert_called_once_with(message)
+    mock_logger.assert_called_once_with(message)
 
 
 @patch('subprocess.run')
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.info')
 def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_asset):
     # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
@@ -429,12 +429,12 @@ def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_a
     github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
 
     mock_subprocess.assert_called()
-    github_archive.logger.info.assert_called_once_with(message)
+    mock_logger.assert_called_once_with(message)
 
 
 @patch('os.path.exists', return_value=True)
 @patch('subprocess.run')
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.info')
 def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
     github_archive = GithubArchive()
@@ -445,33 +445,33 @@ def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_git_asset)
 
 @patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd=subprocess.run, timeout=0.1))
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.error')
 def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_git_asset.name}.'
     github_archive = GithubArchive()
     github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
 
-    github_archive.logger.error.assert_called_with(message)
+    mock_logger.assert_called_with(message)
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
     # mock_remove_dir.assert_called_once_with('mock/path')
 
 
 @patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd=subprocess.run))
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.error')
 def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
     github_archive = GithubArchive()
     github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
 
-    github_archive.logger.error.assert_called()
+    mock_logger.assert_called_once()
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
     # mock_remove_dir.assert_called_once_with('mock/path')
 
 
 @patch('subprocess.run')
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.info')
 def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
     # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
@@ -480,12 +480,12 @@ def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
     github_archive.archive_gist(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
 
     mock_subprocess.assert_called()
-    github_archive.logger.info.assert_called_once_with(message)
+    mock_logger.assert_called_once_with(message)
 
 
 @patch('os.path.exists', return_value=True)
 @patch('subprocess.run')
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.info')
 def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_git_asset):
     operation = CLONE_OPERATION
     github_archive = GithubArchive()
@@ -496,26 +496,26 @@ def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exist
 
 @patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd=subprocess.run, timeout=0.1))
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.error')
 def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_git_asset.id}.'
     github_archive = GithubArchive()
     github_archive.archive_gist(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
 
-    github_archive.logger.error.assert_called_with(message)
+    mock_logger.assert_called_with(message)
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
     # mock_remove_dir.assert_called_once_with('mock/path')
 
 
 @patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd=subprocess.run))
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('logging.Logger.error')
 def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
     github_archive = GithubArchive()
     github_archive.archive_gist(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
 
-    github_archive.logger.error.assert_called()
+    mock_logger.assert_called()
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
     # mock_remove_dir.assert_called_once_with('mock/path')
