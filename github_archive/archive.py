@@ -1,4 +1,3 @@
-import logging  # Used for type hints, logging done through `woodchips`
 import os
 import shutil
 import subprocess
@@ -154,7 +153,7 @@ class GithubArchive:
         finish_message = f'GitHub Archive complete! {execution_time}\n'
         logger.info(finish_message)
 
-    def setup_logger(self) -> logging.Logger:
+    def setup_logger(self):
         """Sets up a logger to log to console and a file.
 
         - Logging can be called with the `logger` property
