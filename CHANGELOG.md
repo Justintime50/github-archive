@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v4.2.2 (2021-11-29)
+
+* Adds `mypy` and fixes typing errors
+
 ## v4.2.1 (2021-11-25)
 
 * Bumps `woodchips` to use the new implementation (also fixes a bug where we were creating a new `woodchips.Logger` class each time we called the logger instead of reusing the same logger instance)

@@ -444,7 +444,7 @@ def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_git_asset)
 
 
 @patch('shutil.rmtree')
-@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd=subprocess.run, timeout=0.1))
+@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
 @patch('logging.Logger.error')
 def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = CLONE_OPERATION
@@ -458,7 +458,7 @@ def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remov
 
 
 @patch('shutil.rmtree')
-@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd=subprocess.run))
+@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
 @patch('logging.Logger.error')
 def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
@@ -495,7 +495,7 @@ def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exist
 
 
 @patch('shutil.rmtree')
-@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd=subprocess.run, timeout=0.1))
+@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
 @patch('logging.Logger.error')
 def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = CLONE_OPERATION
@@ -509,7 +509,7 @@ def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remov
 
 
 @patch('shutil.rmtree')
-@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd=subprocess.run))
+@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
 @patch('logging.Logger.error')
 def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION

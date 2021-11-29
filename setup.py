@@ -13,13 +13,14 @@ DEV_REQUIREMENTS = [
     'coveralls == 3.*',
     'flake8',
     'isort',
+    'mypy',
     'pytest == 6.*',
     'pytest-cov == 2.*',
 ]
 
 setuptools.setup(
     name='github-archive',
-    version='4.2.1',
+    version='4.2.2',
     description=(
         'A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.'
     ),
@@ -29,6 +30,7 @@ setuptools.setup(
     author='Justintime50',
     license='MIT',
     packages=setuptools.find_packages(),
+    package_data={'github-archive': ['py.typed']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

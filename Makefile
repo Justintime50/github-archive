@@ -31,10 +31,10 @@ black-check:
 	$(VIRTUAL_BIN)/black $(PROJECT_NAME)/ test/ --check
 
 ## format - Runs all formatting tools against the project
-format: black isort lint
+format: black isort lint mypy
 
 ## format-check - Checks if the project is formatted correctly against all formatting rules
-format-check: black-check isort-check lint
+format-check: black-check isort-check lint mypy
 
 ## install - Install the project locally
 install:
@@ -53,6 +53,10 @@ isort-check:
 ## lint - Lint the project
 lint:
 	$(VIRTUAL_BIN)/flake8 $(PROJECT_NAME)/ test/
+
+## mypy - Run mypy type checking on the project
+mypy:
+	$(VIRTUAL_BIN)/mypy $(PROJECT_NAME)/ test/
 
 ## test - Test the project
 test:

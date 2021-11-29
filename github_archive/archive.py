@@ -6,7 +6,7 @@ from threading import BoundedSemaphore, Thread
 from typing import List
 
 import woodchips
-from github import AuthenticatedUser, Gist, Github, Repository
+from github import Gist, Github, Repository
 
 from github_archive.constants import (
     DEFAULT_LOCATION,
@@ -193,7 +193,7 @@ class GithubArchive:
             logger.critical(message)
             raise ValueError(message)
 
-    def authenticated_user_in_users(self) -> AuthenticatedUser.AuthenticatedUser:
+    def authenticated_user_in_users(self) -> bool:
         return self.authenticated_user.login.lower() in self.users
 
     def get_all_git_assets(self, context: str) -> List:
@@ -239,7 +239,7 @@ class GithubArchive:
 
         return final_sorted_list
 
-    def iterate_repos_to_archive(self, repos: Repository.Repository, operation: str):
+    def iterate_repos_to_archive(self, repos: List[Repository.Repository], operation: str):
         """Iterate over each repository and start a thread if it can be archived."""
         thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []
@@ -263,7 +263,7 @@ class GithubArchive:
         for thread in thread_list:
             thread.join()
 
-    def iterate_gists_to_archive(self, gists: Gist.Gist, operation: str):
+    def iterate_gists_to_archive(self, gists: List[Gist.Gist], operation: str):
         """Iterate over each gist and start a thread if it can be archived."""
         thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []

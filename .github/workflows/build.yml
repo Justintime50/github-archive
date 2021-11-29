@@ -20,20 +20,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: "3.10"
       - name: Install Dependencies
         run: make install
-      - name: Run linting
-        run: make lint
       - name: Check format
         run: make format-check
-      - name: Check imports
-        run: make isort-check
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pythonversion: ["3.7", "3.8", "3.9"]
+        pythonversion: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
