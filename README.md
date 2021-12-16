@@ -57,6 +57,7 @@ Options:
                             The number of seconds before a git operation times out.
     -th THREADS, --threads THREADS
                             The number of concurrent threads to run.
+    --base_url BASE_URL   The base URL of your GitHub instance (useful for enterprise users with custom hostnames).
 ```
 
 ### Automating SSH Passphrase Prompt (Recommended)

@@ -2,6 +2,7 @@ import argparse
 
 from github_archive import GithubArchive
 from github_archive.constants import (
+    DEFAULT_BASE_URL,
     DEFAULT_LOCATION,
     DEFAULT_NUM_THREADS,
     DEFAULT_TIMEOUT,
@@ -122,6 +123,13 @@ class GithubArchiveCli:
             default=DEFAULT_NUM_THREADS,
             help='The number of concurrent threads to run.',
         )
+        parser.add_argument(
+            '--base_url',
+            type=str,
+            required=False,
+            default=DEFAULT_BASE_URL,
+            help='The base URL of your GitHub instance (useful for enterprise users with custom hostnames).',
+        )
         parser.parse_args(namespace=self)
 
     def run(self):
@@ -139,6 +147,7 @@ class GithubArchiveCli:
             use_https=self.https,
             timeout=self.timeout,
             threads=self.threads,
+            base_url=self.base_url,
         )
         github_archive.run()
 

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v4.3.0 (2021-12-16)
+
+* Adds the ability to specify a custom base_url for GitHub (useful for enterprise GitHub users with a custom hostname, closes #41)
+
 ## v4.2.2 (2021-11-29)
 
 * Adds `mypy` and fixes typing errors

@@ -9,6 +9,7 @@ import woodchips
 from github import Gist, Github, Repository
 
 from github_archive.constants import (
+    DEFAULT_BASE_URL,
     DEFAULT_LOCATION,
     DEFAULT_NUM_THREADS,
     DEFAULT_TIMEOUT,
@@ -42,6 +43,7 @@ class GithubArchive:
         use_https=False,
         timeout=DEFAULT_TIMEOUT,
         threads=DEFAULT_NUM_THREADS,
+        base_url=DEFAULT_BASE_URL,
     ):
         # Parameter variables
         self.token = token
@@ -57,9 +59,10 @@ class GithubArchive:
         self.use_https = use_https
         self.timeout = timeout
         self.threads = threads
+        self.base_url = base_url
 
         # Internal variables
-        self.github_instance = Github(self.token) if self.token else Github()
+        self.github_instance = Github(login_or_token=self.token, base_url=self.base_url)
         self.authenticated_user = self.github_instance.get_user() if self.token else None
         self.authenticated_username = self.authenticated_user.login.lower() if self.token else None
 
