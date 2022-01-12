@@ -15,8 +15,6 @@ A powerful tool to concurrently clone or pull user and org repos and gists to cr
 
 GitHub Archive is a powerful tool to concurrently clone or pull repositories or gists from GitHub with incredible flexibility. It's the perfect tool for spinning up a new dev environment, keeping a local copy of your GitHub instance, or quickly pulling in projects from your favorite users and organizations.
 
-### Configurable Settings
-
 The power of GitHub Archive comes in its configuration. Maybe you only want to clone or pull your personal public repos or maybe you want to go all out and include private repos from you and all organizations you belong to along with your gists. 
 
 ## Install
