@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## NEXT RELEASE
+## v4.4.0 (2021-02-18)
 
 * Adds an `--include` and `--exclude` CLI flag that accepts a comma-separated list of repo names to either include or exclude. If neither are passed, no filtering will occur (closes #43)
 
