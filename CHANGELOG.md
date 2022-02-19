@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## NEXT RELEASE
+
+* Adds an `--include` and `--exclude` CLI flag that accepts a comma-separated list of repo names to either include or exclude. If neither are passed, no filtering will occur (closes #43)
+
 ## v4.3.0 (2021-12-16)
 
 * Adds the ability to specify a custom base_url for GitHub (useful for enterprise GitHub users with a custom hostname, closes #41)

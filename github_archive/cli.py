@@ -92,6 +92,22 @@ class GithubArchiveCli:
             help='Pass this flag to include forked git assets.',
         )
         parser.add_argument(
+            '-i',
+            '--include',
+            type=str,
+            required=False,
+            default=None,
+            help='Pass a comma separated list of repos to include in the Archive.',
+        )
+        parser.add_argument(
+            '-e',
+            '--exclude',
+            type=str,
+            required=False,
+            default=None,
+            help='Pass a comma separated list of repos to exclude from the Archive.',
+        )
+        parser.add_argument(
             '-l',
             '--location',
             type=str,
@@ -144,6 +160,8 @@ class GithubArchiveCli:
             pull=self.pull,
             forks=self.forks,
             location=self.location,
+            include=self.include,
+            exclude=self.exclude,
             use_https=self.https,
             timeout=self.timeout,
             threads=self.threads,

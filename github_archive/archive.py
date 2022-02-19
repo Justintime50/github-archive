@@ -40,6 +40,8 @@ class GithubArchive:
         pull=False,
         forks=False,
         location=DEFAULT_LOCATION,
+        include=None,
+        exclude=None,
         use_https=False,
         timeout=DEFAULT_TIMEOUT,
         threads=DEFAULT_NUM_THREADS,
@@ -56,6 +58,8 @@ class GithubArchive:
         self.pull = pull
         self.forks = forks
         self.location = location
+        self.include = include.lower().split(',') if include else ''
+        self.exclude = exclude.lower().split(',') if exclude else ''
         self.use_https = use_https
         self.timeout = timeout
         self.threads = threads
@@ -195,6 +199,10 @@ class GithubArchive:
             message = 'At least one git operation and one list must be provided to run github-archive.'
             logger.critical(message)
             raise ValueError(message)
+        elif self.include and self.exclude:
+            message = 'The include and exclude flags are mutually exclusive. Only one can be used on each run.'
+            logger.critical(message)
+            raise ValueError(message)
 
     def authenticated_user_in_users(self) -> bool:
         return self.authenticated_user.login.lower() in self.users
@@ -243,24 +251,35 @@ class GithubArchive:
         return final_sorted_list
 
     def iterate_repos_to_archive(self, repos: List[Repository.Repository], operation: str):
-        """Iterate over each repository and start a thread if it can be archived."""
+        """Iterate over each repository and start a thread if it can be archived.
+
+        We ignore repos not in the include or in the exclude list if either are present.
+        """
+        logger = woodchips.get(LOGGER_NAME)
         thread_limiter = BoundedSemaphore(self.threads)
         thread_list = []
 
         for repo in repos:
-            repo_owner_username = repo.owner.login.lower()
-            repo_path = os.path.join(self.location, 'repos', repo_owner_username, repo.name)
-            repo_thread = Thread(
-                target=self.archive_repo,
-                args=(
-                    thread_limiter,
-                    repo,
-                    repo_path,
-                    operation,
-                ),
-            )
-            thread_list.append(repo_thread)
-            repo_thread.start()
+            if (
+                (not self.include and not self.exclude)
+                or (self.include and repo.name in self.include)
+                or (self.exclude and repo.name not in self.exclude)
+            ):
+                repo_owner_username = repo.owner.login.lower()
+                repo_path = os.path.join(self.location, 'repos', repo_owner_username, repo.name)
+                repo_thread = Thread(
+                    target=self.archive_repo,
+                    args=(
+                        thread_limiter,
+                        repo,
+                        repo_path,
+                        operation,
+                    ),
+                )
+                thread_list.append(repo_thread)
+                repo_thread.start()
+            else:
+                logger.debug(f'{repo.name} skipped due to include/exclude filtering')
 
         # Wait for the number of threads in thread_limiter to finish before moving on
         for thread in thread_list:
