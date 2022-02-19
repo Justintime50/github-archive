@@ -97,7 +97,7 @@ class GithubArchiveCli:
             type=str,
             required=False,
             default=None,
-            help='Pass a comma separated list of repos to include in the Archive.',
+            help='Pass a comma separated list of repos to filter what is included in the Archive.',
         )
         parser.add_argument(
             '-e',
@@ -105,7 +105,7 @@ class GithubArchiveCli:
             type=str,
             required=False,
             default=None,
-            help='Pass a comma separated list of repos to exclude from the Archive.',
+            help='Pass a comma separated list of repos to filter what is excluded from the Archive.',
         )
         parser.add_argument(
             '-l',
