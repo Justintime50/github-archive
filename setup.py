@@ -14,8 +14,8 @@ DEV_REQUIREMENTS = [
     'flake8',
     'isort',
     'mypy',
-    'pytest == 6.*',
-    'pytest-cov == 2.*',
+    'pytest == 7.*',
+    'pytest-cov == 3.*',
 ]
 
 setuptools.setup(

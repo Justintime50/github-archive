@@ -1,5 +1,5 @@
 [tool.black]
-experimental-string-processing = true
+preview = true
 line-length = 120
 skip-string-normalization = true
 

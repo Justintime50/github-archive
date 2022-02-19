@@ -1,5 +1,6 @@
 PYTHON_BINARY := python3
-VIRTUAL_BIN := venv/bin
+VIRTUAL_ENV := venv
+VIRTUAL_BIN := $(VIRTUAL_ENV)/bin
 PROJECT_NAME := github_archive
 TEST_DIR := test
 
@@ -17,7 +18,7 @@ coverage:
 
 ## clean - Remove the virtual environment and clear out .pyc files
 clean:
-	rm -rf ~/.venv/$(PROJECT_NAME)/ venv
+	rm -rf $(VIRTUAL_ENV)
 	find . -name '*.pyc' -delete
 	rm -rf dist
 	rm -rf build
@@ -39,8 +40,7 @@ format-check: black-check isort-check lint mypy
 
 ## install - Install the project locally
 install:
-	$(PYTHON_BINARY) -m venv ~/.venv/$(PROJECT_NAME)/
-	ln -snf ~/.venv/$(PROJECT_NAME)/ venv
+	$(PYTHON_BINARY) -m venv $(VIRTUAL_ENV)
 	$(VIRTUAL_BIN)/pip install -e ."[dev]"
 
 ## isort - Sorts imports throughout the project
