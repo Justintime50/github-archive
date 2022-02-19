@@ -291,6 +291,24 @@ def test_initialize_project_missing_all_cli_args(mock_logger):
     assert message == str(error.value)
 
 
+@patch('logging.Logger.critical')
+def test_initialize_project_include_exclude_together(mock_logger):
+    # TODO: Is it possible to test all variations easily in one test?
+    # Parametrize doesn't work great because we can't easily swap the param name being used
+    message = 'The include and exclude flags are mutually exclusive. Only one can be used on each run.'
+    with pytest.raises(ValueError) as error:
+        github_archive = GithubArchive(
+            users='justintime50',
+            clone=True,
+            include='mock-repo',
+            exclude='another-mock-repo',
+        )
+        github_archive.initialize_project()
+
+    mock_logger.assert_called_with(message)
+    assert message == str(error.value)
+
+
 @patch('github_archive.archive.Github.get_user')
 def test_authenticated_user_in_users(mock_get_user):
     authenticated_user_in_users = GithubArchive(
@@ -373,6 +391,32 @@ def test_iterate_repos_matching_authed_username(mock_archive_repo, mock_github_i
     ).iterate_repos_to_archive(repos, CLONE_OPERATION)
 
     mock_archive_repo.assert_called_once()
+
+
+@patch('github_archive.archive.Github')
+@patch('github_archive.archive.GithubArchive.archive_repo')
+def test_iterate_repos_include_list(mock_archive_repo, mock_github_instance, mock_git_asset):
+    """Tests that we iterate repos that are on the include list."""
+    repos = [mock_git_asset]
+    GithubArchive(
+        users='mock_username',
+        include='mock-asset-name',
+    ).iterate_repos_to_archive(repos, CLONE_OPERATION)
+
+    mock_archive_repo.assert_called_once()
+
+
+@patch('github_archive.archive.Github')
+@patch('github_archive.archive.GithubArchive.archive_repo')
+def test_iterate_repos_exclude_list(mock_archive_repo, mock_github_instance, mock_git_asset):
+    """Tests that we do not iterate repos that are on the exclude list."""
+    repos = [mock_git_asset]
+    GithubArchive(
+        users='mock_username',
+        exclude='mock-asset-name',
+    ).iterate_repos_to_archive(repos, CLONE_OPERATION)
+
+    mock_archive_repo.assert_not_called()
 
 
 @patch('github_archive.archive.Github')

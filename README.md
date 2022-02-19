@@ -48,6 +48,10 @@ Options:
     -c, --clone           Pass this flag to clone git assets.
     -p, --pull            Pass this flag to pull git assets.
     -f, --forks           Pass this flag to include forked git assets.
+    -i INCLUDE, --include INCLUDE
+                            Pass a comma separated list of repos to include in the Archive.
+    -e EXCLUDE, --exclude EXCLUDE
+                            Pass a comma separated list of repos to exclude from the Archive.
     -l LOCATION, --location LOCATION
                             The location where you want your GitHub Archive to be stored.
     -ht, --https          Use HTTPS URLs instead of SSH.
