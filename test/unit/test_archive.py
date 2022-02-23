@@ -1,5 +1,4 @@
 import subprocess
-from threading import BoundedSemaphore
 from unittest.mock import patch
 
 import pytest
@@ -7,18 +6,11 @@ import pytest
 from github_archive import GithubArchive
 from github_archive.archive import (
     CLONE_OPERATION,
-    DEFAULT_NUM_THREADS,
     GIST_CONTEXT,
     ORG_CONTEXT,
     PULL_OPERATION,
     USER_CONTEXT,
 )
-
-
-def mock_thread_limiter():
-    thread_limiter = BoundedSemaphore(DEFAULT_NUM_THREADS)
-
-    return thread_limiter
 
 
 @patch('github_archive.archive.Github.get_user')
@@ -455,7 +447,7 @@ def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Repo: {mock_git_asset.owner.login}/{mock_git_asset.name} {operation} success!'
     github_archive = GithubArchive()
-    github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
+    github_archive.archive_repo(mock_git_asset, 'mock/path', operation)
 
     mock_subprocess.assert_called()
     mock_logger.assert_called_once_with(message)
@@ -470,7 +462,7 @@ def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_a
     github_archive = GithubArchive(
         use_https=True,
     )
-    github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
+    github_archive.archive_repo(mock_git_asset, 'mock/path', operation)
 
     mock_subprocess.assert_called()
     mock_logger.assert_called_once_with(message)
@@ -482,7 +474,7 @@ def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_a
 def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
     github_archive = GithubArchive()
-    github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
+    github_archive.archive_repo(mock_git_asset, 'github_archive', operation)
 
     mock_subprocess.assert_not_called()
 
@@ -494,7 +486,7 @@ def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remov
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_git_asset.name}.'
     github_archive = GithubArchive()
-    github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
+    github_archive.archive_repo(mock_git_asset, 'mock/path', operation)
 
     mock_logger.assert_called_with(message)
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
@@ -507,7 +499,7 @@ def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remov
 def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
     github_archive = GithubArchive()
-    github_archive.archive_repo(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
+    github_archive.archive_repo(mock_git_asset, 'github_archive', operation)
 
     mock_logger.assert_called_once()
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
@@ -521,7 +513,7 @@ def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Gist: {mock_git_asset.owner.login}/{mock_git_asset.id} {operation} success!'
     github_archive = GithubArchive()
-    github_archive.archive_gist(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
+    github_archive.archive_gist(mock_git_asset, 'mock/path', operation)
 
     mock_subprocess.assert_called()
     mock_logger.assert_called_once_with(message)
@@ -533,7 +525,7 @@ def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
 def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_git_asset):
     operation = CLONE_OPERATION
     github_archive = GithubArchive()
-    github_archive.archive_gist(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
+    github_archive.archive_gist(mock_git_asset, 'github_archive', operation)
 
     mock_subprocess.assert_not_called()
 
@@ -545,7 +537,7 @@ def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remov
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_git_asset.id}.'
     github_archive = GithubArchive()
-    github_archive.archive_gist(mock_thread_limiter(), mock_git_asset, 'mock/path', operation)
+    github_archive.archive_gist(mock_git_asset, 'mock/path', operation)
 
     mock_logger.assert_called_with(message)
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function
@@ -558,7 +550,7 @@ def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remov
 def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
     operation = PULL_OPERATION
     github_archive = GithubArchive()
-    github_archive.archive_gist(mock_thread_limiter(), mock_git_asset, 'github_archive', operation)
+    github_archive.archive_gist(mock_git_asset, 'github_archive', operation)
 
     mock_logger.assert_called()
     # TODO: This is difficult to mock because it must not exist and then later exist in the same function

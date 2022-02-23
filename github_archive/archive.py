@@ -4,7 +4,7 @@ import stat
 import subprocess
 from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, wait
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import woodchips
 from github import Gist, Github, Repository
@@ -89,7 +89,9 @@ class GithubArchive:
                 self.view_repos(personal_repos)
             if self.clone:
                 logger.info('# Cloning missing personal repos...\n')
-                failed_repo_dirs.extend(self.iterate_repos_to_archive(personal_repos, CLONE_OPERATION))
+                failed_repos = self.iterate_repos_to_archive(personal_repos, CLONE_OPERATION)
+                if any(failed_repos):
+                    failed_repo_dirs.extend(failed_repos)
             if self.pull:
                 logger.info('# Pulling changes to personal repos...\n')
                 _ = self.iterate_repos_to_archive(personal_repos, PULL_OPERATION)
@@ -108,7 +110,9 @@ class GithubArchive:
                 self.view_repos(user_repos)
             if self.clone:
                 logger.info('# Cloning missing user repos...\n')
-                failed_repo_dirs.extend(self.iterate_repos_to_archive(user_repos, CLONE_OPERATION))
+                failed_repos = self.iterate_repos_to_archive(user_repos, CLONE_OPERATION)
+                if any(failed_repos):
+                    failed_repo_dirs.extend(failed_repos)
             if self.pull:
                 logger.info('# Pulling changes to user repos...\n')
                 _ = self.iterate_repos_to_archive(user_repos, PULL_OPERATION)
@@ -123,7 +127,9 @@ class GithubArchive:
                 self.view_repos(org_repos)
             if self.clone:
                 logger.info('# Cloning missing org repos...\n')
-                failed_repo_dirs.extend(self.iterate_repos_to_archive(org_repos, CLONE_OPERATION))
+                failed_repos = self.iterate_repos_to_archive(org_repos, CLONE_OPERATION)
+                if any(failed_repos):
+                    failed_repo_dirs.extend(failed_repos)
             if self.pull:
                 logger.info('# Pulling changes to org repos...\n')
                 _ = self.iterate_repos_to_archive(org_repos, PULL_OPERATION)
@@ -138,7 +144,9 @@ class GithubArchive:
                 self.view_repos(starred_repos)
             if self.clone:
                 logger.info('# Cloning missing starred repos...\n')
-                failed_repo_dirs.extend(self.iterate_repos_to_archive(starred_repos, CLONE_OPERATION))
+                failed_repos = self.iterate_repos_to_archive(starred_repos, CLONE_OPERATION)
+                if any(failed_repos):
+                    failed_repo_dirs.extend(failed_repos)
             if self.pull:
                 logger.info('# Pulling changes to starred repos...\n')
                 _ = self.iterate_repos_to_archive(starred_repos, PULL_OPERATION)
@@ -158,7 +166,9 @@ class GithubArchive:
                 self.view_gists(gists)
             if self.clone:
                 logger.info('# Cloning missing gists...\n')
-                failed_gist_dirs.extend(self.iterate_gists_to_archive(gists, CLONE_OPERATION))
+                failed_gists = self.iterate_gists_to_archive(gists, CLONE_OPERATION)
+                if any(failed_gists):
+                    failed_gist_dirs.extend(failed_gists)
             if self.pull:
                 logger.info('# Pulling changes to gists...\n')
                 _ = self.iterate_gists_to_archive(gists, PULL_OPERATION)
@@ -218,7 +228,7 @@ class GithubArchive:
     def authenticated_user_in_users(self) -> bool:
         return self.authenticated_user.login.lower() in self.users
 
-    def get_all_git_assets(self, context: str) -> List:
+    def get_all_git_assets(self, context: str) -> List[Union[Repository.Repository, Gist.Gist]]:
         """Retrieve a list of lists via API of git assets (repos, gists) of the
         specified owner(s) (users, orgs). Return a sorted, flat, sorted list of git assets.
         """
@@ -261,7 +271,7 @@ class GithubArchive:
 
         return final_sorted_list
 
-    def iterate_repos_to_archive(self, repos: List[Repository.Repository], operation: str) -> List[str]:
+    def iterate_repos_to_archive(self, repos: List[Repository.Repository], operation: str) -> List[Optional[str]]:
         """Iterate over each repository and start a thread if it can be archived.
 
         We ignore repos not in the include or in the exclude list if either are present.
@@ -278,12 +288,14 @@ class GithubArchive:
             ):
                 repo_owner_username = repo.owner.login.lower()
                 repo_path = os.path.join(self.location, 'repos', repo_owner_username, repo.name)
-                thread_list.append(pool.submit(
-                    self.archive_repo,
-                    repo=repo,
-                    repo_path=repo_path,
-                    operation=operation,
-                ))
+                thread_list.append(
+                    pool.submit(
+                        self.archive_repo,
+                        repo=repo,
+                        repo_path=repo_path,
+                        operation=operation,
+                    )
+                )
             else:
                 logger.debug(f'{repo.name} skipped due to include/exclude filtering')
 
@@ -292,19 +304,21 @@ class GithubArchive:
 
         return failed_repos
 
-    def iterate_gists_to_archive(self, gists: List[Gist.Gist], operation: str) -> List[str]:
+    def iterate_gists_to_archive(self, gists: List[Gist.Gist], operation: str) -> List[Optional[str]]:
         """Iterate over each gist and start a thread if it can be archived."""
         pool = ThreadPoolExecutor(self.threads)
         thread_list = []
 
         for gist in gists:
             gist_path = os.path.join(self.location, 'gists', gist.id)
-            thread_list.append(pool.submit(
-                self.archive_gist,
-                gist=gist,
-                gist_path=gist_path,
-                operation=operation,
-            ))
+            thread_list.append(
+                pool.submit(
+                    self.archive_gist,
+                    gist=gist,
+                    gist_path=gist_path,
+                    operation=operation,
+                )
+            )
 
         wait(thread_list, return_when=ALL_COMPLETED)
         failed_gists = [gist.result() for gist in thread_list if gist.result()]
@@ -327,10 +341,11 @@ class GithubArchive:
             gist_id = f'{gist.owner.login}/{gist.id}'
             logger.info(gist_id)
 
-    def archive_repo(
-        self, repo: Repository.Repository, repo_path: str, operation: str
-    ) -> Optional[str]:
-        """Clone and pull repos based on the operation passed."""
+    def archive_repo(self, repo: Repository.Repository, repo_path: str, operation: str) -> Optional[str]:
+        """Clone and pull repos based on the operation passed.
+
+        We return the name of the repo if its git operation fails, otherwise return None.
+        """
         logger = woodchips.get(LOGGER_NAME)
         failed_repo = None
         full_repo_name = os.path.join(repo.owner.login, repo.name)  # We use a path here to properly remove failed dirs
@@ -371,7 +386,10 @@ class GithubArchive:
         return failed_repo
 
     def archive_gist(self, gist: Gist.Gist, gist_path: str, operation: str) -> Optional[str]:
-        """Clone and pull gists based on the operation passed."""
+        """Clone and pull gists based on the operation passed.
+
+        We return the name of the gist if its git operation fails, otherwise return None.
+        """
         logger = woodchips.get(LOGGER_NAME)
         failed_gist = None
         full_gist_id = os.path.join(gist.owner.login, gist.id)  # We use a path here to properly remove failed dirs
