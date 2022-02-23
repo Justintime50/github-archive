@@ -312,10 +312,20 @@ def test_authenticated_user_in_users(mock_get_user):
 
 
 @patch('github_archive.archive.Github.get_user')
-def test_get_all_git_assets(mock_get_user):
+def test_get_all_git_assets_repos(mock_get_user):
     GithubArchive(
         users='justintime50',
     ).get_all_git_assets(USER_CONTEXT)
+
+    mock_get_user.assert_called_once()
+
+
+@patch('github_archive.archive.Github.get_user')
+def test_get_all_git_assets_gists(mock_get_user):
+    # TODO: This test doesn't yet do anything because we need to populate the `git_assets` list with mock data
+    GithubArchive(
+        gists='justintime50',
+    ).get_all_git_assets(GIST_CONTEXT)
 
     mock_get_user.assert_called_once()
 
@@ -480,31 +490,25 @@ def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_path_exist
     mock_subprocess.assert_not_called()
 
 
-@patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
 @patch('logging.Logger.error')
-def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
+def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_git_asset.name}.'
     github_archive = GithubArchive()
     github_archive.archive_repo(mock_git_asset, 'mock/path', operation)
 
     mock_logger.assert_called_with(message)
-    # TODO: This is difficult to mock because it must not exist and then later exist in the same function
-    # mock_remove_dir.assert_called_once_with('mock/path')
 
 
-@patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
 @patch('logging.Logger.error')
-def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
+def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_git_asset):
     operation = PULL_OPERATION
     github_archive = GithubArchive()
     github_archive.archive_repo(mock_git_asset, 'github_archive', operation)
 
     mock_logger.assert_called_once()
-    # TODO: This is difficult to mock because it must not exist and then later exist in the same function
-    # mock_remove_dir.assert_called_once_with('mock/path')
 
 
 @patch('subprocess.run')
@@ -531,28 +535,45 @@ def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exist
     mock_subprocess.assert_not_called()
 
 
-@patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
 @patch('logging.Logger.error')
-def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
+def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Git operation timed out archiving {mock_git_asset.id}.'
     github_archive = GithubArchive()
     github_archive.archive_gist(mock_git_asset, 'mock/path', operation)
 
     mock_logger.assert_called_with(message)
-    # TODO: This is difficult to mock because it must not exist and then later exist in the same function
-    # mock_remove_dir.assert_called_once_with('mock/path')
 
 
-@patch('shutil.rmtree')
 @patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
 @patch('logging.Logger.error')
-def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_remove_dir, mock_git_asset):
+def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_git_asset):
     operation = PULL_OPERATION
     github_archive = GithubArchive()
     github_archive.archive_gist(mock_git_asset, 'github_archive', operation)
 
     mock_logger.assert_called()
-    # TODO: This is difficult to mock because it must not exist and then later exist in the same function
-    # mock_remove_dir.assert_called_once_with('mock/path')
+
+
+@patch('os.path.exists', return_value=True)
+@patch('shutil.rmtree')
+@patch('logging.Logger.debug')
+def test_remove_failed_dirs(mock_logger, mock_remove_dir, mock_path_exists):
+    """Tests that we remove failed dirs correctly."""
+    GithubArchive().remove_failed_dirs('mock/path', ['mock_dir'])
+
+    mock_logger.assert_called_once()
+    mock_remove_dir.assert_called_once()
+
+
+@patch('os.path.exists', return_value=True)
+@patch('os.chmod')
+@patch('logging.Logger.debug')
+def test_remove_failed_dirs_on_error(mock_logger, mock_chmod, mock_path_exists):
+    """Tests that we remove failed dirs correctly when there's an error such as read-only `.git` folders on Windows."""
+    with pytest.raises(OSError):
+        GithubArchive().remove_failed_dirs('mock/path', ['mock_dir'])
+
+    mock_logger.assert_called_once()
+    mock_chmod.assert_called_once()
