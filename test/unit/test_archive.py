@@ -468,10 +468,11 @@ def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_a
     mock_logger.assert_called_once_with(message)
 
 
+@patch('os.path.join', return_value='mock_user/mock_repo')
 @patch('os.path.exists', return_value=True)
 @patch('subprocess.run')
 @patch('logging.Logger.info')
-def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_git_asset):
+def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_path_join, mock_git_asset):
     operation = CLONE_OPERATION
     github_archive = GithubArchive()
     github_archive.archive_repo(mock_git_asset, 'github_archive', operation)

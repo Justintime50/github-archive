@@ -152,7 +152,7 @@ class GithubArchive:
                 _ = self.iterate_repos_to_archive(starred_repos, PULL_OPERATION)
 
         if failed_repo_dirs:
-            logger.info('Cleaning up repos...')
+            logger.info('Cleaning up repos...\n')
             self.remove_failed_dirs('repos', failed_repo_dirs)
 
         # Gists
@@ -174,7 +174,7 @@ class GithubArchive:
                 _ = self.iterate_gists_to_archive(gists, PULL_OPERATION)
 
             if failed_gist_dirs:
-                logger.info('Cleaning up gists...')
+                logger.info('Cleaning up gists...\n')
                 self.remove_failed_dirs('gists', failed_gist_dirs)
 
         execution_time = f'Execution time: {datetime.now() - start_time}.'
