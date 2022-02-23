@@ -5,6 +5,7 @@ with open('README.md', 'r') as fh:
 
 REQUIREMENTS = [
     'PyGithub == 1.*',
+    'typing_extensions',  # TODO: Remove once we drop support for Python 3.7 (used for Literal type hint)
     'woodchips == 0.2.*',
 ]
 
@@ -20,7 +21,7 @@ DEV_REQUIREMENTS = [
 
 setuptools.setup(
     name='github-archive',
-    version='4.4.0',
+    version='4.5.0',
     description=(
         'A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.'
     ),

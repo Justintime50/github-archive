@@ -1,13 +1,13 @@
 # CHANGELOG
 
-## NEXT RELEASE
+## v4.5.0 (2022-02-22)
 
 * Switches from the `threading` package to the `concurrent.futures` package allowing us to return values from each individual thread (in this case, the names of failed git assets)
     * Fixes a long-standing bug where git repos that failed to clone would remain in the archive on Windows. This meant that recloning was impossible due to the repo existing and pulling was not possible because the repo wasn't yet fully initialized. The tool now has a proper cleanup step after everything has run that is compatible with both Unix and Windows environments (closes #38)
 * Adds `--log_level` to allow the user to specify a custom log level
 * Small adjustment to `include` and `exclude` help verbage used to be more clear they are optional filters
 
-## v4.4.0 (2021-02-18)
+## v4.4.0 (2022-02-18)
 
 * Adds an `--include` and `--exclude` CLI flag that accepts a comma-separated list of repo names to either include or exclude. If neither are passed, no filtering will occur (closes #43)
 
