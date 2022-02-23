@@ -1,11 +1,14 @@
 import argparse
+from typing import get_args
 
 from github_archive import GithubArchive
 from github_archive.constants import (
     DEFAULT_BASE_URL,
     DEFAULT_LOCATION,
+    DEFAULT_LOG_LEVEL,
     DEFAULT_NUM_THREADS,
     DEFAULT_TIMEOUT,
+    LOG_LEVEL_CHOICES,
 )
 
 
@@ -146,6 +149,14 @@ class GithubArchiveCli:
             default=DEFAULT_BASE_URL,
             help='The base URL of your GitHub instance (useful for enterprise users with custom hostnames).',
         )
+        parser.add_argument(
+            '--log_level',
+            type=str,
+            required=False,
+            default=DEFAULT_LOG_LEVEL,
+            choices=set(get_args(LOG_LEVEL_CHOICES)),
+            help='The log level used for the tool.',
+        )
         parser.parse_args(namespace=self)
 
     def run(self):
@@ -166,6 +177,7 @@ class GithubArchiveCli:
             timeout=self.timeout,
             threads=self.threads,
             base_url=self.base_url,
+            log_level=self.log_level,
         )
         github_archive.run()
 

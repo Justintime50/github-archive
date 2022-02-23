@@ -60,6 +60,8 @@ Options:
     -th THREADS, --threads THREADS
                             The number of concurrent threads to run.
     --base_url BASE_URL   The base URL of your GitHub instance (useful for enterprise users with custom hostnames).
+    --log_level {error,debug,warning,info,critical}
+                            The log level used for the tool.
 ```
 
 ### Automating SSH Passphrase Prompt (Recommended)

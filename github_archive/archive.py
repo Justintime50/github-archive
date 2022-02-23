@@ -12,6 +12,7 @@ from github import Gist, Github, Repository
 from github_archive.constants import (
     DEFAULT_BASE_URL,
     DEFAULT_LOCATION,
+    DEFAULT_LOG_LEVEL,
     DEFAULT_NUM_THREADS,
     DEFAULT_TIMEOUT,
 )
@@ -47,6 +48,7 @@ class GithubArchive:
         timeout=DEFAULT_TIMEOUT,
         threads=DEFAULT_NUM_THREADS,
         base_url=DEFAULT_BASE_URL,
+        log_level=DEFAULT_LOG_LEVEL,
     ):
         # Parameter variables
         self.token = token
@@ -65,6 +67,7 @@ class GithubArchive:
         self.timeout = timeout
         self.threads = threads
         self.base_url = base_url
+        self.log_level = log_level
 
         # Internal variables
         self.github_instance = Github(login_or_token=self.token, base_url=self.base_url)
@@ -189,7 +192,7 @@ class GithubArchive:
         """
         logger = woodchips.Logger(
             name=LOGGER_NAME,
-            level='INFO',
+            level=self.log_level,
         )
         logger.log_to_console()
         logger.log_to_file(location=os.path.join(self.location, 'logs'))
