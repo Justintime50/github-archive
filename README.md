@@ -75,7 +75,7 @@ ssh-add
 
 ### Notes
 
-**SSH Key:** By default, you must have an SSH key generated on your local machine and added to your GitHub account as this tool uses the `ssh_url` to clone/pull. If you'd like to instead use the `git_url` to clone/pull, you can pass the `--https` flag which will authenticate with your username and password.
+**SSH Key:** By default, you must have an SSH key generated on your local machine and added to your GitHub account as this tool uses the `ssh_url` to clone/pull. If you'd like to instead use the `git_url` to clone/pull, you can pass the `--https` flag which currently requires no authentication. Without using a token/SSH, you will not be able to interact with private git assets. Additionally, GitHub has a hard limit of 60 requests per hour - using the `--https` option may quickly burn through that unauthenticated limit if you have a large GitHub instance to archive.
 
 **Merge Conflicts:** Be aware that using GitHub Archive could lead to merge conflicts if you do not commit or stash your changes if using these repos as active development repos instead of simply an archive or one-time clone.
 
