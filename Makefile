@@ -10,7 +10,7 @@ help:
 
 ## build - Builds the project in preparation for release
 build:
-	$(PYTHON_BINARY) setup.py sdist bdist_wheel
+	$(VIRTUAL_BIN)/python -m build
 
 ## coverage - Test the project and generate an HTML coverage report
 coverage:
@@ -18,11 +18,8 @@ coverage:
 
 ## clean - Remove the virtual environment and clear out .pyc files
 clean:
-	rm -rf $(VIRTUAL_ENV)
+	rm -rf $(VIRTUAL_ENV) dist build *.egg-info .coverage
 	find . -name '*.pyc' -delete
-	rm -rf dist
-	rm -rf build
-	rm -rf *.egg-info
 
 ## black - Runs the Black Python formatter against the project
 black:
