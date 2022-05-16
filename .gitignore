@@ -4,7 +4,6 @@ __pycache__
 .env
 .idea
 *.egg-info
-build
 dist
 htmlcov
 venv
