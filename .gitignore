@@ -1,10 +1,10 @@
+__pycache__
+.coverage
 .DS_Store
-.idea
 .env
+.idea
 *.egg-info
 build
 dist
-__pycache__
-venv
-.coverage
 htmlcov
+venv

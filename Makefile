@@ -18,7 +18,7 @@ coverage:
 
 ## clean - Remove the virtual environment and clear out .pyc files
 clean:
-	rm -rf $(VIRTUAL_ENV) dist build *.egg-info .coverage
+	rm -rf $(VIRTUAL_ENV) dist *.egg-info .coverage
 	find . -name '*.pyc' -delete
 
 ## black - Runs the Black Python formatter against the project

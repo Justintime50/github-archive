@@ -32,8 +32,17 @@ setuptools.setup(
     url='http://github.com/justintime50/github-archive',
     author='Justintime50',
     license='MIT',
-    packages=setuptools.find_packages(),
-    package_data={'github-archive': ['py.typed']},
+    packages=setuptools.find_packages(
+        exclude=[
+            'examples',
+            'test',
+        ]
+    ),
+    package_data={
+        'github-archive': [
+            'py.typed',
+        ]
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
