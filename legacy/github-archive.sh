@@ -25,7 +25,7 @@ cd "$LOCATION"/repos || exit
     # Clone all repos from the user's account
     if [[ "$USER_ON" == "enable" && "$CLONE_ON" == "enable" ]]; then
         echo -e "Cloning personal repos..."
-        for PAGE in ${PAGES[*]}; do
+        for PAGE in "${PAGES[@]}"; do
             mkdir -p "$LOCATION"/repos/"$USERNAME"
             cd "$LOCATION"/repos/"$USERNAME" || exit
             curl -s -H "Authorization: token $TOKEN" "https://api.github.com/user/repos?page=$PAGE&per_page=$PER_PAGE&affiliation=owner" |
@@ -36,8 +36,8 @@ cd "$LOCATION"/repos || exit
 
         # Clone all repos from the configured orgs you have access to
         if [[ "$ORGS_ON" == "enable" ]]; then
-            for PAGE in ${PAGES[*]}; do
-                for ORG in ${ORGS[*]}; do
+            for PAGE in "${PAGES[@]}"; do
+                for ORG in "${ORGS[@]}"; do
                     echo -e "Cloning $ORG repos..."
                     mkdir -p "$LOCATION"/repos/"$ORG"
                     cd "$LOCATION"/repos/"$ORG" || exit
@@ -63,7 +63,7 @@ cd "$LOCATION"/repos || exit
     # Pull any changes from each repo in the archive if enabled
     if [[ "$PULL_ON" == "enable" ]]; then
         echo -e "Pulling existing repos..."
-        for TOPDIR in ${DIRARRAY[*]}; do
+        for TOPDIR in "${DIRARRAY[@]}"; do
             printf '%s\n' "$TOPDIR"
             cd "$TOPDIR" || exit
             for DIR in */; do
@@ -79,7 +79,7 @@ cd "$LOCATION"/repos || exit
     # Clone all gists from the user's account
     if [[ "$GISTS_ON" == "enable" && "$CLONE_ON" == "enable" ]]; then
         echo -e "Cloning personal gists..."
-        for PAGE in ${PAGES[*]}; do
+        for PAGE in "${PAGES[@]}"; do
             cd "$LOCATION"/gists || exit
             curl -s -H "Authorization: token $TOKEN" "https://api.github.com/gists?page=$PAGE&per_page=$PER_PAGE" |
                 python -c $'import json, sys, os\nfor repo in json.load(sys.stdin): os.system("git clone " + repo["html_url"])'
