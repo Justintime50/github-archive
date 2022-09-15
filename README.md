@@ -15,7 +15,7 @@ A powerful tool to concurrently clone or pull user and org repos and gists to cr
 
 GitHub Archive is a powerful tool to concurrently clone or pull repositories or gists from GitHub with incredible flexibility. It's the perfect tool for spinning up a new dev environment, keeping a local copy of your GitHub instance, or quickly pulling in projects from your favorite users and organizations.
 
-The power of GitHub Archive comes in its configuration. Maybe you only want to clone or pull your personal public repos or maybe you want to go all out and include private repos from you and all organizations you belong to along with your gists. 
+The power of GitHub Archive comes in its configuration. Maybe you only want to clone or pull your personal public repos or maybe you want to go all out and include private repos from you and all organizations you belong to along with your gists. GitHub Archive can do it all.
 
 ## Install
 
@@ -25,7 +25,7 @@ pip3 install github-archive
 
 # Install locally
 make install
-``` 
+```
 
 ## Usage
 
@@ -53,7 +53,7 @@ Options:
     -e EXCLUDE, --exclude EXCLUDE
                             Pass a comma separated list of repos to filter what is excluded from the Archive.
     -l LOCATION, --location LOCATION
-                            The location where you want your GitHub Archive to be stored.
+                            The location where you want your GitHub Archive to be stored. By default, this is /Users/USERNAME/github-archive
     -ht, --https          Use HTTPS URLs instead of SSH.
     -to TIMEOUT, --timeout TIMEOUT
                             The number of seconds before a git operation times out.

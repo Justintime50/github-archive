@@ -10,12 +10,13 @@ REQUIREMENTS = [
 ]
 
 DEV_REQUIREMENTS = [
+    'bandit == 1.7.*',
     'black == 22.*',
-    'build == 0.7.*',
+    'build == 0.8.*',
     'coveralls == 3.*',
-    'flake8 == 4.*',
+    'flake8 == 5.*',
     'isort == 5.*',
-    'mypy == 0.942',
+    'mypy == 0.971',
     'pytest == 7.*',
     'pytest-cov == 3.*',
     'twine == 4.*',
@@ -23,7 +24,7 @@ DEV_REQUIREMENTS = [
 
 setuptools.setup(
     name='github-archive',
-    version='4.5.0',
+    version='4.5.1',
     description=(
         'A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.'
     ),

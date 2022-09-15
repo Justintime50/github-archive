@@ -1,6 +1,18 @@
 name: build
 
-on: [push, pull_request]
+on: 
+  push:
+    paths:
+      - '.github/workflows/build.yml'
+      - '**/*.py'
+    branches:
+      - "**"
+    tags:
+      - "!**"
+  pull_request:
+    paths:
+      - '.github/workflows/build.yml'
+      - '**/*.py'
 
 jobs:
   sh-checker:
@@ -25,6 +37,8 @@ jobs:
         run: make install
       - name: Check format
         run: make format-check
+      - name: Scan for security vulnerabilities
+        run: make scan
   test:
     runs-on: ubuntu-latest
     strategy:

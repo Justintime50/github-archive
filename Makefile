@@ -56,8 +56,12 @@ lint:
 mypy:
 	$(VIRTUAL_BIN)/mypy $(PROJECT_NAME)/ $(TEST_DIR)/
 
+## scan - Scans the project for security vulnerabilities
+scan:
+	$(VIRTUAL_BIN)/bandit -r $(PROJECT_NAME)/
+
 ## test - Test the project
 test:
 	$(VIRTUAL_BIN)/pytest
 
-.PHONY: help build coverage clean black black-check format format-check install isort isort-check lint mypy test
+.PHONY: help build coverage clean black black-check format format-check install isort isort-check lint mypy scan test

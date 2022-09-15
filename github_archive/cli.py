@@ -1,7 +1,11 @@
 import argparse
-from typing import get_args
+from typing import (
+    get_args,
+)
 
-from github_archive import GithubArchive
+from github_archive import (
+    GithubArchive,
+)
 from github_archive.constants import (
     DEFAULT_BASE_URL,
     DEFAULT_LOCATION,
@@ -116,7 +120,9 @@ class GithubArchiveCli:
             type=str,
             required=False,
             default=DEFAULT_LOCATION,
-            help='The location where you want your GitHub Archive to be stored.',
+            help=(
+                f'The location where you want your GitHub Archive to be stored. By default, this is: {DEFAULT_LOCATION}'
+            ),
         )
         parser.add_argument(
             '-ht',

@@ -1,13 +1,27 @@
 import os
 import shutil
 import stat
-import subprocess
-from concurrent.futures import ALL_COMPLETED, ThreadPoolExecutor, wait
-from datetime import datetime
-from typing import List, Optional, Union
+import subprocess  # nosec
+from concurrent.futures import (
+    ALL_COMPLETED,
+    ThreadPoolExecutor,
+    wait,
+)
+from datetime import (
+    datetime,
+)
+from typing import (
+    List,
+    Optional,
+    Union,
+)
 
 import woodchips
-from github import Gist, Github, Repository
+from github import (
+    Gist,
+    Github,
+    Repository,
+)
 
 from github_archive.constants import (
     DEFAULT_BASE_URL,
@@ -16,6 +30,7 @@ from github_archive.constants import (
     DEFAULT_NUM_THREADS,
     DEFAULT_TIMEOUT,
 )
+
 
 CLONE_OPERATION = 'clone'
 PULL_OPERATION = 'pull'
@@ -370,7 +385,7 @@ class GithubArchive:
             git_command = commands[operation]
 
             try:
-                subprocess.run(
+                subprocess.run(  # nosec
                     git_command,
                     stdout=subprocess.DEVNULL,
                     stdin=subprocess.DEVNULL,
@@ -409,7 +424,7 @@ class GithubArchive:
             git_command = commands[operation]
 
             try:
-                subprocess.run(
+                subprocess.run(  # nosec
                     git_command,
                     stdout=subprocess.DEVNULL,
                     stdin=subprocess.DEVNULL,
