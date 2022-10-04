@@ -7,9 +7,7 @@ from concurrent.futures import (
     ThreadPoolExecutor,
     wait,
 )
-from datetime import (
-    datetime,
-)
+from datetime import datetime
 from typing import (
     List,
     Optional,

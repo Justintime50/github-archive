@@ -1,13 +1,9 @@
 import subprocess
-from unittest.mock import (
-    patch,
-)
+from unittest.mock import patch
 
 import pytest
 
-from github_archive import (
-    GithubArchive,
-)
+from github_archive import GithubArchive
 from github_archive.archive import (
     CLONE_OPERATION,
     GIST_CONTEXT,

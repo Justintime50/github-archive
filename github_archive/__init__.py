@@ -1,6 +1,4 @@
-from github_archive.archive import (
-    GithubArchive,
-)
+from github_archive.archive import GithubArchive
 
 
 __all__ = [

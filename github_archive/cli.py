@@ -1,11 +1,7 @@
 import argparse
-from typing import (
-    get_args,
-)
+from typing import get_args
 
-from github_archive import (
-    GithubArchive,
-)
+from github_archive import GithubArchive
 from github_archive.constants import (
     DEFAULT_BASE_URL,
     DEFAULT_LOCATION,
