@@ -1,5 +1,10 @@
 import subprocess
-from unittest.mock import patch
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
+
+from github import Repository
 
 from github_archive import GithubArchive
 from github_archive.archive import (
@@ -8,6 +13,7 @@ from github_archive.archive import (
 )
 from github_archive.repos import (
     _archive_repo,
+    fork_repo,
     iterate_repos_to_archive,
     view_repos,
 )
@@ -137,3 +143,11 @@ def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_gi
     _archive_repo(github_archive, mock_git_asset, 'github_archive', operation)
 
     mock_logger.assert_called_once()
+
+
+@patch('github.Repository.Repository.create_fork')
+def test_fork_repo(mock_create_fork):
+    repo = MagicMock(spec=Repository.Repository)
+    fork_repo(repo)
+
+    mock_create_fork.assert_called_once()

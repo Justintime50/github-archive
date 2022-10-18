@@ -74,6 +74,11 @@ def view_repos(repos: List[Repository.Repository]):
         logger.info(repo_name)
 
 
+def fork_repo(repo: Repository.Repository):
+    """Forks a repository to the authenticated user's GitHub instance."""
+    repo.create_fork()
+
+
 def _archive_repo(
     github_archive: GithubArchive, repo: Repository.Repository, repo_path: str, operation: str
 ) -> Optional[str]:

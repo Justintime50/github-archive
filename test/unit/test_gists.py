@@ -1,5 +1,10 @@
 import subprocess
-from unittest.mock import patch
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
+
+from github import Gist
 
 from github_archive import GithubArchive
 from github_archive.archive import (
@@ -8,6 +13,7 @@ from github_archive.archive import (
 )
 from github_archive.gists import (
     _archive_gist,
+    fork_gist,
     iterate_gists_to_archive,
     view_gists,
 )
@@ -77,3 +83,11 @@ def test_view_gists(mock_logger, mock_git_asset):
     view_gists(gists)
 
     mock_logger.assert_called_with('mock_username/123')
+
+
+@patch('github.Gist.Gist.create_fork')
+def test_fork_gist(mock_create_fork):
+    gist = MagicMock(spec=Gist.Gist)
+    fork_gist(gist)
+
+    mock_create_fork.assert_called_once()

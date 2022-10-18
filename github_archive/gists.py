@@ -62,6 +62,11 @@ def view_gists(gists: List[Gist.Gist]):
         logger.info(gist_id)
 
 
+def fork_gist(gist: Gist.Gist):
+    """Forks a gist to the authenticated user's GitHub instance."""
+    gist.create_fork()
+
+
 def _archive_gist(github_archive: GithubArchive, gist: Gist.Gist, gist_path: str, operation: str) -> Optional[str]:
     """Clone and pull gists based on the operation passed.
 
