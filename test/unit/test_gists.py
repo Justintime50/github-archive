@@ -1,0 +1,79 @@
+import subprocess
+from unittest.mock import patch
+
+from github_archive import GithubArchive
+from github_archive.archive import (
+    CLONE_OPERATION,
+    PULL_OPERATION,
+)
+from github_archive.gists import (
+    _archive_gist,
+    iterate_gists_to_archive,
+    view_gists,
+)
+
+
+@patch('github_archive.archive.Github')
+@patch('github_archive.gists._archive_gist')
+def test_iterate_gists(mock_archive_gist, mock_github_instance, mock_git_asset):
+    gists = [mock_git_asset]
+    github_archive = GithubArchive(
+        gists='mock_username',
+    )
+
+    iterate_gists_to_archive(github_archive, gists, CLONE_OPERATION)
+
+    mock_archive_gist.assert_called()
+
+
+@patch('subprocess.run')
+@patch('logging.Logger.info')
+def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
+    # TODO: Mock the subprocess better to ensure it's doing what it should
+    operation = CLONE_OPERATION
+    message = f'Gist: {mock_git_asset.owner.login}/{mock_git_asset.id} {operation} success!'
+    github_archive = GithubArchive()
+    _archive_gist(github_archive, mock_git_asset, 'mock/path', operation)
+
+    mock_subprocess.assert_called()
+    mock_logger.assert_called_once_with(message)
+
+
+@patch('os.path.exists', return_value=True)
+@patch('subprocess.run')
+@patch('logging.Logger.info')
+def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_git_asset):
+    operation = CLONE_OPERATION
+    github_archive = GithubArchive()
+    _archive_gist(github_archive, mock_git_asset, 'github_archive', operation)
+
+    mock_subprocess.assert_not_called()
+
+
+@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
+@patch('logging.Logger.error')
+def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_git_asset):
+    operation = CLONE_OPERATION
+    message = f'Git operation timed out archiving {mock_git_asset.id}.'
+    github_archive = GithubArchive()
+    _archive_gist(github_archive, mock_git_asset, 'mock/path', operation)
+
+    mock_logger.assert_called_with(message)
+
+
+@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
+@patch('logging.Logger.error')
+def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_git_asset):
+    operation = PULL_OPERATION
+    github_archive = GithubArchive()
+    _archive_gist(github_archive, mock_git_asset, 'github_archive', operation)
+
+    mock_logger.assert_called()
+
+
+@patch('logging.Logger.info')
+def test_view_gists(mock_logger, mock_git_asset):
+    gists = [mock_git_asset]
+    view_gists(gists)
+
+    mock_logger.assert_called_with('mock_username/123')
