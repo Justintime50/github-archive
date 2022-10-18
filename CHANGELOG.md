@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## NEXT RELEASE
+
+- Namespaces for various functions changed for better project organization. As this project is intended to be used as a CLI tool and not a library, the impact should be minimal
+
 ## 4.5.1 (2022-09-15)
 
 - Clarifies default location of github-archive in help output

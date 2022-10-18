@@ -1,4 +1,3 @@
-import subprocess
 from unittest.mock import patch
 
 import pytest
@@ -15,7 +14,7 @@ from github_archive.archive import (
 
 @patch('github_archive.archive.Github.get_user')
 @patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
-@patch('github_archive.archive.GithubArchive.view_repos')
+@patch('github_archive.archive.view_repos')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_token_view(mock_get_all_git_assets, mock_view_repos, mock_authed_user_in_users, mock_get_user):
     github_archive = GithubArchive(
@@ -34,7 +33,7 @@ def test_run_token_view(mock_get_all_git_assets, mock_view_repos, mock_authed_us
 
 @patch('github_archive.archive.Github.get_user')
 @patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
-@patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
+@patch('github_archive.archive.iterate_repos_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_token_clone(
     mock_get_all_git_assets, mock_iterate_repos_to_archive, mock_authed_user_in_users, mock_get_user
@@ -49,13 +48,13 @@ def test_run_token_clone(
     github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
+    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), CLONE_OPERATION)
     assert github_archive.users == []  # Assert the authed user gets removed from list
 
 
 @patch('github_archive.archive.Github.get_user')
 @patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
-@patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
+@patch('github_archive.archive.iterate_repos_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_token_pull(
     mock_get_all_git_assets, mock_iterate_repos_to_archive, mock_authed_user_in_users, mock_get_user
@@ -70,252 +69,235 @@ def test_run_token_pull(
     github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
+    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
     assert github_archive.users == []  # Assert the authed user gets removed from list
 
 
-@patch('github_archive.archive.GithubArchive.view_repos')
+@patch('github_archive.archive.view_repos')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_users_view(mock_get_all_git_assets, mock_view_repos):
-    GithubArchive(
+    github_archive = GithubArchive(
         users='justintime50',
         view=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
     mock_view_repos.assert_called_once()
 
 
-@patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
+@patch('github_archive.archive.iterate_repos_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_users_clone(mock_get_all_git_assets, mock_iterate_repos_to_archive):
-    GithubArchive(
+    github_archive = GithubArchive(
         users='justintime50',
         clone=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
+    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), CLONE_OPERATION)
 
 
-@patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
+@patch('github_archive.archive.iterate_repos_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_users_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
-    GithubArchive(
+    github_archive = GithubArchive(
         users='justintime50',
         pull=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
+    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
 
 
-@patch('github_archive.archive.GithubArchive.view_repos')
+@patch('github_archive.archive.view_repos')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_orgs_view(mock_get_all_git_assets, mock_view_repos):
-    GithubArchive(
+    github_archive = GithubArchive(
         orgs='org1',
         view=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
     mock_view_repos.assert_called_once()
 
 
-@patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
+@patch('github_archive.archive.iterate_repos_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_orgs_clone(mock_get_all_git_assets, mock_iterate_repos_to_archive):
-    GithubArchive(
+    github_archive = GithubArchive(
         orgs='org1',
         clone=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
+    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), CLONE_OPERATION)
 
 
-@patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
+@patch('github_archive.archive.iterate_repos_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_orgs_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
-    GithubArchive(
+    github_archive = GithubArchive(
         orgs='org1',
         pull=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
+    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
 
 
-@patch('github_archive.archive.GithubArchive.view_gists')
+@patch('github_archive.archive.view_gists')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_gists_view(mock_get_all_git_assets, mock_view_gists):
-    GithubArchive(
+    github_archive = GithubArchive(
         gists='justintime50',
         view=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
     mock_view_gists.assert_called_once()
 
 
-@patch('github_archive.archive.GithubArchive.iterate_gists_to_archive')
+@patch('github_archive.archive.iterate_gists_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_gists_clone(mock_get_all_git_assets, mock_iterate_gists_to_archive):
-    GithubArchive(
+    github_archive = GithubArchive(
         gists='org1',
         clone=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_gists_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
+    mock_iterate_gists_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), CLONE_OPERATION)
 
 
-@patch('github_archive.archive.GithubArchive.iterate_gists_to_archive')
+@patch('github_archive.archive.iterate_gists_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_gists_pull(mock_get_all_git_assets, mock_iterate_gists_to_archive):
-    GithubArchive(
+    github_archive = GithubArchive(
         gists='org1',
         pull=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_gists_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
+    mock_iterate_gists_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
 
 
-@patch('github_archive.archive.GithubArchive.view_repos')
+@patch('github_archive.archive.view_repos')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_stars_view(mock_get_all_git_assets, mock_view_repos):
-    GithubArchive(
+    github_archive = GithubArchive(
         stars='justintime50',
         view=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
     mock_view_repos.assert_called_once()
 
 
-@patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
+@patch('github_archive.archive.iterate_repos_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_stars_clone(mock_get_all_git_assets, mock_iterate_repos_to_archive):
-    GithubArchive(
+    github_archive = GithubArchive(
         stars='justintime50',
         clone=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), CLONE_OPERATION)
+    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), CLONE_OPERATION)
 
 
-@patch('github_archive.archive.GithubArchive.iterate_repos_to_archive')
+@patch('github_archive.archive.iterate_repos_to_archive')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_stars_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
-    GithubArchive(
+    github_archive = GithubArchive(
         stars='justintime50',
         pull=True,
-    ).run()
+    )
+
+    github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(mock_get_all_git_assets(), PULL_OPERATION)
+    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
 
 
-@patch('woodchips.Logger')
-def test_setup_logger(mock_logger):
-    """Test that we setup the `woodchips` logger correctly and that it returns a logger instance."""
-    github_archive = GithubArchive()
-    github_archive.setup_logger()
-
-    mock_logger.assert_called_once()
-
-
-@patch('github_archive.GithubArchive.setup_logger')
+@patch('github_archive.archive.setup_logger')
 @patch('os.path.exists', return_value=False)
 @patch('os.makedirs')
 def test_initialize_project(mock_make_dirs, mock_dir_exist, mock_logger):
-    GithubArchive(
+    github_archive = GithubArchive(
         users='justintime50',
         clone=True,
-    ).initialize_project()
+    )
 
-    mock_logger.assert_called_once()
+    github_archive.initialize_project()
+
+    mock_logger.assert_called_once_with(github_archive)
     assert mock_make_dirs.call_count == 2
 
 
+@pytest.mark.parametrize(
+    'args, expected_message',
+    [
+        ({'users': 'justintime50'}, 'A git operation must be specified when a list of users or orgs is provided.'),
+        ({'clone': True}, 'A list must be provided when a git operation is specified.'),
+        ({}, 'At least one git operation and one list must be provided to run github-archive.'),
+        (
+            {'users': 'justintime50', 'clone': True, 'include': 'mock-repo', 'exclude': 'another-mock-repo'},
+            'The include and exclude flags are mutually exclusive. Only one can be used on each run.',
+        ),
+    ],
+)
 @patch('logging.Logger.critical')
-def test_initialize_project_missing_list(mock_logger):
-    # TODO: Is it possible to test all variations easily in one test?
-    # Parametrize doesn't work great because we can't easily swap the param name being used
-    message = 'A git operation must be specified when a list of users or orgs is provided.'
+def test_initialize_project_missing_cli_args(mock_logger, args, expected_message):
+    """Tests various alterations of missing CLI args and asserts that the error message matches the situation."""
     with pytest.raises(ValueError) as error:
-        github_archive = GithubArchive(
-            users='justintime50',
-        )
+        github_archive = GithubArchive(**args)
         github_archive.initialize_project()
 
-    mock_logger.assert_called_with(message)
-    assert message == str(error.value)
-
-
-@patch('logging.Logger.critical')
-def test_initialize_project_missing_operation(mock_logger):
-    # TODO: Is it possible to test all variations easily in one test?
-    # Parametrize doesn't work great because we can't easily swap the param name being used
-    message = 'A list must be provided when a git operation is specified.'
-    with pytest.raises(ValueError) as error:
-        github_archive = GithubArchive(
-            clone=True,
-        )
-        github_archive.initialize_project()
-
-    mock_logger.assert_called_with(message)
-    assert message == str(error.value)
-
-
-@patch('logging.Logger.critical')
-def test_initialize_project_missing_all_cli_args(mock_logger):
-    # TODO: Is it possible to test all variations easily in one test?
-    # Parametrize doesn't work great because we can't easily swap the param name being used
-    message = 'At least one git operation and one list must be provided to run github-archive.'
-    with pytest.raises(ValueError) as error:
-        github_archive = GithubArchive()
-        github_archive.initialize_project()
-
-    mock_logger.assert_called_with(message)
-    assert message == str(error.value)
-
-
-@patch('logging.Logger.critical')
-def test_initialize_project_include_exclude_together(mock_logger):
-    # TODO: Is it possible to test all variations easily in one test?
-    # Parametrize doesn't work great because we can't easily swap the param name being used
-    message = 'The include and exclude flags are mutually exclusive. Only one can be used on each run.'
-    with pytest.raises(ValueError) as error:
-        github_archive = GithubArchive(
-            users='justintime50',
-            clone=True,
-            include='mock-repo',
-            exclude='another-mock-repo',
-        )
-        github_archive.initialize_project()
-
-    mock_logger.assert_called_with(message)
-    assert message == str(error.value)
+    mock_logger.assert_called_with(expected_message)
+    assert expected_message == str(error.value)
 
 
 @patch('github_archive.archive.Github.get_user')
 def test_authenticated_user_in_users(mock_get_user):
-    authenticated_user_in_users = GithubArchive(
+    github_archive = GithubArchive(
         token='123',
         users='unauthenticated_user',
-    ).authenticated_user_in_users()
+    )
+
+    authenticated_user_in_users = github_archive.authenticated_user_in_users()
 
     assert authenticated_user_in_users is False
 
 
 @patch('github_archive.archive.Github.get_user')
 def test_get_all_git_assets_repos(mock_get_user):
-    GithubArchive(
+    github_archive = GithubArchive(
         users='justintime50',
-    ).get_all_git_assets(USER_CONTEXT)
+    )
+
+    github_archive.get_all_git_assets(USER_CONTEXT)
 
     mock_get_user.assert_called_once()
 
@@ -323,9 +305,11 @@ def test_get_all_git_assets_repos(mock_get_user):
 @patch('github_archive.archive.Github.get_user')
 def test_get_all_git_assets_gists(mock_get_user):
     # TODO: This test doesn't yet do anything because we need to populate the `git_assets` list with mock data
-    GithubArchive(
+    github_archive = GithubArchive(
         gists='justintime50',
-    ).get_all_git_assets(GIST_CONTEXT)
+    )
+
+    github_archive.get_all_git_assets(GIST_CONTEXT)
 
     mock_get_user.assert_called_once()
 
@@ -335,9 +319,11 @@ def test_get_all_git_assets_gists(mock_get_user):
 @patch('github_archive.archive.Github.get_user')
 def test_get_all_user_repos(mock_get_user, mock_get_repos, mock_github_instance):
     users = 'justintime50,user2'
-    GithubArchive(
+    github_archive = GithubArchive(
         users=users,
-    ).get_all_git_assets(USER_CONTEXT)
+    )
+
+    github_archive.get_all_git_assets(USER_CONTEXT)
 
     mock_get_user.call_count == len(users)
     mock_get_repos.call_count == len(users)
@@ -349,9 +335,11 @@ def test_get_all_user_repos(mock_get_user, mock_get_repos, mock_github_instance)
 @patch('github_archive.archive.Github.get_organization')
 def test_get_all_org_repos(mock_get_org, mock_get_repos, mock_github_instance):
     orgs = 'org1,org2'
-    GithubArchive(
+    github_archive = GithubArchive(
         orgs=orgs,
-    ).get_all_git_assets(ORG_CONTEXT)
+    )
+
+    github_archive.get_all_git_assets(ORG_CONTEXT)
 
     mock_get_org.call_count == len(orgs)
     mock_get_repos.call_count == len(orgs)
@@ -361,199 +349,17 @@ def test_get_all_org_repos(mock_get_org, mock_get_repos, mock_github_instance):
 @patch('github_archive.archive.Github')
 @patch('github_archive.archive.Github.get_gists')
 @patch('github_archive.archive.Github.get_user')
-def test_get_get_all_gists(mock_get_user, mock_get_gists, mock_github_instance):
+def test_get_all_gists(mock_get_user, mock_get_gists, mock_github_instance):
     gists = 'justintime50,user2'
-    GithubArchive(
+    github_archive = GithubArchive(
         gists=gists,
-    ).get_all_git_assets(GIST_CONTEXT)
+    )
+
+    github_archive.get_all_git_assets(GIST_CONTEXT)
 
     mock_get_user.call_count == len(gists)
     mock_get_gists.call_count == len(gists)
     # TODO: Assert the list returned
-
-
-@patch('github_archive.archive.Github')
-@patch('github_archive.archive.GithubArchive.archive_repo')
-def test_iterate_repos_not_matching_authed_username(mock_archive_repo, mock_github_instance, mock_git_asset):
-    repos = [mock_git_asset]
-    GithubArchive(
-        users='mock_username',
-    ).iterate_repos_to_archive(repos, CLONE_OPERATION)
-
-    mock_archive_repo.assert_called_once()
-
-
-@patch('github_archive.archive.Github')
-@patch('github_archive.archive.GithubArchive.archive_repo')
-def test_iterate_repos_matching_authed_username(mock_archive_repo, mock_github_instance, mock_git_asset):
-    repos = [mock_git_asset]
-    GithubArchive(
-        token='123',
-        users='mock_username',  # matches the username of the git asset
-    ).iterate_repos_to_archive(repos, CLONE_OPERATION)
-
-    mock_archive_repo.assert_called_once()
-
-
-@patch('github_archive.archive.Github')
-@patch('github_archive.archive.GithubArchive.archive_repo')
-def test_iterate_repos_include_list(mock_archive_repo, mock_github_instance, mock_git_asset):
-    """Tests that we iterate repos that are on the include list."""
-    repos = [mock_git_asset]
-    GithubArchive(
-        users='mock_username',
-        include='mock-asset-name',
-    ).iterate_repos_to_archive(repos, CLONE_OPERATION)
-
-    mock_archive_repo.assert_called_once()
-
-
-@patch('github_archive.archive.Github')
-@patch('github_archive.archive.GithubArchive.archive_repo')
-def test_iterate_repos_exclude_list(mock_archive_repo, mock_github_instance, mock_git_asset):
-    """Tests that we do not iterate repos that are on the exclude list."""
-    repos = [mock_git_asset]
-    GithubArchive(
-        users='mock_username',
-        exclude='mock-asset-name',
-    ).iterate_repos_to_archive(repos, CLONE_OPERATION)
-
-    mock_archive_repo.assert_not_called()
-
-
-@patch('github_archive.archive.Github')
-@patch('github_archive.archive.GithubArchive.archive_gist')
-def test_iterate_gists(mock_archive_gist, mock_github_instance, mock_git_asset):
-    gists = [mock_git_asset]
-    GithubArchive(
-        gists='mock_username',
-    ).iterate_gists_to_archive(gists, CLONE_OPERATION)
-
-    mock_archive_gist.assert_called()
-
-
-@patch('logging.Logger.info')
-def test_view_repos(mock_logger, mock_git_asset):
-    repos = [mock_git_asset]
-    github_archive = GithubArchive()
-    github_archive.view_repos(repos)
-
-    mock_logger.assert_called_with('mock_username/mock-asset-name')
-
-
-@patch('logging.Logger.info')
-def test_view_gists(mock_logger, mock_git_asset):
-    gists = [mock_git_asset]
-    github_archive = GithubArchive()
-    github_archive.view_gists(gists)
-
-    mock_logger.assert_called_with('mock_username/123')
-
-
-@patch('subprocess.run')
-@patch('logging.Logger.info')
-def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
-    # TODO: Mock the subprocess better to ensure it's doing what it should
-    operation = CLONE_OPERATION
-    message = f'Repo: {mock_git_asset.owner.login}/{mock_git_asset.name} {operation} success!'
-    github_archive = GithubArchive()
-    github_archive.archive_repo(mock_git_asset, 'mock/path', operation)
-
-    mock_subprocess.assert_called()
-    mock_logger.assert_called_once_with(message)
-
-
-@patch('subprocess.run')
-@patch('logging.Logger.info')
-def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_asset):
-    # TODO: Mock the subprocess better to ensure it's doing what it should
-    operation = CLONE_OPERATION
-    message = f'Repo: {mock_git_asset.owner.login}/{mock_git_asset.name} {operation} success!'
-    github_archive = GithubArchive(
-        use_https=True,
-    )
-    github_archive.archive_repo(mock_git_asset, 'mock/path', operation)
-
-    mock_subprocess.assert_called()
-    mock_logger.assert_called_once_with(message)
-
-
-@patch('os.path.join', return_value='mock_user/mock_repo')
-@patch('os.path.exists', return_value=True)
-@patch('subprocess.run')
-@patch('logging.Logger.info')
-def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_path_join, mock_git_asset):
-    operation = CLONE_OPERATION
-    github_archive = GithubArchive()
-    github_archive.archive_repo(mock_git_asset, 'github_archive', operation)
-
-    mock_subprocess.assert_not_called()
-
-
-@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
-@patch('logging.Logger.error')
-def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_git_asset):
-    operation = CLONE_OPERATION
-    message = f'Git operation timed out archiving {mock_git_asset.name}.'
-    github_archive = GithubArchive()
-    github_archive.archive_repo(mock_git_asset, 'mock/path', operation)
-
-    mock_logger.assert_called_with(message)
-
-
-@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
-@patch('logging.Logger.error')
-def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_git_asset):
-    operation = PULL_OPERATION
-    github_archive = GithubArchive()
-    github_archive.archive_repo(mock_git_asset, 'github_archive', operation)
-
-    mock_logger.assert_called_once()
-
-
-@patch('subprocess.run')
-@patch('logging.Logger.info')
-def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
-    # TODO: Mock the subprocess better to ensure it's doing what it should
-    operation = CLONE_OPERATION
-    message = f'Gist: {mock_git_asset.owner.login}/{mock_git_asset.id} {operation} success!'
-    github_archive = GithubArchive()
-    github_archive.archive_gist(mock_git_asset, 'mock/path', operation)
-
-    mock_subprocess.assert_called()
-    mock_logger.assert_called_once_with(message)
-
-
-@patch('os.path.exists', return_value=True)
-@patch('subprocess.run')
-@patch('logging.Logger.info')
-def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_git_asset):
-    operation = CLONE_OPERATION
-    github_archive = GithubArchive()
-    github_archive.archive_gist(mock_git_asset, 'github_archive', operation)
-
-    mock_subprocess.assert_not_called()
-
-
-@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
-@patch('logging.Logger.error')
-def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_git_asset):
-    operation = CLONE_OPERATION
-    message = f'Git operation timed out archiving {mock_git_asset.id}.'
-    github_archive = GithubArchive()
-    github_archive.archive_gist(mock_git_asset, 'mock/path', operation)
-
-    mock_logger.assert_called_with(message)
-
-
-@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
-@patch('logging.Logger.error')
-def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_git_asset):
-    operation = PULL_OPERATION
-    github_archive = GithubArchive()
-    github_archive.archive_gist(mock_git_asset, 'github_archive', operation)
-
-    mock_logger.assert_called()
 
 
 @patch('os.path.exists', return_value=True)
@@ -561,7 +367,9 @@ def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_gi
 @patch('logging.Logger.debug')
 def test_remove_failed_dirs(mock_logger, mock_remove_dir, mock_path_exists):
     """Tests that we remove failed dirs correctly."""
-    GithubArchive().remove_failed_dirs('mock/path', ['mock_dir'])
+    github_archive = GithubArchive()
+
+    github_archive.remove_failed_dirs('mock/path', ['mock_dir'])
 
     mock_logger.assert_called_once()
     mock_remove_dir.assert_called_once()
@@ -573,7 +381,9 @@ def test_remove_failed_dirs(mock_logger, mock_remove_dir, mock_path_exists):
 def test_remove_failed_dirs_on_error(mock_logger, mock_chmod, mock_path_exists):
     """Tests that we remove failed dirs correctly when there's an error such as read-only `.git` folders on Windows."""
     with pytest.raises(OSError):
-        GithubArchive().remove_failed_dirs('mock/path', ['mock_dir'])
+        github_archive = GithubArchive()
+
+        github_archive.remove_failed_dirs('mock/path', ['mock_dir'])
 
     mock_logger.assert_called_once()
     mock_chmod.assert_called_once()

@@ -16,3 +16,14 @@ LOG_LEVEL_CHOICES = Literal[
     'error',
     'critical',
 ]
+
+LOGGER_NAME = 'github-archive'
+
+CLONE_OPERATION = 'clone'
+PULL_OPERATION = 'pull'
+
+GIST_CONTEXT = 'gist'
+ORG_CONTEXT = 'org'
+PERSONAL_CONTEXT = 'personal'
+STAR_CONTEXT = 'star'
+USER_CONTEXT = 'user'

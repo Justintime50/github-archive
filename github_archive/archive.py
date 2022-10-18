@@ -1,16 +1,9 @@
 import os
 import shutil
 import stat
-import subprocess  # nosec
-from concurrent.futures import (
-    ALL_COMPLETED,
-    ThreadPoolExecutor,
-    wait,
-)
 from datetime import datetime
 from typing import (
     List,
-    Optional,
     Union,
 )
 
@@ -22,24 +15,32 @@ from github import (
 )
 
 from github_archive.constants import (
+    CLONE_OPERATION,
     DEFAULT_BASE_URL,
     DEFAULT_LOCATION,
     DEFAULT_LOG_LEVEL,
     DEFAULT_NUM_THREADS,
     DEFAULT_TIMEOUT,
+    GIST_CONTEXT,
+    LOGGER_NAME,
+    ORG_CONTEXT,
+    PERSONAL_CONTEXT,
+    PULL_OPERATION,
+    STAR_CONTEXT,
+    USER_CONTEXT,
 )
-
-
-CLONE_OPERATION = 'clone'
-PULL_OPERATION = 'pull'
-
-GIST_CONTEXT = 'gist'
-ORG_CONTEXT = 'org'
-PERSONAL_CONTEXT = 'personal'
-STAR_CONTEXT = 'star'
-USER_CONTEXT = 'user'
-
-LOGGER_NAME = 'github-archive'
+from github_archive.gists import (
+    iterate_gists_to_archive,
+    view_gists,
+)
+from github_archive.logger import (
+    log_and_raise_value_error,
+    setup_logger,
+)
+from github_archive.repos import (
+    iterate_repos_to_archive,
+    view_repos,
+)
 
 
 class GithubArchive:
@@ -102,15 +103,15 @@ class GithubArchive:
 
             if self.view:
                 logger.info('# Viewing user repos...\n')
-                self.view_repos(personal_repos)
+                view_repos(personal_repos)
             if self.clone:
                 logger.info('# Cloning missing personal repos...\n')
-                failed_repos = self.iterate_repos_to_archive(personal_repos, CLONE_OPERATION)
+                failed_repos = iterate_repos_to_archive(self, personal_repos, CLONE_OPERATION)
                 if any(failed_repos):
                     failed_repo_dirs.extend(failed_repos)
             if self.pull:
                 logger.info('# Pulling changes to personal repos...\n')
-                _ = self.iterate_repos_to_archive(personal_repos, PULL_OPERATION)
+                _ = iterate_repos_to_archive(self, personal_repos, PULL_OPERATION)
 
             # We remove the authenticated user from the list so that we don't double pull their
             # repos for the `users` logic.
@@ -123,15 +124,15 @@ class GithubArchive:
 
             if self.view:
                 logger.info('# Viewing user repos...\n')
-                self.view_repos(user_repos)
+                view_repos(user_repos)
             if self.clone:
                 logger.info('# Cloning missing user repos...\n')
-                failed_repos = self.iterate_repos_to_archive(user_repos, CLONE_OPERATION)
+                failed_repos = iterate_repos_to_archive(self, user_repos, CLONE_OPERATION)
                 if any(failed_repos):
                     failed_repo_dirs.extend(failed_repos)
             if self.pull:
                 logger.info('# Pulling changes to user repos...\n')
-                _ = self.iterate_repos_to_archive(user_repos, PULL_OPERATION)
+                _ = iterate_repos_to_archive(self, user_repos, PULL_OPERATION)
 
         # Orgs
         if self.orgs:
@@ -140,15 +141,15 @@ class GithubArchive:
 
             if self.view:
                 logger.info('# Viewing org repos...\n')
-                self.view_repos(org_repos)
+                view_repos(org_repos)
             if self.clone:
                 logger.info('# Cloning missing org repos...\n')
-                failed_repos = self.iterate_repos_to_archive(org_repos, CLONE_OPERATION)
+                failed_repos = iterate_repos_to_archive(self, org_repos, CLONE_OPERATION)
                 if any(failed_repos):
                     failed_repo_dirs.extend(failed_repos)
             if self.pull:
                 logger.info('# Pulling changes to org repos...\n')
-                _ = self.iterate_repos_to_archive(org_repos, PULL_OPERATION)
+                _ = iterate_repos_to_archive(self, org_repos, PULL_OPERATION)
 
         # Stars
         if self.stars:
@@ -157,15 +158,15 @@ class GithubArchive:
 
             if self.view:
                 logger.info('# Viewing stars...\n')
-                self.view_repos(starred_repos)
+                view_repos(starred_repos)
             if self.clone:
                 logger.info('# Cloning missing starred repos...\n')
-                failed_repos = self.iterate_repos_to_archive(starred_repos, CLONE_OPERATION)
+                failed_repos = iterate_repos_to_archive(self, starred_repos, CLONE_OPERATION)
                 if any(failed_repos):
                     failed_repo_dirs.extend(failed_repos)
             if self.pull:
                 logger.info('# Pulling changes to starred repos...\n')
-                _ = self.iterate_repos_to_archive(starred_repos, PULL_OPERATION)
+                _ = iterate_repos_to_archive(self, starred_repos, PULL_OPERATION)
 
         if failed_repo_dirs:
             logger.info('Cleaning up repos...\n')
@@ -179,15 +180,15 @@ class GithubArchive:
 
             if self.view:
                 logger.info('# Viewing gists...\n')
-                self.view_gists(gists)
+                view_gists(gists)
             if self.clone:
                 logger.info('# Cloning missing gists...\n')
-                failed_gists = self.iterate_gists_to_archive(gists, CLONE_OPERATION)
+                failed_gists = iterate_gists_to_archive(self, gists, CLONE_OPERATION)
                 if any(failed_gists):
                     failed_gist_dirs.extend(failed_gists)
             if self.pull:
                 logger.info('# Pulling changes to gists...\n')
-                _ = self.iterate_gists_to_archive(gists, PULL_OPERATION)
+                _ = iterate_gists_to_archive(self, gists, PULL_OPERATION)
 
             if failed_gist_dirs:
                 logger.info('Cleaning up gists...\n')
@@ -197,27 +198,13 @@ class GithubArchive:
         finish_message = f'GitHub Archive complete! {execution_time}\n'
         logger.info(finish_message)
 
-    def setup_logger(self):
-        """Sets up a logger to log to console and a file.
-
-        - Logging can be called with the `logger` property
-        - Files will automatically roll over
-        """
-        logger = woodchips.Logger(
-            name=LOGGER_NAME,
-            level=self.log_level,
-        )
-        logger.log_to_console()
-        logger.log_to_file(location=os.path.join(self.location, 'logs'))
-
     def initialize_project(self):
-        """Initialize the tool and ensure everything is in order before running any logic.
-
-        This function also ensures the minimum set of requirements are passed in to run the tool:
-        1. a git operation
-        2. a list of assets to run operations on
+        """Initialize the tool and ensure everything is in order before moving on:
+        1. Directories are setup correctly
+        2. A git operation was specified
+        3. A list of assets to run operations on is specified
         """
-        self.setup_logger()
+        setup_logger(self)
         logger = woodchips.get(LOGGER_NAME)
 
         if not os.path.exists(self.location):
@@ -225,33 +212,38 @@ class GithubArchive:
             os.makedirs(os.path.join(self.location, 'gists'))
 
         if (self.users or self.orgs or self.gists or self.stars) and not (self.view or self.clone or self.pull):
-            message = 'A git operation must be specified when a list of users or orgs is provided.'
-            logger.critical(message)
-            raise ValueError(message)
+            log_and_raise_value_error(
+                logger=logger,
+                message='A git operation must be specified when a list of users or orgs is provided.',
+            )
         elif not (self.users or self.orgs or self.gists or self.stars) and (self.view or self.clone or self.pull):
-            message = 'A list must be provided when a git operation is specified.'
-            logger.critical(message)
-            raise ValueError(message)
+            log_and_raise_value_error(
+                logger=logger,
+                message='A list must be provided when a git operation is specified.',
+            )
         elif not (self.users or self.orgs or self.gists or self.stars or self.view or self.clone or self.pull):
-            message = 'At least one git operation and one list must be provided to run github-archive.'
-            logger.critical(message)
-            raise ValueError(message)
+            log_and_raise_value_error(
+                logger=logger,
+                message='At least one git operation and one list must be provided to run github-archive.',
+            )
         elif self.include and self.exclude:
-            message = 'The include and exclude flags are mutually exclusive. Only one can be used on each run.'
-            logger.critical(message)
-            raise ValueError(message)
+            log_and_raise_value_error(
+                logger=logger,
+                message='The include and exclude flags are mutually exclusive. Only one can be used on each run.',
+            )
 
     def authenticated_user_in_users(self) -> bool:
+        """Returns True if the authenticated user is in the list of users."""
         return self.authenticated_user.login.lower() in self.users
 
     def get_all_git_assets(self, context: str) -> List[Union[Repository.Repository, Gist.Gist]]:
         """Retrieve a list of lists via API of git assets (repos, gists) of the
-        specified owner(s) (users, orgs). Return a sorted, flat, sorted list of git assets.
+        specified owner(s) (users, orgs). Returns a flattened, sorted list of git assets.
         """
         logger = woodchips.get(LOGGER_NAME)
 
         get_org_repos = lambda owner: self.github_instance.get_organization(owner).get_repos()  # noqa
-        get_personal_repos = lambda owner: self.authenticated_user.get_repos(affiliation='owner')  # noqa
+        get_personal_repos = lambda _: self.authenticated_user.get_repos(affiliation='owner')  # noqa
         get_starred_repos = lambda owner: self.github_instance.get_user(owner).get_starred()  # noqa
         get_user_gists = lambda owner: self.github_instance.get_user(owner).get_gists()  # noqa
         get_user_repos = lambda owner: self.github_instance.get_user(owner).get_repos()  # noqa
@@ -287,166 +279,13 @@ class GithubArchive:
 
         return final_sorted_list
 
-    def iterate_repos_to_archive(self, repos: List[Repository.Repository], operation: str) -> List[Optional[str]]:
-        """Iterate over each repository and start a thread if it can be archived.
-
-        We ignore repos not in the include or in the exclude list if either are present.
-        """
-        logger = woodchips.get(LOGGER_NAME)
-        pool = ThreadPoolExecutor(self.threads)
-        thread_list = []
-
-        for repo in repos:
-            if (
-                (not self.include and not self.exclude)
-                or (self.include and repo.name in self.include)
-                or (self.exclude and repo.name not in self.exclude)
-            ):
-                repo_owner_username = repo.owner.login.lower()
-                repo_path = os.path.join(self.location, 'repos', repo_owner_username, repo.name)
-                thread_list.append(
-                    pool.submit(
-                        self.archive_repo,
-                        repo=repo,
-                        repo_path=repo_path,
-                        operation=operation,
-                    )
-                )
-            else:
-                logger.debug(f'{repo.name} skipped due to include/exclude filtering')
-
-        wait(thread_list, return_when=ALL_COMPLETED)
-        failed_repos = [repo.result() for repo in thread_list if repo.result()]
-
-        return failed_repos
-
-    def iterate_gists_to_archive(self, gists: List[Gist.Gist], operation: str) -> List[Optional[str]]:
-        """Iterate over each gist and start a thread if it can be archived."""
-        pool = ThreadPoolExecutor(self.threads)
-        thread_list = []
-
-        for gist in gists:
-            gist_path = os.path.join(self.location, 'gists', gist.id)
-            thread_list.append(
-                pool.submit(
-                    self.archive_gist,
-                    gist=gist,
-                    gist_path=gist_path,
-                    operation=operation,
-                )
-            )
-
-        wait(thread_list, return_when=ALL_COMPLETED)
-        failed_gists = [gist.result() for gist in thread_list if gist.result()]
-
-        return failed_gists
-
-    def view_repos(self, repos: List[Repository.Repository]):
-        """View a list of repos that will be cloned/pulled."""
-        logger = woodchips.get(LOGGER_NAME)
-
-        for repo in repos:
-            repo_name = f'{repo.owner.login}/{repo.name}'
-            logger.info(repo_name)
-
-    def view_gists(self, gists: List[Gist.Gist]):
-        """View a list of gists that will be cloned/pulled."""
-        logger = woodchips.get(LOGGER_NAME)
-
-        for gist in gists:
-            gist_id = f'{gist.owner.login}/{gist.id}'
-            logger.info(gist_id)
-
-    def archive_repo(self, repo: Repository.Repository, repo_path: str, operation: str) -> Optional[str]:
-        """Clone and pull repos based on the operation passed.
-
-        We return the name of the repo if its git operation fails, otherwise return None.
-        """
-        logger = woodchips.get(LOGGER_NAME)
-        failed_repo = None
-        full_repo_name = os.path.join(repo.owner.login, repo.name)  # We use a path here to properly remove failed dirs
-
-        if (os.path.exists(repo_path) and operation == CLONE_OPERATION) or (
-            not os.path.exists(repo_path) and operation == PULL_OPERATION
-        ):
-            pass
-        else:
-            commands = {
-                PULL_OPERATION: ['git', '-C', repo_path, 'pull', '--rebase'],
-            }
-
-            if self.use_https:
-                commands.update({CLONE_OPERATION: ['git', 'clone', repo.html_url, repo_path]})
-            else:
-                commands.update({CLONE_OPERATION: ['git', 'clone', repo.ssh_url, repo_path]})
-
-            git_command = commands[operation]
-
-            try:
-                subprocess.run(  # nosec
-                    git_command,
-                    stdout=subprocess.DEVNULL,
-                    stdin=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    check=True,
-                    timeout=self.timeout,
-                )
-                logger.info(f'Repo: {full_repo_name} {operation} success!')
-            except subprocess.TimeoutExpired:
-                logger.error(f'Git operation timed out archiving {repo.name}.')
-                failed_repo = full_repo_name
-            except subprocess.CalledProcessError as error:
-                logger.error(f'Failed to {operation} {repo.name}\n{error}')
-                failed_repo = full_repo_name
-
-        return failed_repo
-
-    def archive_gist(self, gist: Gist.Gist, gist_path: str, operation: str) -> Optional[str]:
-        """Clone and pull gists based on the operation passed.
-
-        We return the name of the gist if its git operation fails, otherwise return None.
-        """
-        logger = woodchips.get(LOGGER_NAME)
-        failed_gist = None
-        full_gist_id = os.path.join(gist.owner.login, gist.id)  # We use a path here to properly remove failed dirs
-
-        if (os.path.exists(gist_path) and operation == CLONE_OPERATION) or (
-            not os.path.exists(gist_path) and operation == PULL_OPERATION
-        ):
-            pass
-        else:
-            commands = {
-                CLONE_OPERATION: ['git', 'clone', gist.html_url, gist_path],
-                PULL_OPERATION: ['git', '-C', gist_path, 'pull', '--rebase'],
-            }
-            git_command = commands[operation]
-
-            try:
-                subprocess.run(  # nosec
-                    git_command,
-                    stdout=subprocess.DEVNULL,
-                    stdin=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    check=True,
-                    timeout=self.timeout,
-                )
-                logger.info(f'Gist: {full_gist_id} {operation} success!')
-            except subprocess.TimeoutExpired:
-                logger.error(f'Git operation timed out archiving {gist.id}.')
-                failed_gist = full_gist_id
-            except subprocess.CalledProcessError as error:
-                logger.error(f'Failed to {operation} {gist.id}\n{error}')
-                failed_gist = full_gist_id
-
-        return failed_gist
-
     def remove_failed_dirs(self, dirs_location: str, failed_dirs: List[str]):
         """Removes a directory if it fails a git operation due to
         timing out or other errors so it can be retried on the next run.
         """
         logger = woodchips.get(LOGGER_NAME)
 
-        def make_dir_writable(function, path, exception):
+        def make_dir_writable(function, path, _):
             """The `.git` folder on Windows cannot be gracefully removed due to being read-only,
             so we make the directory writable on a failure and retry the original function.
             """
