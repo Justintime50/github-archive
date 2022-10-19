@@ -120,7 +120,7 @@ class GithubArchiveCli:
             type=str,
             required=False,
             default=DEFAULT_LOCATION,
-            help=(f'The location where you want your GitHub Archive to be stored. Default: {DEFAULT_LOCATION}'),
+            help=f'The location where you want your GitHub Archive to be stored. Default: {DEFAULT_LOCATION}',
         )
         parser.add_argument(
             '--https',
@@ -148,7 +148,10 @@ class GithubArchiveCli:
             type=str,
             required=False,
             default=DEFAULT_BASE_URL,
-            help=f'The base URL of your GitHub instance (useful for enterprise users with custom hostnames). Default: {DEFAULT_BASE_URL}',  # noqa
+            help=(  # noqa
+                'The base URL of your GitHub instance (useful for enterprise users with custom hostnames). Default:'
+                f' {DEFAULT_BASE_URL}'
+            ),
         )
         parser.add_argument(
             '--log_level',
