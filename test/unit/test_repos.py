@@ -148,6 +148,7 @@ def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_gi
 @patch('github.Repository.Repository.create_fork')
 def test_fork_repo(mock_create_fork):
     repo = MagicMock(spec=Repository.Repository)
+    repo.create_fork = mock_create_fork
     fork_repo(repo)
 
-    mock_create_fork.assert_called_once()
+    mock_create_fork.assert_called_once_with()

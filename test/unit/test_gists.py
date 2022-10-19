@@ -88,6 +88,7 @@ def test_view_gists(mock_logger, mock_git_asset):
 @patch('github.Gist.Gist.create_fork')
 def test_fork_gist(mock_create_fork):
     gist = MagicMock(spec=Gist.Gist)
+    gist.create_fork = mock_create_fork
     fork_gist(gist)
 
     mock_create_fork.assert_called_once()
