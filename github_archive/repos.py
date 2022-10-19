@@ -76,7 +76,11 @@ def view_repos(repos: List[Repository.Repository]):
 
 def fork_repo(repo: Repository.Repository):
     """Forks a repository to the authenticated user's GitHub instance."""
+    logger = woodchips.get(LOGGER_NAME)
+
     repo.create_fork()
+    repo_name = f'{repo.owner.login}/{repo.name}'
+    logger.info(f'{repo_name} forked!')
 
 
 def _archive_repo(

@@ -54,10 +54,11 @@ class GithubArchive:
         view=False,
         clone=False,
         pull=False,
-        forks=False,
-        location=DEFAULT_LOCATION,
+        fork=False,
         include=None,
         exclude=None,
+        forks=False,
+        location=DEFAULT_LOCATION,
         use_https=False,
         timeout=DEFAULT_TIMEOUT,
         threads=DEFAULT_NUM_THREADS,
@@ -73,10 +74,11 @@ class GithubArchive:
         self.view = view
         self.clone = clone
         self.pull = pull
-        self.forks = forks
-        self.location = location
+        self.fork = fork
         self.include = include.lower().split(',') if include else ''
         self.exclude = exclude.lower().split(',') if exclude else ''
+        self.forks = forks
+        self.location = location
         self.use_https = use_https
         self.timeout = timeout
         self.threads = threads

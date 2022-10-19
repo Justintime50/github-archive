@@ -88,14 +88,13 @@ class GithubArchiveCli:
         )
         parser.add_argument(
             '-f',
-            '--forks',
+            '--fork',
             action='store_true',
             required=False,
             default=False,
-            help='Pass this flag to include forked git assets.',
+            help='Pass this flag to fork git assets.',
         )
         parser.add_argument(
-            '-i',
             '--include',
             type=str,
             required=False,
@@ -103,7 +102,6 @@ class GithubArchiveCli:
             help='Pass a comma separated list of repos to filter what is included in the Archive.',
         )
         parser.add_argument(
-            '-e',
             '--exclude',
             type=str,
             required=False,
@@ -111,17 +109,20 @@ class GithubArchiveCli:
             help='Pass a comma separated list of repos to filter what is excluded from the Archive.',
         )
         parser.add_argument(
-            '-l',
+            '--forks',
+            action='store_true',
+            required=False,
+            default=False,
+            help='Pass this flag to include forked git assets (when cloning or pulling).',
+        )
+        parser.add_argument(
             '--location',
             type=str,
             required=False,
             default=DEFAULT_LOCATION,
-            help=(
-                f'The location where you want your GitHub Archive to be stored. By default, this is: {DEFAULT_LOCATION}'
-            ),
+            help=(f'The location where you want your GitHub Archive to be stored. Default: {DEFAULT_LOCATION}'),
         )
         parser.add_argument(
-            '-ht',
             '--https',
             action='store_true',
             required=False,
@@ -129,27 +130,25 @@ class GithubArchiveCli:
             help='Use HTTPS URLs instead of SSH.',
         )
         parser.add_argument(
-            '-to',
             '--timeout',
             type=int,
             required=False,
             default=DEFAULT_TIMEOUT,
-            help='The number of seconds before a git operation times out.',
+            help=f'The number of seconds before a git operation times out. Default: {DEFAULT_TIMEOUT}',
         )
         parser.add_argument(
-            '-th',
             '--threads',
             type=int,
             required=False,
             default=DEFAULT_NUM_THREADS,
-            help='The number of concurrent threads to run.',
+            help=f'The number of concurrent threads to run. Default: {DEFAULT_NUM_THREADS}',
         )
         parser.add_argument(
             '--base_url',
             type=str,
             required=False,
             default=DEFAULT_BASE_URL,
-            help='The base URL of your GitHub instance (useful for enterprise users with custom hostnames).',
+            help=f'The base URL of your GitHub instance (useful for enterprise users with custom hostnames). Default: {DEFAULT_BASE_URL}',
         )
         parser.add_argument(
             '--log_level',
@@ -157,7 +156,7 @@ class GithubArchiveCli:
             required=False,
             default=DEFAULT_LOG_LEVEL,
             choices=set(get_args(LOG_LEVEL_CHOICES)),
-            help='The log level used for the tool.',
+            help=f'The log level used for the tool. Default: {DEFAULT_LOG_LEVEL}',
         )
         parser.parse_args(namespace=self)
 
@@ -171,10 +170,11 @@ class GithubArchiveCli:
             view=self.view,
             clone=self.clone,
             pull=self.pull,
-            forks=self.forks,
-            location=self.location,
+            fork=self.fork,
             include=self.include,
             exclude=self.exclude,
+            forks=self.forks,
+            location=self.location,
             use_https=self.https,
             timeout=self.timeout,
             threads=self.threads,

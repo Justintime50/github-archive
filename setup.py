@@ -27,7 +27,7 @@ setuptools.setup(
     name='github-archive',
     version='4.5.1',
     description=(
-        'A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.'
+        'A powerful tool to concurrently clone, pull, or fork user and org repos and gists to create a GitHub archive.'
     ),
     long_description=long_description,
     long_description_content_type="text/markdown",
