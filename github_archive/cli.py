@@ -148,7 +148,7 @@ class GithubArchiveCli:
             type=str,
             required=False,
             default=DEFAULT_BASE_URL,
-            help=f'The base URL of your GitHub instance (useful for enterprise users with custom hostnames). Default: {DEFAULT_BASE_URL}',
+            help=f'The base URL of your GitHub instance (useful for enterprise users with custom hostnames). Default: {DEFAULT_BASE_URL}',  # noqa
         )
         parser.add_argument(
             '--log_level',

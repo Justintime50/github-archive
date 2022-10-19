@@ -13,8 +13,9 @@ from github_archive.archive import (
 )
 from github_archive.repos import (
     _archive_repo,
-    fork_repo,
+    _fork_repo,
     iterate_repos_to_archive,
+    iterate_repos_to_fork,
     view_repos,
 )
 
@@ -145,12 +146,31 @@ def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_gi
     mock_logger.assert_called_once()
 
 
+@patch('github_archive.repos._fork_repo')
+def test_iterate_repos_to_fork(mock_fork_repo):
+    repo = MagicMock(spec=Repository.Repository)
+    iterate_repos_to_fork([repo])
+
+    mock_fork_repo.assert_called_once()
+
+
 @patch('logging.Logger.info')
 @patch('github.Repository.Repository.create_fork')
-def test_fork_repo(mock_create_fork, mock_logger):
+def test_fork_repo_success(mock_create_fork, mock_logger):
     repo = MagicMock(spec=Repository.Repository)
     repo.create_fork = mock_create_fork
-    fork_repo(repo)
+    _fork_repo(repo)
 
-    mock_create_fork.assert_called_once_with()
+    mock_create_fork.assert_called_once()
+    mock_logger.assert_called_once()
+
+
+@patch('logging.Logger.error')
+@patch('github.Repository.Repository.create_fork', side_effect=Exception())
+def test_fork_repo_failure(mock_create_fork, mock_logger):
+    repo = MagicMock(spec=Repository.Repository)
+    repo.create_fork = mock_create_fork
+    _fork_repo(repo)
+
+    mock_create_fork.assert_called_once()
     mock_logger.assert_called_once()
