@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## NEXT RELEASE
+## v5.0.0 (2022-10-19)
 
 - Adds a new `--fork` CLI arg which adds support to fork the repos or gists specified via `users`, `orgs`, `stars`, or `gists`
 - Removed various shorthand CLI args to avoid confusion and improved help message output for CLI args (updated docs as well)
