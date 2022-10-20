@@ -1,5 +1,10 @@
 import subprocess
-from unittest.mock import patch
+from unittest.mock import (
+    MagicMock,
+    patch,
+)
+
+from github import Gist
 
 from github_archive import GithubArchive
 from github_archive.archive import (
@@ -8,7 +13,9 @@ from github_archive.archive import (
 )
 from github_archive.gists import (
     _archive_gist,
+    _fork_gist,
     iterate_gists_to_archive,
+    iterate_gists_to_fork,
     view_gists,
 )
 
@@ -77,3 +84,33 @@ def test_view_gists(mock_logger, mock_git_asset):
     view_gists(gists)
 
     mock_logger.assert_called_with('mock_username/123')
+
+
+@patch('github_archive.gists._fork_gist')
+def test_iterate_gists_to_fork(mock_fork_gist):
+    gist = MagicMock(spec=Gist.Gist)
+    iterate_gists_to_fork([gist])
+
+    mock_fork_gist.assert_called_once()
+
+
+@patch('logging.Logger.info')
+@patch('github.Gist.Gist.create_fork')
+def test_fork_gist_success(mock_create_fork, mock_logger):
+    gist = MagicMock(spec=Gist.Gist)
+    gist.create_fork = mock_create_fork
+    _fork_gist(gist)
+
+    mock_create_fork.assert_called_once()
+    mock_logger.assert_called_once()
+
+
+@patch('logging.Logger.warning')
+@patch('github.Gist.Gist.create_fork', side_effect=Exception())
+def test_fork_gist_failure(mock_create_fork, mock_logger):
+    gist = MagicMock(spec=Gist.Gist)
+    gist.create_fork = mock_create_fork
+    _fork_gist(gist)
+
+    mock_create_fork.assert_called_once()
+    mock_logger.assert_called_once()

@@ -2,7 +2,7 @@
 
 # GitHub Archive
 
-A powerful tool to concurrently clone or pull user and org repos and gists to create a GitHub archive.
+A powerful tool to concurrently clone, pull, or fork user and org repos and gists to create a GitHub archive.
 
 [![Build Status](https://github.com/Justintime50/github-archive/workflows/build/badge.svg)](https://github.com/Justintime50/github-archive/actions)
 [![Coverage Status](https://coveralls.io/repos/github/Justintime50/github-archive/badge.svg?branch=main)](https://coveralls.io/github/Justintime50/github-archive?branch=main)
@@ -13,7 +13,7 @@ A powerful tool to concurrently clone or pull user and org repos and gists to cr
 
 </div>
 
-GitHub Archive is a powerful tool to concurrently clone or pull repositories or gists from GitHub with incredible flexibility. It's the perfect tool for spinning up a new dev environment, keeping a local copy of your GitHub instance, or quickly pulling in projects from your favorite users and organizations.
+GitHub Archive is a powerful tool to concurrently clone, pull, or fork repositories or gists from GitHub with incredible flexibility. It's the perfect tool for spinning up a new dev environment, keeping a local copy of your GitHub instance, or quickly pulling in projects from your favorite users and organizations.
 
 The power of GitHub Archive comes in its configuration. Maybe you only want to clone or pull your personal public repos or maybe you want to go all out and include private repos from you and all organizations you belong to along with your gists. GitHub Archive can do it all.
 
@@ -47,21 +47,17 @@ Options:
     -v, --view            Pass this flag to view git assets (dry run).
     -c, --clone           Pass this flag to clone git assets.
     -p, --pull            Pass this flag to pull git assets.
-    -f, --forks           Pass this flag to include forked git assets.
-    -i INCLUDE, --include INCLUDE
-                            Pass a comma separated list of repos to filter what is included in the Archive.
-    -e EXCLUDE, --exclude EXCLUDE
-                            Pass a comma separated list of repos to filter what is excluded from the Archive.
-    -l LOCATION, --location LOCATION
-                            The location where you want your GitHub Archive to be stored. By default, this is /Users/USERNAME/github-archive
-    -ht, --https          Use HTTPS URLs instead of SSH.
-    -to TIMEOUT, --timeout TIMEOUT
-                            The number of seconds before a git operation times out.
-    -th THREADS, --threads THREADS
-                            The number of concurrent threads to run.
-    --base_url BASE_URL   The base URL of your GitHub instance (useful for enterprise users with custom hostnames).
-    --log_level {error,debug,warning,info,critical}
-                            The log level used for the tool.
+    -f, --fork            Pass this flag to fork git assets.
+    --include INCLUDE     Pass a comma separated list of repos to filter what is included in the Archive.
+    --exclude EXCLUDE     Pass a comma separated list of repos to filter what is excluded from the Archive.
+    --forks               Pass this flag to include forked git assets (when cloning or pulling).
+    --location LOCATION   The location where you want your GitHub Archive to be stored. Default: /Users/USERNAME/github-archive
+    --https               Use HTTPS URLs instead of SSH.
+    --timeout TIMEOUT     The number of seconds before a git operation times out. Default: 300
+    --threads THREADS     The number of concurrent threads to run. Default: 10
+    --base_url BASE_URL   The base URL of your GitHub instance (useful for enterprise users with custom hostnames). Default: https://api.github.com
+    --log_level {error,critical,warning,info,debug}
+                            The log level used for the tool. Default: info
 ```
 
 ### Automating SSH Passphrase Prompt (Recommended)

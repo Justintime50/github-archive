@@ -2,6 +2,8 @@
 
 ## NEXT RELEASE
 
+- Adds a new `--fork` CLI arg which adds support to fork the repos or gists specified via `users`, `orgs`, `stars`, or `gists`
+- Removed various shorthand CLI args to avoid confusion and improved help message output for CLI args (updated docs as well)
 - Namespaces for various functions changed for better project organization. As this project is intended to be used as a CLI tool and not a library, the impact should be minimal
 
 ## 4.5.1 (2022-09-15)

@@ -31,7 +31,8 @@ from github_archive.constants import (
 def iterate_repos_to_archive(
     github_archive: GithubArchive, repos: List[Repository.Repository], operation: str
 ) -> List[Optional[str]]:
-    """Iterate over each repository and start a thread if it can be archived.
+    """Iterate over each repository and start a thread after filtering based on the
+    user input and attempt to archive it.
 
     We ignore repos not in the include or in the exclude list if either are present.
     """
@@ -72,6 +73,25 @@ def view_repos(repos: List[Repository.Repository]):
     for repo in repos:
         repo_name = f'{repo.owner.login}/{repo.name}'
         logger.info(repo_name)
+
+
+def iterate_repos_to_fork(repos: List[Repository.Repository]):
+    """Iterates through a list of repos and attempts to fork them."""
+    for repo in repos:
+        _fork_repo(repo)
+
+
+def _fork_repo(repo: Repository.Repository):
+    """Forks a repository to the authenticated user's GitHub instance."""
+    logger = woodchips.get(LOGGER_NAME)
+
+    repo_name = f'{repo.owner.login}/{repo.name}'
+
+    try:
+        repo.create_fork()
+        logger.info(f'{repo_name} forked!')
+    except Exception:
+        logger.error(f'{repo_name} failed to fork!')
 
 
 def _archive_repo(

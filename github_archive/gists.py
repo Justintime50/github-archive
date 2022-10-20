@@ -62,6 +62,25 @@ def view_gists(gists: List[Gist.Gist]):
         logger.info(gist_id)
 
 
+def iterate_gists_to_fork(gists: List[Gist.Gist]):
+    """Iterates through a list of gists and attempts to fork them."""
+    for gist in gists:
+        _fork_gist(gist)
+
+
+def _fork_gist(gist: Gist.Gist):
+    """Forks a gist to the authenticated user's GitHub instance."""
+    logger = woodchips.get(LOGGER_NAME)
+
+    gist_id = f'{gist.owner.login}/{gist.id}'
+
+    try:
+        gist.create_fork()
+        logger.info(f'{gist_id} forked!')
+    except Exception:
+        logger.warning(f'{gist_id} failed to fork!')
+
+
 def _archive_gist(github_archive: GithubArchive, gist: Gist.Gist, gist_path: str, operation: str) -> Optional[str]:
     """Clone and pull gists based on the operation passed.
 

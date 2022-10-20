@@ -31,6 +31,7 @@ from github_archive.constants import (
 )
 from github_archive.gists import (
     iterate_gists_to_archive,
+    iterate_gists_to_fork,
     view_gists,
 )
 from github_archive.logger import (
@@ -39,6 +40,7 @@ from github_archive.logger import (
 )
 from github_archive.repos import (
     iterate_repos_to_archive,
+    iterate_repos_to_fork,
     view_repos,
 )
 
@@ -54,10 +56,11 @@ class GithubArchive:
         view=False,
         clone=False,
         pull=False,
-        forks=False,
-        location=DEFAULT_LOCATION,
+        fork=False,
         include=None,
         exclude=None,
+        forks=False,
+        location=DEFAULT_LOCATION,
         use_https=False,
         timeout=DEFAULT_TIMEOUT,
         threads=DEFAULT_NUM_THREADS,
@@ -73,10 +76,11 @@ class GithubArchive:
         self.view = view
         self.clone = clone
         self.pull = pull
-        self.forks = forks
-        self.location = location
+        self.fork = fork
         self.include = include.lower().split(',') if include else ''
         self.exclude = exclude.lower().split(',') if exclude else ''
+        self.forks = forks
+        self.location = location
         self.use_https = use_https
         self.timeout = timeout
         self.threads = threads
@@ -112,6 +116,9 @@ class GithubArchive:
             if self.pull:
                 logger.info('# Pulling changes to personal repos...\n')
                 _ = iterate_repos_to_archive(self, personal_repos, PULL_OPERATION)
+            if self.fork:
+                # We can't fork a repo we already have, do nothing
+                pass
 
             # We remove the authenticated user from the list so that we don't double pull their
             # repos for the `users` logic.
@@ -133,6 +140,9 @@ class GithubArchive:
             if self.pull:
                 logger.info('# Pulling changes to user repos...\n')
                 _ = iterate_repos_to_archive(self, user_repos, PULL_OPERATION)
+            if self.fork:
+                logger.info('# Forking starred repos...\n')
+                iterate_repos_to_fork(user_repos)
 
         # Orgs
         if self.orgs:
@@ -150,6 +160,9 @@ class GithubArchive:
             if self.pull:
                 logger.info('# Pulling changes to org repos...\n')
                 _ = iterate_repos_to_archive(self, org_repos, PULL_OPERATION)
+            if self.fork:
+                logger.info('# Forking starred repos...\n')
+                iterate_repos_to_fork(org_repos)
 
         # Stars
         if self.stars:
@@ -167,6 +180,9 @@ class GithubArchive:
             if self.pull:
                 logger.info('# Pulling changes to starred repos...\n')
                 _ = iterate_repos_to_archive(self, starred_repos, PULL_OPERATION)
+            if self.fork:
+                logger.info('# Forking starred repos...\n')
+                iterate_repos_to_fork(starred_repos)
 
         if failed_repo_dirs:
             logger.info('Cleaning up repos...\n')
@@ -189,6 +205,9 @@ class GithubArchive:
             if self.pull:
                 logger.info('# Pulling changes to gists...\n')
                 _ = iterate_gists_to_archive(self, gists, PULL_OPERATION)
+            if self.fork:
+                logger.info('# Forking gists...\n')
+                iterate_gists_to_fork(gists)
 
             if failed_gist_dirs:
                 logger.info('Cleaning up gists...\n')
@@ -211,17 +230,23 @@ class GithubArchive:
             os.makedirs(os.path.join(self.location, 'repos'))
             os.makedirs(os.path.join(self.location, 'gists'))
 
-        if (self.users or self.orgs or self.gists or self.stars) and not (self.view or self.clone or self.pull):
+        if (self.users or self.orgs or self.gists or self.stars) and not (
+            self.view or self.clone or self.pull or self.fork
+        ):
             log_and_raise_value_error(
                 logger=logger,
                 message='A git operation must be specified when a list of users or orgs is provided.',
             )
-        elif not (self.users or self.orgs or self.gists or self.stars) and (self.view or self.clone or self.pull):
+        elif not (self.users or self.orgs or self.gists or self.stars) and (
+            self.view or self.clone or self.pull or self.fork
+        ):
             log_and_raise_value_error(
                 logger=logger,
                 message='A list must be provided when a git operation is specified.',
             )
-        elif not (self.users or self.orgs or self.gists or self.stars or self.view or self.clone or self.pull):
+        elif not (
+            self.users or self.orgs or self.gists or self.stars or self.view or self.clone or self.pull or self.fork
+        ):
             log_and_raise_value_error(
                 logger=logger,
                 message='At least one git operation and one list must be provided to run github-archive.',

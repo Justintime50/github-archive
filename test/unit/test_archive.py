@@ -12,64 +12,48 @@ from github_archive.archive import (
 )
 
 
+@pytest.mark.parametrize(
+    'args, patch_function',
+    [
+        (
+            {
+                'token': '123',
+                'users': 'justintime50',
+                'view': True,
+            },
+            'github_archive.archive.view_repos',
+        ),
+        (
+            {
+                'token': '123',
+                'users': 'justintime50',
+                'clone': True,
+            },
+            'github_archive.archive.iterate_repos_to_archive',
+        ),
+        (
+            {
+                'token': '123',
+                'users': 'justintime50',
+                'pull': True,
+            },
+            'github_archive.archive.iterate_repos_to_archive',
+        ),
+    ],
+)
 @patch('github_archive.archive.Github.get_user')
 @patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
-@patch('github_archive.archive.view_repos')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
-def test_run_token_view(mock_get_all_git_assets, mock_view_repos, mock_authed_user_in_users, mock_get_user):
-    github_archive = GithubArchive(
-        token='123',
-        users='justintime50',
-        view=True,
-    )
+def test_run_with_token(mock_get_all_git_assets, mock_authed_user_in_users, mock_get_user, args, patch_function):
+    """Tests running the tool with different params when a token is specified."""
+    github_archive = GithubArchive(**args)
 
     github_archive.authenticated_username = 'justintime50'
-    github_archive.run()
+    with patch(patch_function) as func:
+        github_archive.run()
 
     mock_get_all_git_assets.assert_called_once()
-    mock_view_repos.assert_called_once()
-    assert github_archive.users == []  # Assert the authed user gets removed from list
-
-
-@patch('github_archive.archive.Github.get_user')
-@patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
-@patch('github_archive.archive.iterate_repos_to_archive')
-@patch('github_archive.archive.GithubArchive.get_all_git_assets')
-def test_run_token_clone(
-    mock_get_all_git_assets, mock_iterate_repos_to_archive, mock_authed_user_in_users, mock_get_user
-):
-    github_archive = GithubArchive(
-        token='123',
-        users='justintime50',
-        clone=True,
-    )
-
-    github_archive.authenticated_username = 'justintime50'
-    github_archive.run()
-
-    mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), CLONE_OPERATION)
-    assert github_archive.users == []  # Assert the authed user gets removed from list
-
-
-@patch('github_archive.archive.Github.get_user')
-@patch('github_archive.archive.GithubArchive.authenticated_user_in_users', return_value=True)
-@patch('github_archive.archive.iterate_repos_to_archive')
-@patch('github_archive.archive.GithubArchive.get_all_git_assets')
-def test_run_token_pull(
-    mock_get_all_git_assets, mock_iterate_repos_to_archive, mock_authed_user_in_users, mock_get_user
-):
-    github_archive = GithubArchive(
-        token='123',
-        users='justintime50',
-        pull=True,
-    )
-
-    github_archive.authenticated_username = 'justintime50'
-    github_archive.run()
-
-    mock_get_all_git_assets.assert_called_once()
-    mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
+    func.assert_called_once()
     assert github_archive.users == []  # Assert the authed user gets removed from list
 
 
@@ -115,6 +99,20 @@ def test_run_users_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
     mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
 
 
+@patch('github_archive.archive.iterate_repos_to_fork')
+@patch('github_archive.archive.GithubArchive.get_all_git_assets')
+def test_run_users_fork(mock_get_all_git_assets, mock_iterate_repos_to_fork):
+    github_archive = GithubArchive(
+        users='justintime50',
+        fork=True,
+    )
+
+    github_archive.run()
+
+    mock_get_all_git_assets.assert_called_once()
+    mock_iterate_repos_to_fork.assert_called_once()
+
+
 @patch('github_archive.archive.view_repos')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_orgs_view(mock_get_all_git_assets, mock_view_repos):
@@ -155,6 +153,20 @@ def test_run_orgs_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
 
     mock_get_all_git_assets.assert_called_once()
     mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
+
+
+@patch('github_archive.archive.iterate_repos_to_fork')
+@patch('github_archive.archive.GithubArchive.get_all_git_assets')
+def test_run_orgs_fork(mock_get_all_git_assets, mock_iterate_repos_to_fork):
+    github_archive = GithubArchive(
+        orgs='org1',
+        fork=True,
+    )
+
+    github_archive.run()
+
+    mock_get_all_git_assets.assert_called_once()
+    mock_iterate_repos_to_fork.assert_called_once()
 
 
 @patch('github_archive.archive.view_gists')
@@ -199,6 +211,20 @@ def test_run_gists_pull(mock_get_all_git_assets, mock_iterate_gists_to_archive):
     mock_iterate_gists_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
 
 
+@patch('github_archive.archive.iterate_gists_to_fork')
+@patch('github_archive.archive.GithubArchive.get_all_git_assets')
+def test_run_gists_fork(mock_get_all_git_assets, mock_iterate_gists_to_fork):
+    github_archive = GithubArchive(
+        gists='org1',
+        fork=True,
+    )
+
+    github_archive.run()
+
+    mock_get_all_git_assets.assert_called_once()
+    mock_iterate_gists_to_fork.assert_called_once()
+
+
 @patch('github_archive.archive.view_repos')
 @patch('github_archive.archive.GithubArchive.get_all_git_assets')
 def test_run_stars_view(mock_get_all_git_assets, mock_view_repos):
@@ -239,6 +265,20 @@ def test_run_stars_pull(mock_get_all_git_assets, mock_iterate_repos_to_archive):
 
     mock_get_all_git_assets.assert_called_once()
     mock_iterate_repos_to_archive.assert_called_once_with(github_archive, mock_get_all_git_assets(), PULL_OPERATION)
+
+
+@patch('github_archive.archive.iterate_repos_to_fork')
+@patch('github_archive.archive.GithubArchive.get_all_git_assets')
+def test_run_stars_fork(mock_get_all_git_assets, mock_iterate_repos_to_fork):
+    github_archive = GithubArchive(
+        stars='justintime50',
+        fork=True,
+    )
+
+    github_archive.run()
+
+    mock_get_all_git_assets.assert_called_once()
+    mock_iterate_repos_to_fork.assert_called_once()
 
 
 @patch('github_archive.archive.setup_logger')
