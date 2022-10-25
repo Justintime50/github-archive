@@ -32,7 +32,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - name: Install Dependencies
         run: make install
       - name: Check format
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pythonversion: ["3.7", "3.8", "3.9", "3.10"]
+        pythonversion: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
