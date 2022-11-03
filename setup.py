@@ -14,12 +14,11 @@ DEV_REQUIREMENTS = [
     'bandit == 1.7.*',
     'black == 22.*',
     'build == 0.8.*',
-    'coveralls == 3.*',
     'flake8 == 5.*',
     'isort == 5.*',
     'mypy == 0.982',
     'pytest == 7.*',
-    'pytest-cov == 3.*',
+    'pytest-cov == 4.*',
     'twine == 4.*',
 ]
 
