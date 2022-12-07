@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v5.0.1 (2022-12-07)
+
+- Fixes a bug that tries removing the authenticated user from a list so we don't double dip git operations even when there is no authenticated user (eg: using the `--https` flag)
+- Fixes a bug that allowed users to use both the `--token` and `--https` when it should only be one or the other
+
 ## v5.0.0 (2022-10-19)
 
 - Adds a new `--fork` CLI arg which adds support to fork the repos or gists specified via `users`, `orgs`, `stars`, or `gists`
