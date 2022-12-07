@@ -122,7 +122,8 @@ class GithubArchive:
 
             # We remove the authenticated user from the list so that we don't double pull their
             # repos for the `users` logic.
-            self.users.remove(self.authenticated_username)
+            if self.authenticated_username:
+                self.users.remove(self.authenticated_username)
 
         # Users (can include personal non-authenticated items, excludes personal authenticated calls)
         if self.users and len(self.users) > 0:
@@ -255,6 +256,11 @@ class GithubArchive:
             log_and_raise_value_error(
                 logger=logger,
                 message='The include and exclude flags are mutually exclusive. Only one can be used on each run.',
+            )
+        elif self.token and self.use_https:
+            log_and_raise_value_error(
+                logger=logger,
+                message='Use only one of `token` or `https` flags to authenticate.',
             )
 
     def authenticated_user_in_users(self) -> bool:

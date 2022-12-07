@@ -306,11 +306,16 @@ def test_initialize_project(mock_make_dirs, mock_dir_exist, mock_logger):
             {'users': 'justintime50', 'clone': True, 'include': 'mock-repo', 'exclude': 'another-mock-repo'},
             'The include and exclude flags are mutually exclusive. Only one can be used on each run.',
         ),
+        (
+            {'token': '123', 'use_https': True, 'users': 'justintime50', 'clone': True},
+            'Use only one of `token` or `https` flags to authenticate.',
+        ),
     ],
 )
+@patch('github_archive.archive.Github.get_user')
 @patch('logging.Logger.critical')
-def test_initialize_project_missing_cli_args(mock_logger, args, expected_message):
-    """Tests various alterations of missing CLI args and asserts that the error message matches the situation."""
+def test_initialize_project_args(mock_logger, mock_get_user, args, expected_message):
+    """Tests various alterations of CLI args and asserts that the error message matches the situation."""
     with pytest.raises(ValueError) as error:
         github_archive = GithubArchive(**args)
         github_archive.initialize_project()
