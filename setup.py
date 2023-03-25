@@ -14,7 +14,7 @@ DEV_REQUIREMENTS = [
     'bandit == 1.7.*',
     'black == 22.*',
     'build == 0.10.*',
-    'flake8 == 6.*',
+    'flake8 == 5.*',  # TODO: Bump once we drop support for Python 3.7
     'isort == 5.*',
     'mypy == 1.1.*',
     'pytest == 7.*',
