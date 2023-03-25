@@ -85,23 +85,26 @@ def test_view_repos(mock_logger, mock_git_asset):
     mock_logger.assert_called_with('mock_username/mock-asset-name')
 
 
-@patch('subprocess.run')
+@patch('subprocess.check_output')
 @patch('logging.Logger.info')
 def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
-    # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
     message = f'Repo: {mock_git_asset.owner.login}/{mock_git_asset.name} {operation} success!'
     github_archive = GithubArchive()
     _archive_repo(github_archive, mock_git_asset, 'mock/path', operation)
 
-    mock_subprocess.assert_called()
+    mock_subprocess.assert_called_once_with(
+        ['git', 'clone', 'mock/ssh_url', 'mock/path'],
+        stderr=-2,
+        text=True,
+        timeout=300,
+    )
     mock_logger.assert_called_once_with(message)
 
 
-@patch('subprocess.run')
+@patch('subprocess.check_output')
 @patch('logging.Logger.info')
 def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_asset):
-    # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
     message = f'Repo: {mock_git_asset.owner.login}/{mock_git_asset.name} {operation} success!'
     github_archive = GithubArchive(
@@ -109,13 +112,18 @@ def test_archive_repo_use_https_success(mock_logger, mock_subprocess, mock_git_a
     )
     _archive_repo(github_archive, mock_git_asset, 'mock/path', operation)
 
-    mock_subprocess.assert_called()
+    mock_subprocess.assert_called_once_with(
+        ['git', 'clone', 'mock/html_url', 'mock/path'],
+        stderr=-2,
+        text=True,
+        timeout=300,
+    )
     mock_logger.assert_called_once_with(message)
 
 
 @patch('os.path.join', return_value='mock_user/mock_repo')
 @patch('os.path.exists', return_value=True)
-@patch('subprocess.run')
+@patch('subprocess.check_output')
 @patch('logging.Logger.info')
 def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_path_join, mock_git_asset):
     operation = CLONE_OPERATION
@@ -125,7 +133,7 @@ def test_archive_repo_clone_exists(mock_logger, mock_subprocess, mock_path_exist
     mock_subprocess.assert_not_called()
 
 
-@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
+@patch('subprocess.check_output', side_effect=subprocess.TimeoutExpired(cmd='subprocess.check_output', timeout=0.1))
 @patch('logging.Logger.error')
 def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
@@ -136,7 +144,9 @@ def test_archive_repo_timeout_exception(mock_logger, mock_subprocess, mock_git_a
     mock_logger.assert_called_with(message)
 
 
-@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
+@patch(
+    'subprocess.check_output', side_effect=subprocess.CalledProcessError(cmd='subprocess.check_output', returncode=1)
+)
 @patch('logging.Logger.error')
 def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_git_asset):
     operation = PULL_OPERATION

@@ -122,12 +122,10 @@ def _archive_repo(
         git_command = commands[operation]
 
         try:
-            subprocess.run(  # nosec
+            subprocess.check_output(  # nosec
                 git_command,
-                stdout=subprocess.DEVNULL,
-                stdin=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                check=True,
+                stderr=subprocess.STDOUT,
+                text=True,
                 timeout=github_archive.timeout,
             )
             logger.info(f'Repo: {full_repo_name} {operation} success!')
@@ -135,7 +133,7 @@ def _archive_repo(
             logger.error(f'Git operation timed out archiving {repo.name}.')
             failed_repo = full_repo_name
         except subprocess.CalledProcessError as error:
-            logger.error(f'Failed to {operation} {repo.name}\n{error}')
+            logger.error(f'Failed to {operation} {repo.name}\n{error.output}')
             failed_repo = full_repo_name
 
     return failed_repo

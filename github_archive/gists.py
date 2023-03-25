@@ -102,12 +102,10 @@ def _archive_gist(github_archive: GithubArchive, gist: Gist.Gist, gist_path: str
         git_command = commands[operation]
 
         try:
-            subprocess.run(  # nosec
+            subprocess.check_output(  # nosec
                 git_command,
-                stdout=subprocess.DEVNULL,
-                stdin=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                check=True,
+                stderr=subprocess.STDOUT,
+                text=True,
                 timeout=github_archive.timeout,
             )
             logger.info(f'Gist: {full_gist_id} {operation} success!')
@@ -115,7 +113,7 @@ def _archive_gist(github_archive: GithubArchive, gist: Gist.Gist, gist_path: str
             logger.error(f'Git operation timed out archiving {gist.id}.')
             failed_gist = full_gist_id
         except subprocess.CalledProcessError as error:
-            logger.error(f'Failed to {operation} {gist.id}\n{error}')
+            logger.error(f'Failed to {operation} {gist.id}\n{error.output}')
             failed_gist = full_gist_id
 
     return failed_gist

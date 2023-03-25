@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v5.0.2 (2023-03-25)
+
+- Overhauls subprocess error handling so output is no longer clobbered
+- No longer inserts newlines (which were often formatted incorrectly) when a log entry was for a new section or action
+
 ## v5.0.1 (2022-12-07)
 
 - Fixes a bug that tries removing the authenticated user from a list so we don't double dip git operations even when there is no authenticated user (eg: using the `--https` flag)

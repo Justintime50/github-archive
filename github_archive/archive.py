@@ -96,25 +96,25 @@ class GithubArchive:
         """Run the tool based on the arguments passed via the CLI."""
         self.initialize_project()
         logger = woodchips.get(LOGGER_NAME)
-        logger.info('# GitHub Archive started...\n')
+        logger.info('# GitHub Archive started...')
         start_time = datetime.now()
         failed_repo_dirs = []
 
         # Personal (includes personal authenticated items)
         if self.token and self.authenticated_user_in_users and self.users:
-            logger.info('# Making API call to GitHub for personal repos...\n')
+            logger.info('# Making API call to GitHub for personal repos...')
             personal_repos = self.get_all_git_assets(PERSONAL_CONTEXT)
 
             if self.view:
-                logger.info('# Viewing user repos...\n')
+                logger.info('# Viewing user repos...')
                 view_repos(personal_repos)
             if self.clone:
-                logger.info('# Cloning missing personal repos...\n')
+                logger.info('# Cloning missing personal repos...')
                 failed_repos = iterate_repos_to_archive(self, personal_repos, CLONE_OPERATION)
                 if any(failed_repos):
                     failed_repo_dirs.extend(failed_repos)
             if self.pull:
-                logger.info('# Pulling changes to personal repos...\n')
+                logger.info('# Pulling changes to personal repos...')
                 _ = iterate_repos_to_archive(self, personal_repos, PULL_OPERATION)
             if self.fork:
                 # We can't fork a repo we already have, do nothing
@@ -127,95 +127,95 @@ class GithubArchive:
 
         # Users (can include personal non-authenticated items, excludes personal authenticated calls)
         if self.users and len(self.users) > 0:
-            logger.info('# Making API calls to GitHub for user repos...\n')
+            logger.info('# Making API calls to GitHub for user repos...')
             user_repos = self.get_all_git_assets(USER_CONTEXT)
 
             if self.view:
-                logger.info('# Viewing user repos...\n')
+                logger.info('# Viewing user repos...')
                 view_repos(user_repos)
             if self.clone:
-                logger.info('# Cloning missing user repos...\n')
+                logger.info('# Cloning missing user repos...')
                 failed_repos = iterate_repos_to_archive(self, user_repos, CLONE_OPERATION)
                 if any(failed_repos):
                     failed_repo_dirs.extend(failed_repos)
             if self.pull:
-                logger.info('# Pulling changes to user repos...\n')
+                logger.info('# Pulling changes to user repos...')
                 _ = iterate_repos_to_archive(self, user_repos, PULL_OPERATION)
             if self.fork:
-                logger.info('# Forking starred repos...\n')
+                logger.info('# Forking starred repos...')
                 iterate_repos_to_fork(user_repos)
 
         # Orgs
         if self.orgs:
-            logger.info('# Making API calls to GitHub for org repos...\n')
+            logger.info('# Making API calls to GitHub for org repos...')
             org_repos = self.get_all_git_assets(ORG_CONTEXT)
 
             if self.view:
-                logger.info('# Viewing org repos...\n')
+                logger.info('# Viewing org repos...')
                 view_repos(org_repos)
             if self.clone:
-                logger.info('# Cloning missing org repos...\n')
+                logger.info('# Cloning missing org repos...')
                 failed_repos = iterate_repos_to_archive(self, org_repos, CLONE_OPERATION)
                 if any(failed_repos):
                     failed_repo_dirs.extend(failed_repos)
             if self.pull:
-                logger.info('# Pulling changes to org repos...\n')
+                logger.info('# Pulling changes to org repos...')
                 _ = iterate_repos_to_archive(self, org_repos, PULL_OPERATION)
             if self.fork:
-                logger.info('# Forking starred repos...\n')
+                logger.info('# Forking starred repos...')
                 iterate_repos_to_fork(org_repos)
 
         # Stars
         if self.stars:
-            logger.info('# Making API call to GitHub for starred repos...\n')
+            logger.info('# Making API call to GitHub for starred repos...')
             starred_repos = self.get_all_git_assets(STAR_CONTEXT)
 
             if self.view:
-                logger.info('# Viewing stars...\n')
+                logger.info('# Viewing stars...')
                 view_repos(starred_repos)
             if self.clone:
-                logger.info('# Cloning missing starred repos...\n')
+                logger.info('# Cloning missing starred repos...')
                 failed_repos = iterate_repos_to_archive(self, starred_repos, CLONE_OPERATION)
                 if any(failed_repos):
                     failed_repo_dirs.extend(failed_repos)
             if self.pull:
-                logger.info('# Pulling changes to starred repos...\n')
+                logger.info('# Pulling changes to starred repos...')
                 _ = iterate_repos_to_archive(self, starred_repos, PULL_OPERATION)
             if self.fork:
-                logger.info('# Forking starred repos...\n')
+                logger.info('# Forking starred repos...')
                 iterate_repos_to_fork(starred_repos)
 
         if failed_repo_dirs:
-            logger.info('Cleaning up repos...\n')
+            logger.info('Cleaning up repos...')
             self.remove_failed_dirs('repos', failed_repo_dirs)
 
         # Gists
         if self.gists:
-            logger.info('# Making API call to GitHub for gists...\n')
+            logger.info('# Making API call to GitHub for gists...')
             gists = self.get_all_git_assets(GIST_CONTEXT)
             failed_gist_dirs = []
 
             if self.view:
-                logger.info('# Viewing gists...\n')
+                logger.info('# Viewing gists...')
                 view_gists(gists)
             if self.clone:
-                logger.info('# Cloning missing gists...\n')
+                logger.info('# Cloning missing gists...')
                 failed_gists = iterate_gists_to_archive(self, gists, CLONE_OPERATION)
                 if any(failed_gists):
                     failed_gist_dirs.extend(failed_gists)
             if self.pull:
-                logger.info('# Pulling changes to gists...\n')
+                logger.info('# Pulling changes to gists...')
                 _ = iterate_gists_to_archive(self, gists, PULL_OPERATION)
             if self.fork:
-                logger.info('# Forking gists...\n')
+                logger.info('# Forking gists...')
                 iterate_gists_to_fork(gists)
 
             if failed_gist_dirs:
-                logger.info('Cleaning up gists...\n')
+                logger.info('Cleaning up gists...')
                 self.remove_failed_dirs('gists', failed_gist_dirs)
 
         execution_time = f'Execution time: {datetime.now() - start_time}.'
-        finish_message = f'GitHub Archive complete! {execution_time}\n'
+        finish_message = f'GitHub Archive complete! {execution_time}'
         logger.info(finish_message)
 
     def initialize_project(self):

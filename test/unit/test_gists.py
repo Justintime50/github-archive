@@ -33,21 +33,25 @@ def test_iterate_gists(mock_archive_gist, mock_github_instance, mock_git_asset):
     mock_archive_gist.assert_called()
 
 
-@patch('subprocess.run')
+@patch('subprocess.check_output')
 @patch('logging.Logger.info')
 def test_archive_gist_success(mock_logger, mock_subprocess, mock_git_asset):
-    # TODO: Mock the subprocess better to ensure it's doing what it should
     operation = CLONE_OPERATION
     message = f'Gist: {mock_git_asset.owner.login}/{mock_git_asset.id} {operation} success!'
     github_archive = GithubArchive()
     _archive_gist(github_archive, mock_git_asset, 'mock/path', operation)
 
-    mock_subprocess.assert_called()
+    mock_subprocess.assert_called_once_with(
+        ['git', 'clone', 'mock/html_url', 'mock/path'],
+        stderr=-2,
+        text=True,
+        timeout=300,
+    )
     mock_logger.assert_called_once_with(message)
 
 
 @patch('os.path.exists', return_value=True)
-@patch('subprocess.run')
+@patch('subprocess.check_output')
 @patch('logging.Logger.info')
 def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exists, mock_git_asset):
     operation = CLONE_OPERATION
@@ -57,7 +61,7 @@ def test_archive_gist_clone_exists(mock_logger, mock_subprocess, mock_path_exist
     mock_subprocess.assert_not_called()
 
 
-@patch('subprocess.run', side_effect=subprocess.TimeoutExpired(cmd='subprocess.run', timeout=0.1))
+@patch('subprocess.check_output', side_effect=subprocess.TimeoutExpired(cmd='subprocess.check_output', timeout=0.1))
 @patch('logging.Logger.error')
 def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_git_asset):
     operation = CLONE_OPERATION
@@ -68,7 +72,9 @@ def test_archive_gist_timeout_exception(mock_logger, mock_subprocess, mock_git_a
     mock_logger.assert_called_with(message)
 
 
-@patch('subprocess.run', side_effect=subprocess.CalledProcessError(returncode=1, cmd='subprocess.run'))
+@patch(
+    'subprocess.check_output', side_effect=subprocess.CalledProcessError(cmd='subprocess.check_output', returncode=1)
+)
 @patch('logging.Logger.error')
 def test_archive_gist_called_process_error(mock_logger, mock_subprocess, mock_git_asset):
     operation = PULL_OPERATION
