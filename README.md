@@ -9,7 +9,7 @@ A powerful tool to concurrently clone, pull, or fork user and org repos and gist
 [![PyPi](https://img.shields.io/pypi/v/github-archive)](https://pypi.org/project/github-archive)
 [![Licence](https://img.shields.io/github/license/justintime50/GitHub-archive)](LICENSE)
 
-<img src="https://raw.githubusercontent.com/justintime50/assets/main/src/github-archive/showcase.png" alt="Showcase">
+![Showcase](https://raw.githubusercontent.com/justintime50/assets/main/src/github-archive/showcase.png)
 
 </div>
 
@@ -29,7 +29,7 @@ make install
 
 ## Usage
 
-```
+```text
 Usage:
     github-archive --users justintime50 --clone
 
