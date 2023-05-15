@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v5.0.3 (2023-05-15)
+
+- Fixes a syntax error that led to not being able to remove the authenticated user from the user's list so their git assets weren't included twice (fixes #55)
+
 ## v5.0.2 (2023-03-25)
 
 - Overhauls subprocess error handling so output is no longer clobbered

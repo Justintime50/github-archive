@@ -101,7 +101,7 @@ class GithubArchive:
         failed_repo_dirs = []
 
         # Personal (includes personal authenticated items)
-        if self.token and self.authenticated_user_in_users and self.users:
+        if self.token and self.users and self.authenticated_user_in_users():
             logger.info('# Making API call to GitHub for personal repos...')
             personal_repos = self.get_all_git_assets(PERSONAL_CONTEXT)
 
@@ -122,8 +122,7 @@ class GithubArchive:
 
             # We remove the authenticated user from the list so that we don't double pull their
             # repos for the `users` logic.
-            if self.authenticated_username:
-                self.users.remove(self.authenticated_username)
+            self.users.remove(self.authenticated_username)
 
         # Users (can include personal non-authenticated items, excludes personal authenticated calls)
         if self.users and len(self.users) > 0:

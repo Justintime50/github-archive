@@ -24,7 +24,7 @@ DEV_REQUIREMENTS = [
 
 setuptools.setup(
     name='github-archive',
-    version='5.0.2',
+    version='5.0.3',
     description=(
         'A powerful tool to concurrently clone, pull, or fork user and org repos and gists to create a GitHub archive.'
     ),
