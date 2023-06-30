@@ -6,17 +6,16 @@ with open('README.md', 'r') as fh:
 
 REQUIREMENTS = [
     'PyGithub == 1.*',
-    'typing_extensions',  # TODO: Remove once we drop support for Python 3.7 (used for Literal type hint)
     'woodchips == 0.2.*',
 ]
 
 DEV_REQUIREMENTS = [
     'bandit == 1.7.*',
-    'black == 22.*',
+    'black == 23.*',
     'build == 0.10.*',
-    'flake8 == 5.*',  # TODO: Bump once we drop support for Python 3.7
+    'flake8 == 6.*',
     'isort == 5.*',
-    'mypy == 1.1.*',
+    'mypy == 1.3.*',
     'pytest == 7.*',
     'pytest-cov == 4.*',
     'twine == 4.*',
@@ -24,7 +23,7 @@ DEV_REQUIREMENTS = [
 
 setuptools.setup(
     name='github-archive',
-    version='5.0.3',
+    version='6.0.0',
     description=(
         'A powerful tool to concurrently clone, pull, or fork user and org repos and gists to create a GitHub archive.'
     ),
@@ -57,5 +56,5 @@ setuptools.setup(
             'github-archive=github_archive.cli:main',
         ]
     },
-    python_requires='>=3.7, <4',
+    python_requires='>=3.8, <4',
 )

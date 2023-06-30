@@ -24,7 +24,7 @@ The power of GitHub Archive comes in its configuration. Maybe you only want to c
 pip3 install github-archive
 
 # Install locally
-make install
+just install
 ```
 
 ## Usage
@@ -81,7 +81,7 @@ ssh-add
 
 ```bash
 # Get a comprehensive list of development tools
-make help
+just --list
 
 # Run the tool locally
 venv/bin/python github_archive/cli.py --help

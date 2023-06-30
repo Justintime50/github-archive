@@ -1,6 +1,6 @@
 import os
 
-from typing_extensions import Literal
+from typing import Literal
 
 
 DEFAULT_BASE_URL = 'https://api.github.com'
