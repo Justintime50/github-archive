@@ -56,10 +56,6 @@ isort-check:
 mypy:
     {{VIRTUAL_BIN}}/mypy {{PROJECT_NAME}}/ {{TEST_DIR}}/
 
-# Scans the project for security vulnerabilities
-scan:
-    {{VIRTUAL_BIN}}/bandit -r {{PROJECT_NAME}}/
-
 # Test the project
 test:
     {{VIRTUAL_BIN}}/pytest
