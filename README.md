@@ -58,6 +58,7 @@ Options:
     --base_url BASE_URL   The base URL of your GitHub instance (useful for enterprise users with custom hostnames). Default: https://api.github.com
     --log_level {error,critical,warning,info,debug}
                             The log level used for the tool. Default: info
+    --version             show program's version number and exit
 ```
 
 ### Authentication
