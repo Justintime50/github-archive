@@ -2,6 +2,7 @@ import argparse
 from typing import get_args
 
 from github_archive import GithubArchive
+from github_archive._version import __version__
 from github_archive.constants import (
     DEFAULT_BASE_URL,
     DEFAULT_LOCATION,
@@ -160,6 +161,11 @@ class GithubArchiveCli:
             default=DEFAULT_LOG_LEVEL,
             choices=set(get_args(LOG_LEVEL_CHOICES)),
             help=f'The log level used for the tool. Default: {DEFAULT_LOG_LEVEL}',
+        )
+        parser.add_argument(
+            '--version',
+            action='version',
+            version=f'%(prog)s {__version__}',
         )
         parser.parse_args(namespace=self)
 

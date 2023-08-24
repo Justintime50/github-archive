@@ -1,2 +1,4 @@
 [run]
-omit = github_archive/cli.py
+omit = 
+    github_archive/cli.py
+    github_archive/_version.py

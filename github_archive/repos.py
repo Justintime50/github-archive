@@ -114,9 +114,11 @@ def _archive_repo(
             PULL_OPERATION: ['git', '-C', repo_path, 'pull', '--rebase'],
         }
 
-        if github_archive.use_https:
+        if github_archive.use_https or not github_archive.token:
+            # Will be used for unauthenticated requests or with items like GCM
             commands.update({CLONE_OPERATION: ['git', 'clone', repo.html_url, repo_path]})
         else:
+            # Will be used for SSH authenticated requests
             commands.update({CLONE_OPERATION: ['git', 'clone', repo.ssh_url, repo_path]})
 
         git_command = commands[operation]

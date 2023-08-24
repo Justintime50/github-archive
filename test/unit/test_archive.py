@@ -306,10 +306,6 @@ def test_initialize_project(mock_make_dirs, mock_dir_exist, mock_logger):
             {'users': 'justintime50', 'clone': True, 'include': 'mock-repo', 'exclude': 'another-mock-repo'},
             'The include and exclude flags are mutually exclusive. Only one can be used on each run.',
         ),
-        (
-            {'token': '123', 'use_https': True, 'users': 'justintime50', 'clone': True},
-            'Use only one of `token` or `https` flags to authenticate.',
-        ),
     ],
 )
 @patch('github_archive.archive.Github.get_user')

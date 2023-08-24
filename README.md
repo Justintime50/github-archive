@@ -60,22 +60,36 @@ Options:
                             The log level used for the tool. Default: info
 ```
 
-### Automating SSH Passphrase Prompt (Recommended)
+### Authentication
 
-To allow the script to run continuosly without requiring your SSH passphrase, you'll need to add your passphrase to the SSH agent. **NOTE:** Your SSH passphrase will be unloaded upon logout.
+There are three methods of authentication with this tool.
+
+#### Unauthenticated
+
+You can run a command similar to `github-archive --users justintime50 --clone` which would only clone public repositories. GitHub has a hard limit of `60 requests per hour` - not authenticating may quickly burn through that limit if you have a large GitHub instance to archive.
+
+#### SSH
+
+To allow the script to run continuosly without requiring passwords for every repo, you can add your SSH passphrase to the SSH agent:
 
 ```bash
 # This assumes you've saved your SSH keys to the default location
 ssh-add
 ```
 
+You can then run a command similar to `github-archive --users justintime50 --clone --token 123` where the token is your GitHub API token. This will authenticate you with the GitHub API via the `token` and with GitHub via `ssh`.
+
+#### Git Credential Manager
+
+Alternatively, you can use a tool like [Git Credential Manager](https://github.com/git-ecosystem/git-credential-manager) to populate your Git credentials under the hood. When not using SSH, we'll clone/pull from the git URLs instead of the SSH URLs. To trigger this behavior, you must pass the `--https` flag.
+
+You can then run a command similar to `github-archive --users justintime50 --clone --token 123 --https` where the token is your GitHub API token. This will authenticate you with the GitHub API via the `token` and with GitHub via your Git credentials via `GCM`.
+
 ### Notes
 
-**SSH Key:** By default, you must have an SSH key generated on your local machine and added to your GitHub account as this tool uses the `ssh_url` to clone/pull. If you'd like to instead use the `git_url` to clone/pull, you can pass the `--https` flag which currently requires no authentication. Without using a token/SSH, you will not be able to interact with private git assets. Additionally, GitHub has a hard limit of 60 requests per hour - using the `--https` option may quickly burn through that unauthenticated limit if you have a large GitHub instance to archive.
+**Access**: GitHub Archive can only clone or pull git assets that the authenticated user has access to. This means that private repos from another user or org that you don't have access to will not be able to be cloned or pulled. Additionally without using a token and SSH/CGM, you will not be able to interact with private git assets.
 
 **Merge Conflicts:** Be aware that using GitHub Archive could lead to merge conflicts if you do not commit or stash your changes if using these repos as active development repos instead of simply an archive or one-time clone.
-
-**Access**: GitHub Archive can only clone or pull git assets that the authenticated user has access to. This means that private repos from another user or org that you don't have access to will not be able to be cloned or pulled.
 
 ## Development
 

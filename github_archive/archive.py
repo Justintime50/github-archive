@@ -9,6 +9,7 @@ from typing import (
 
 import woodchips
 from github import (
+    Auth,
     Gist,
     Github,
     Repository,
@@ -88,7 +89,11 @@ class GithubArchive:
         self.log_level = log_level
 
         # Internal variables
-        self.github_instance = Github(login_or_token=self.token, base_url=self.base_url)
+        self.github_instance = (
+            Github(auth=Auth.Token(self.token), base_url=self.base_url)
+            if self.token
+            else Github(base_url=self.base_url)
+        )
         self.authenticated_user = self.github_instance.get_user() if self.token else None
         self.authenticated_username = self.authenticated_user.login.lower() if self.token else None
 
@@ -255,11 +260,6 @@ class GithubArchive:
             log_and_raise_value_error(
                 logger=logger,
                 message='The include and exclude flags are mutually exclusive. Only one can be used on each run.',
-            )
-        elif self.token and self.use_https:
-            log_and_raise_value_error(
-                logger=logger,
-                message='Use only one of `token` or `https` flags to authenticate.',
             )
 
     def authenticated_user_in_users(self) -> bool:

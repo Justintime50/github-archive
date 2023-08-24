@@ -85,12 +85,13 @@ def test_view_repos(mock_logger, mock_git_asset):
     mock_logger.assert_called_with('mock_username/mock-asset-name')
 
 
+@patch('github_archive.archive.Github')
 @patch('subprocess.check_output')
 @patch('logging.Logger.info')
-def test_archive_repo_success(mock_logger, mock_subprocess, mock_git_asset):
+def test_archive_repo_success(mock_logger, mock_subprocess, mock_github, mock_git_asset):
     operation = CLONE_OPERATION
     message = f'Repo: {mock_git_asset.owner.login}/{mock_git_asset.name} {operation} success!'
-    github_archive = GithubArchive()
+    github_archive = GithubArchive(token='123')
     _archive_repo(github_archive, mock_git_asset, 'mock/path', operation)
 
     mock_subprocess.assert_called_once_with(
