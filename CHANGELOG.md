@@ -4,6 +4,7 @@
 
 - Allows the tool to be run without passing any authentication flags (previously, to use unauthenticated, you'd have to at least pass the `--https` flag)
 - Removes constraint that required `--token` and `--https` to be mutually exclusive (you can now authenticate with other tools such as Git Credential Manager instead of only SSH)
+- Adds `--version` CLI flag
 
 ## v6.0.0 (2023-06-30)
 
