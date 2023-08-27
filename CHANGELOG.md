@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v6.1.1 (2023-08-26)
+
+- Fixes PyGithub pinned version to ensure `Auth` is available
+
 ## v6.1.0 (2023-08-24)
 
 - Allows the tool to be run without passing any authentication flags (previously, to use unauthenticated, you'd have to at least pass the `--https` flag)

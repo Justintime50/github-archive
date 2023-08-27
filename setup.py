@@ -15,7 +15,7 @@ with open('github_archive/_version.py', 'r') as version_file:
         raise RuntimeError('Unable to find version string!')
 
 REQUIREMENTS = [
-    'PyGithub == 1.*',
+    'PyGithub >= 1.59.0',
     'woodchips == 1.*',
 ]
 
