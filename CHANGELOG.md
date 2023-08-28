@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v6.1.2 (2023-08-27)
+
+- Expand paths for user-supplied `--location` strings. This now allows for spaces in paths and proper expansion of home directories (eg: `~`)
+
 ## v6.1.1 (2023-08-26)
 
 - Fixes PyGithub pinned version to ensure `Auth` is available

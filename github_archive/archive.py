@@ -81,7 +81,7 @@ class GithubArchive:
         self.include = include.lower().split(',') if include else ''
         self.exclude = exclude.lower().split(',') if exclude else ''
         self.forks = forks
-        self.location = location
+        self.location = os.path.expanduser(location)
         self.use_https = use_https
         self.timeout = timeout
         self.threads = threads
