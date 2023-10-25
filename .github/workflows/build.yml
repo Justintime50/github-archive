@@ -22,13 +22,13 @@ jobs:
       - uses: extractions/setup-just@v1
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - run: just install lint
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pythonversion: ['3.8', '3.9', '3.10', '3.11']
+        pythonversion: ['3.8', '3.9', '3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v3
       - uses: extractions/setup-just@v1
@@ -44,7 +44,7 @@ jobs:
       - uses: extractions/setup-just@v1
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - run: just install coverage
       - uses: coverallsapp/github-action@v2
         with:
