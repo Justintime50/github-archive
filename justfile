@@ -54,7 +54,7 @@ isort-check:
 
 # Run mypy type checking on the project
 mypy:
-    {{VIRTUAL_BIN}}/mypy {{PROJECT_NAME}}/ {{TEST_DIR}}/
+    {{VIRTUAL_BIN}}/mypy --install-types --non-interactive {{PROJECT_NAME}}/ {{TEST_DIR}}/
 
 # Test the project
 test:

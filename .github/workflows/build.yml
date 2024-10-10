@@ -18,21 +18,21 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: extractions/setup-just@v2
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
       - run: just install lint
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pythonversion: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        pythonversion: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: extractions/setup-just@v2
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pythonversion }}
       - run: just install coverage
@@ -40,11 +40,11 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: extractions/setup-just@v2
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
       - run: just install coverage
       - uses: coverallsapp/github-action@v2
         with:
