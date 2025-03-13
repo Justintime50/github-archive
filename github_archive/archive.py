@@ -146,7 +146,7 @@ class GithubArchive:
                 logger.info('# Pulling changes to user repos...')
                 _ = iterate_repos_to_archive(self, user_repos, PULL_OPERATION)
             if self.fork:
-                logger.info('# Forking starred repos...')
+                logger.info('# Forking user repos...')
                 iterate_repos_to_fork(user_repos)
 
         # Orgs
@@ -166,7 +166,7 @@ class GithubArchive:
                 logger.info('# Pulling changes to org repos...')
                 _ = iterate_repos_to_archive(self, org_repos, PULL_OPERATION)
             if self.fork:
-                logger.info('# Forking starred repos...')
+                logger.info('# Forking org repos...')
                 iterate_repos_to_fork(org_repos)
 
         # Stars
@@ -212,7 +212,7 @@ class GithubArchive:
                 _ = iterate_gists_to_archive(self, gists, PULL_OPERATION)
             if self.fork:
                 logger.info('# Forking gists...')
-                iterate_gists_to_fork(gists)
+                iterate_gists_to_fork(self, gists)
 
             if failed_gist_dirs:
                 logger.info('Cleaning up gists...')

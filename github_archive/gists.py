@@ -62,10 +62,23 @@ def view_gists(gists: List[Gist.Gist]):
         logger.info(gist_id)
 
 
-def iterate_gists_to_fork(gists: List[Gist.Gist]):
+def iterate_gists_to_fork(github_archive: GithubArchive, gists: List[Gist.Gist]) -> List[Optional[str]]:
     """Iterates through a list of gists and attempts to fork them."""
+    pool = ThreadPoolExecutor(github_archive.threads)
+    thread_list = []
+
     for gist in gists:
-        _fork_gist(gist)
+        thread_list.append(
+            pool.submit(
+                _fork_gist,
+                gist=gist,
+            )
+        )
+
+    wait(thread_list, return_when=ALL_COMPLETED)
+    failed_gists = [gist.result() for gist in thread_list if gist.result()]
+
+    return failed_gists
 
 
 def _fork_gist(gist: Gist.Gist):

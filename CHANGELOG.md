@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v6.2.0 (2025-03-13)
+
+- Forking gists is now a threaded operation like all other operations instead of sequential
+- Corrects two log messages that incorrectly mentioned `starred` resources when they should have been `org/user` resources
+
 ## v6.1.2 (2023-08-27)
 
 - Expand paths for user-supplied `--location` strings. This now allows for spaces in paths and proper expansion of home directories (eg: `~`)

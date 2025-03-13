@@ -92,10 +92,15 @@ def test_view_gists(mock_logger, mock_git_asset):
     mock_logger.assert_called_with('mock_username/123')
 
 
+@patch('github_archive.archive.Github')
 @patch('github_archive.gists._fork_gist')
-def test_iterate_gists_to_fork(mock_fork_gist):
+def test_iterate_gists_to_fork(mock_fork_gist, mock_github_instance):
     gist = MagicMock(spec=Gist.Gist)
-    iterate_gists_to_fork([gist])
+    github_archive = GithubArchive(
+        gists='mock_username',
+    )
+
+    iterate_gists_to_fork(github_archive, [gist])
 
     mock_fork_gist.assert_called_once()
 
