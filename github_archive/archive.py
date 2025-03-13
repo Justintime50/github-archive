@@ -60,6 +60,7 @@ class GithubArchive:
         fork=False,
         include=None,
         exclude=None,
+        languages=None,
         forks=False,
         location=DEFAULT_LOCATION,
         use_https=False,
@@ -80,6 +81,7 @@ class GithubArchive:
         self.fork = fork
         self.include = include.lower().split(',') if include else ''
         self.exclude = exclude.lower().split(',') if exclude else ''
+        self.languages = languages.lower().split(',') if languages else ''
         self.forks = forks
         self.location = os.path.expanduser(location)
         self.use_https = use_https
@@ -147,7 +149,7 @@ class GithubArchive:
                 _ = iterate_repos_to_archive(self, user_repos, PULL_OPERATION)
             if self.fork:
                 logger.info('# Forking user repos...')
-                iterate_repos_to_fork(user_repos)
+                iterate_repos_to_fork(self, user_repos)
 
         # Orgs
         if self.orgs:
@@ -167,7 +169,7 @@ class GithubArchive:
                 _ = iterate_repos_to_archive(self, org_repos, PULL_OPERATION)
             if self.fork:
                 logger.info('# Forking org repos...')
-                iterate_repos_to_fork(org_repos)
+                iterate_repos_to_fork(self, org_repos)
 
         # Stars
         if self.stars:
@@ -187,7 +189,7 @@ class GithubArchive:
                 _ = iterate_repos_to_archive(self, starred_repos, PULL_OPERATION)
             if self.fork:
                 logger.info('# Forking starred repos...')
-                iterate_repos_to_fork(starred_repos)
+                iterate_repos_to_fork(self, starred_repos)
 
         if failed_repo_dirs:
             logger.info('Cleaning up repos...')
@@ -260,6 +262,11 @@ class GithubArchive:
             log_and_raise_value_error(
                 logger=logger,
                 message='The include and exclude flags are mutually exclusive. Only one can be used on each run.',
+            )
+        elif (self.include or self.exclude) and self.languages:
+            log_and_raise_value_error(
+                logger=logger,
+                message='The include and exclude flags cannot be used with the languages flag.',
             )
 
     def authenticated_user_in_users(self) -> bool:

@@ -50,6 +50,7 @@ Options:
     -f, --fork            Pass this flag to fork git assets.
     --include INCLUDE     Pass a comma separated list of repos to filter what is included in the Archive.
     --exclude EXCLUDE     Pass a comma separated list of repos to filter what is excluded from the Archive.
+    --languages LANGUAGES Pass a comma separated list of languages to filter what is included in the Archive.
     --forks               Pass this flag to include forked git assets (when cloning or pulling).
     --location LOCATION   The location where you want your GitHub Archive to be stored. Default: /Users/USERNAME/github-archive
     --https               Use HTTPS URLs instead of SSH.

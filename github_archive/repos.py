@@ -42,7 +42,14 @@ def iterate_repos_to_archive(
 
     for repo in repos:
         if (
-            (not github_archive.include and not github_archive.exclude)
+            (
+                github_archive.languages
+                and repo.language
+                and repo.language.lower() in github_archive.languages
+                and not github_archive.include
+                and not github_archive.exclude
+            )
+            or (not github_archive.languages and not github_archive.include and not github_archive.exclude)
             or (github_archive.include and repo.name in github_archive.include)
             or (github_archive.exclude and repo.name not in github_archive.exclude)
         ):
@@ -58,7 +65,7 @@ def iterate_repos_to_archive(
                 )
             )
         else:
-            logger.debug(f'{repo.name} skipped due to include/exclude filtering')
+            logger.debug(f'{repo.name} skipped due to filtering')
 
     wait(thread_list, return_when=ALL_COMPLETED)
     failed_repos = [repo.result() for repo in thread_list if repo.result()]
@@ -75,10 +82,20 @@ def view_repos(repos: List[Repository.Repository]):
         logger.info(repo_name)
 
 
-def iterate_repos_to_fork(repos: List[Repository.Repository]):
+def iterate_repos_to_fork(github_archive: GithubArchive, repos: List[Repository.Repository]) -> None:
     """Iterates through a list of repos and attempts to fork them."""
+    pool = ThreadPoolExecutor(github_archive.threads)
+    thread_list = []
+
     for repo in repos:
-        _fork_repo(repo)
+        thread_list.append(
+            pool.submit(
+                _fork_repo,
+                repo=repo,
+            )
+        )
+
+    wait(thread_list, return_when=ALL_COMPLETED)
 
 
 def _fork_repo(repo: Repository.Repository):

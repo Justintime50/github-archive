@@ -15,5 +15,6 @@ def mock_git_asset():
     mock_git_asset.owner.login = 'mock_username'
     mock_git_asset.html_url = 'mock/html_url'
     mock_git_asset.ssh_url = 'mock/ssh_url'
+    mock_git_asset.language = 'Python'
 
     return mock_git_asset

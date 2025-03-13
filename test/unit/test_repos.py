@@ -1,3 +1,4 @@
+import copy
 import subprocess
 from unittest.mock import (
     MagicMock,
@@ -51,7 +52,9 @@ def test_iterate_repos_matching_authed_username(mock_archive_repo, mock_github_i
 @patch('github_archive.repos._archive_repo')
 def test_iterate_repos_include_list(mock_archive_repo, mock_github_instance, mock_git_asset):
     """Tests that we iterate repos that are on the include list."""
-    repos = [mock_git_asset]
+    mock_non_include_asset = copy.deepcopy(mock_git_asset)
+    mock_non_include_asset.name = 'not-the-name'
+    repos = [mock_git_asset, mock_non_include_asset]
     github_archive = GithubArchive(
         users='mock_username',
         include='mock-asset-name',
@@ -59,14 +62,16 @@ def test_iterate_repos_include_list(mock_archive_repo, mock_github_instance, moc
 
     iterate_repos_to_archive(github_archive, repos, CLONE_OPERATION)
 
-    mock_archive_repo.assert_called_once()
+    mock_archive_repo.assert_called_once()  # Called once even though there are two, ensure we filtered
 
 
 @patch('github_archive.archive.Github')
 @patch('github_archive.repos._archive_repo')
 def test_iterate_repos_exclude_list(mock_archive_repo, mock_github_instance, mock_git_asset):
     """Tests that we do not iterate repos that are on the exclude list."""
-    repos = [mock_git_asset]
+    mock_non_exclude_asset = copy.deepcopy(mock_git_asset)
+    mock_non_exclude_asset.name = 'not-the-name'
+    repos = [mock_git_asset, mock_non_exclude_asset]
     github_archive = GithubArchive(
         users='mock_username',
         exclude='mock-asset-name',
@@ -74,7 +79,24 @@ def test_iterate_repos_exclude_list(mock_archive_repo, mock_github_instance, moc
 
     iterate_repos_to_archive(github_archive, repos, CLONE_OPERATION)
 
-    mock_archive_repo.assert_not_called()
+    mock_archive_repo.assert_called_once()  # Called once even though there are two, ensure we filtered
+
+
+@patch('github_archive.archive.Github')
+@patch('github_archive.repos._archive_repo')
+def test_iterate_repos_languages_list(mock_archive_repo, mock_github_instance, mock_git_asset):
+    """Tests that we iterate repos that are one of the languages in the list."""
+    mock_non_language_asset = copy.deepcopy(mock_git_asset)
+    mock_non_language_asset.language = 'Go'
+    repos = [mock_git_asset, mock_non_language_asset]
+    github_archive = GithubArchive(
+        users='mock_username',
+        languages='python',
+    )
+
+    iterate_repos_to_archive(github_archive, repos, CLONE_OPERATION)
+
+    mock_archive_repo.assert_called_once()  # Called once even though there are two, ensure we filtered
 
 
 @patch('logging.Logger.info')
@@ -157,10 +179,14 @@ def test_archive_repo_called_process_error(mock_logger, mock_subprocess, mock_gi
     mock_logger.assert_called_once()
 
 
+@patch('github_archive.archive.Github')
 @patch('github_archive.repos._fork_repo')
-def test_iterate_repos_to_fork(mock_fork_repo):
+def test_iterate_repos_to_fork(mock_fork_repo, mock_github_instance):
     repo = MagicMock(spec=Repository.Repository)
-    iterate_repos_to_fork([repo])
+    github_archive = GithubArchive(
+        gists='mock_username',
+    )
+    iterate_repos_to_fork(github_archive, [repo])
 
     mock_fork_repo.assert_called_once()
 

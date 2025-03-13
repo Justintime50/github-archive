@@ -306,6 +306,10 @@ def test_initialize_project(mock_make_dirs, mock_dir_exist, mock_logger):
             {'users': 'justintime50', 'clone': True, 'include': 'mock-repo', 'exclude': 'another-mock-repo'},
             'The include and exclude flags are mutually exclusive. Only one can be used on each run.',
         ),
+        (
+            {'users': 'justintime50', 'clone': True, 'include': 'mock-repo', 'languages': 'python'},
+            'The include and exclude flags cannot be used with the languages flag.',
+        ),
     ],
 )
 @patch('github_archive.archive.Github.get_user')

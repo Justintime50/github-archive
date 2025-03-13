@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v6.3.0 (2025-03-13)
+
+- Adds new `languages` CLI flag allowing filtering via a comma-separated list of GitHub languages for repos (cannot be used with include/exclude) - (closes #59)
+- Forking repos is now a threaded operation like all other operations instead of sequential
+
 ## v6.2.0 (2025-03-13)
 
 - Forking gists is now a threaded operation like all other operations instead of sequential

@@ -110,6 +110,13 @@ class GithubArchiveCli:
             help='Pass a comma separated list of repos to filter what is excluded from the Archive.',
         )
         parser.add_argument(
+            '--languages',
+            type=str,
+            required=False,
+            default=None,
+            help='Pass a comma separated list of languages to filter what is included in the Archive.',
+        )
+        parser.add_argument(
             '--forks',
             action='store_true',
             required=False,
@@ -182,6 +189,7 @@ class GithubArchiveCli:
             fork=self.fork,
             include=self.include,
             exclude=self.exclude,
+            languages=self.languages,
             forks=self.forks,
             location=self.location,
             use_https=self.https,
