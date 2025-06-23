@@ -20,7 +20,11 @@ The power of GitHub Archive comes in its configuration. Maybe you only want to c
 ## Install
 
 ```bash
-# Install tool
+# Homebrew install
+brew tap justintime50/formulas
+brew install github-archive
+
+# Pip install
 pip3 install github-archive
 
 # Install locally
