@@ -19,8 +19,7 @@ jobs:
           commit_owner: Justintime50
           commit_email: 39606064+Justintime50@users.noreply.github.com
           update_readme_table: true
-          depends_on: |
-            python@3.13
-          install: 'virtualenv_install_with_resources'
+          depends_on: '"python@3.13"'
+          install: virtualenv_install_with_resources
           formula_includes: 'include Language::Python::Virtualenv'
           update_python_resources: true
