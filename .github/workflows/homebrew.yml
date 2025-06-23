@@ -21,5 +21,6 @@ jobs:
           update_readme_table: true
           depends_on: '"python@3.13"'
           install: virtualenv_install_with_resources
+          test: 'assert_match "github-archive #{version}", shell_output("#{bin}/github-archive --version")'
           formula_includes: 'include Language::Python::Virtualenv'
           update_python_resources: true
