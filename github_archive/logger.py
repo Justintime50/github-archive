@@ -16,7 +16,7 @@ def setup_logger(github_archive):
         level=github_archive.log_level,
     )
     logger.log_to_console()
-    logger.log_to_file(location=os.path.join(github_archive.location, 'logs'))
+    logger.log_to_file(location=os.path.join(github_archive.location, "logs"))
 
 
 def log_and_raise_value_error(logger, message):

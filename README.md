@@ -5,7 +5,7 @@
 A powerful tool to concurrently clone, pull, or fork user and org repos and gists to create a GitHub archive.
 
 [![Build Status](https://github.com/Justintime50/github-archive/workflows/build/badge.svg)](https://github.com/Justintime50/github-archive/actions)
-[![Coverage Status](https://coveralls.io/repos/github/Justintime50/github-archive/badge.svg?branch=main)](https://coveralls.io/github/Justintime50/github-archive?branch=main)
+[![Coverage Status](https://img.shields.io/codecov/c/github/justintime50/github-archive)](https://app.codecov.io/github/Justintime50/github-archive)
 [![PyPi](https://img.shields.io/pypi/v/github-archive)](https://pypi.org/project/github-archive)
 [![Licence](https://img.shields.io/github/license/justintime50/GitHub-archive)](LICENSE)
 

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v7.0.0 (2025-11-18)
+
+- Drops support for Python 3.8 and 3.9
+- Bumps dependencies
+  - PyGithub was updated to v2 which brings retry logic and rate limiting. Depending on the number of resources you request with github-archive, you may see different behavior than before
+
 ## v6.3.0 (2025-03-13)
 
 - Adds new `languages` CLI flag allowing filtering via a comma-separated list of GitHub languages for repos (cannot be used with include/exclude) - (closes #59)

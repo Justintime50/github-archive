@@ -54,7 +54,7 @@ def iterate_repos_to_archive(
             or (github_archive.exclude and repo.name not in github_archive.exclude)
         ):
             repo_owner_username = repo.owner.login.lower()
-            repo_path = os.path.join(github_archive.location, 'repos', repo_owner_username, repo.name)
+            repo_path = os.path.join(github_archive.location, "repos", repo_owner_username, repo.name)
             thread_list.append(
                 pool.submit(
                     _archive_repo,
@@ -65,7 +65,7 @@ def iterate_repos_to_archive(
                 )
             )
         else:
-            logger.debug(f'{repo.name} skipped due to filtering')
+            logger.debug(f"{repo.name} skipped due to filtering")
 
     wait(thread_list, return_when=ALL_COMPLETED)
     failed_repos = [repo.result() for repo in thread_list if repo.result()]
@@ -78,7 +78,7 @@ def view_repos(repos: List[Repository.Repository]):
     logger = woodchips.get(LOGGER_NAME)
 
     for repo in repos:
-        repo_name = f'{repo.owner.login}/{repo.name}'
+        repo_name = f"{repo.owner.login}/{repo.name}"
         logger.info(repo_name)
 
 
@@ -102,13 +102,13 @@ def _fork_repo(repo: Repository.Repository):
     """Forks a repository to the authenticated user's GitHub instance."""
     logger = woodchips.get(LOGGER_NAME)
 
-    repo_name = f'{repo.owner.login}/{repo.name}'
+    repo_name = f"{repo.owner.login}/{repo.name}"
 
     try:
         repo.create_fork()
-        logger.info(f'{repo_name} forked!')
+        logger.info(f"{repo_name} forked!")
     except Exception:
-        logger.error(f'{repo_name} failed to fork!')
+        logger.error(f"{repo_name} failed to fork!")
 
 
 def _archive_repo(
@@ -128,15 +128,15 @@ def _archive_repo(
         pass
     else:
         commands = {
-            PULL_OPERATION: ['git', '-C', repo_path, 'pull', '--rebase'],
+            PULL_OPERATION: ["git", "-C", repo_path, "pull", "--rebase"],
         }
 
         if github_archive.use_https or not github_archive.token:
             # Will be used for unauthenticated requests or with items like GCM
-            commands.update({CLONE_OPERATION: ['git', 'clone', repo.html_url, repo_path]})
+            commands.update({CLONE_OPERATION: ["git", "clone", repo.html_url, repo_path]})
         else:
             # Will be used for SSH authenticated requests
-            commands.update({CLONE_OPERATION: ['git', 'clone', repo.ssh_url, repo_path]})
+            commands.update({CLONE_OPERATION: ["git", "clone", repo.ssh_url, repo_path]})
 
         git_command = commands[operation]
 
@@ -147,12 +147,12 @@ def _archive_repo(
                 text=True,
                 timeout=github_archive.timeout,
             )
-            logger.info(f'Repo: {full_repo_name} {operation} success!')
+            logger.info(f"Repo: {full_repo_name} {operation} success!")
         except subprocess.TimeoutExpired:
-            logger.error(f'Git operation timed out archiving {repo.name}.')
+            logger.error(f"Git operation timed out archiving {repo.name}.")
             failed_repo = full_repo_name
         except subprocess.CalledProcessError as error:
-            logger.error(f'Failed to {operation} {repo.name}\n{error.output}')
+            logger.error(f"Failed to {operation} {repo.name}\n{error.output}")
             failed_repo = full_repo_name
 
     return failed_repo

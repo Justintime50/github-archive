@@ -34,7 +34,7 @@ def iterate_gists_to_archive(github_archive: GithubArchive, gists: List[Gist.Gis
     thread_list = []
 
     for gist in gists:
-        gist_path = os.path.join(github_archive.location, 'gists', gist.id)
+        gist_path = os.path.join(github_archive.location, "gists", gist.id)
         thread_list.append(
             pool.submit(
                 _archive_gist,
@@ -53,7 +53,7 @@ def view_gists(gists: List[Gist.Gist]):
     logger = woodchips.get(LOGGER_NAME)
 
     for gist in gists:
-        gist_id = f'{gist.owner.login}/{gist.id}'
+        gist_id = f"{gist.owner.login}/{gist.id}"
         logger.info(gist_id)
 
 
@@ -80,13 +80,13 @@ def _fork_gist(gist: Gist.Gist):
     """Forks a gist to the authenticated user's GitHub instance."""
     logger = woodchips.get(LOGGER_NAME)
 
-    gist_id = f'{gist.owner.login}/{gist.id}'
+    gist_id = f"{gist.owner.login}/{gist.id}"
 
     try:
         gist.create_fork()
-        logger.info(f'{gist_id} forked!')
+        logger.info(f"{gist_id} forked!")
     except Exception:
-        logger.warning(f'{gist_id} failed to fork!')
+        logger.warning(f"{gist_id} failed to fork!")
 
 
 def _archive_gist(github_archive: GithubArchive, gist: Gist.Gist, gist_path: str, operation: str) -> Optional[str]:
@@ -104,8 +104,8 @@ def _archive_gist(github_archive: GithubArchive, gist: Gist.Gist, gist_path: str
         pass
     else:
         commands = {
-            CLONE_OPERATION: ['git', 'clone', gist.html_url, gist_path],
-            PULL_OPERATION: ['git', '-C', gist_path, 'pull', '--rebase'],
+            CLONE_OPERATION: ["git", "clone", gist.html_url, gist_path],
+            PULL_OPERATION: ["git", "-C", gist_path, "pull", "--rebase"],
         }
         git_command = commands[operation]
 
@@ -116,12 +116,12 @@ def _archive_gist(github_archive: GithubArchive, gist: Gist.Gist, gist_path: str
                 text=True,
                 timeout=github_archive.timeout,
             )
-            logger.info(f'Gist: {full_gist_id} {operation} success!')
+            logger.info(f"Gist: {full_gist_id} {operation} success!")
         except subprocess.TimeoutExpired:
-            logger.error(f'Git operation timed out archiving {gist.id}.')
+            logger.error(f"Git operation timed out archiving {gist.id}.")
             failed_gist = full_gist_id
         except subprocess.CalledProcessError as error:
-            logger.error(f'Failed to {operation} {gist.id}\n{error.output}')
+            logger.error(f"Failed to {operation} {gist.id}\n{error.output}")
             failed_gist = full_gist_id
 
     return failed_gist
