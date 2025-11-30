@@ -21,8 +21,8 @@ jobs:
           update_readme_table: true
           # rust is needed to build the cryptography dependency
           depends_on: |
-            '"python@3.14"'
-            '"rust" => :build'
+            "python@3.14"
+            "rust" => :build
           install: virtualenv_install_with_resources
           test: 'assert_match "github-archive #{version}", shell_output("#{bin}/github-archive --version")'
           formula_includes: 'include Language::Python::Virtualenv'
