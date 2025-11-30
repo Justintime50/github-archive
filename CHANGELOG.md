@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v7.0.1 (2025-11-29)
+
+- Swaps Python 3.14 for Python 3.10 on Homebrew to match our lowest supported version for better compatibility
+
 ## v7.0.0 (2025-11-18)
 
 - Drops support for Python 3.8 and 3.9
