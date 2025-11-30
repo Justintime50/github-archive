@@ -10,10 +10,10 @@ readme = "README.md"
 requires-python = ">=3.10, <4"
 license = { text = "MIT" }
 authors = [{ name = "Justintime50" }]
+urls = { Homepage = "http://github.com/justintime50/github-archive" }
+scripts = { github-archive = "github_archive.cli:main" }
 dependencies = ["PyGithub == 2.8.*", "woodchips == 2.*"]
-
-[project.optional-dependencies]
-dev = [
+optional-dependencies = { dev = [
     "bandit == 1.9.*",
     "black == 25.*",
     "build == 1.3.*",
@@ -22,22 +22,16 @@ dev = [
     "mypy == 1.18.*",
     "pytest == 9.*",
     "pytest-cov == 7.*",
-]
+] }
 
 [tool.setuptools.dynamic]
 version = { attr = "github_archive._version.__version__" }
-
-[project.urls]
-Homepage = "http://github.com/justintime50/github-archive"
 
 [tool.setuptools.packages.find]
 exclude = ["test"]
 
 [tool.setuptools.package-data]
 github_archive = ["py.typed"]
-
-[project.scripts]
-github-archive = "github_archive.cli:main"
 
 [tool.black]
 line-length = 120
