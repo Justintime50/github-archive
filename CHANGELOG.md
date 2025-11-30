@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v7.0.2 (2025-11-30)
+
+- Include the Rust buildchain when releasing via Homebrew to support building the `cryptography` transient dependency
+- Swaps Homebrew Python back to 3.14
+- Swaps setup.py for pyproject.toml
+
 ## v7.0.1 (2025-11-29)
 
 - Swaps Python 3.14 for Python 3.10 on Homebrew to match our lowest supported version for better compatibility
