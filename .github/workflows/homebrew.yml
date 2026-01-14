@@ -11,7 +11,7 @@ jobs:
     name: homebrew-releaser
     steps:
       - name: Release project to my Homebrew tap
-        uses: Justintime50/homebrew-releaser@v2
+        uses: Justintime50/homebrew-releaser@v3
         with:
           homebrew_owner: Justintime50
           homebrew_tap: homebrew-formulas

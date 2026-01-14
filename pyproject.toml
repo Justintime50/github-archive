@@ -15,14 +15,11 @@ scripts = { github-archive = "github_archive.cli:main" }
 dependencies = ["PyGithub == 2.8.*", "woodchips == 2.*"]
 optional-dependencies = { dev = [
     "bandit == 1.9.*",
-    "black == 25.*",
     "build == 1.3.*",
-    "flake8 == 7.*",
-    "Flake8-pyproject == 1.2.*",
-    "isort == 7.*",
     "mypy == 1.18.*",
     "pytest == 9.*",
     "pytest-cov == 7.*",
+    "ruff == 0.14.*",
 ] }
 
 [tool.setuptools.dynamic]
@@ -34,23 +31,8 @@ exclude = ["test"]
 [tool.setuptools.package-data]
 github_archive = ["py.typed"]
 
-[tool.black]
+[tool.ruff]
 line-length = 120
-
-[tool.isort]
-profile = "black"
-line_length = 120
-indent = 4
-force_grid_wrap = 2
-multi_line_output = 3
-sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-lines_after_imports = 2
-include_trailing_comma = true
-use_parentheses = true
 
 [tool.mypy]
 disable_error_code = "import-untyped"
-
-[tool.flake8]
-max-line-length = 120
-extend-ignore = "E203"

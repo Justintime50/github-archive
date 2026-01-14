@@ -1,27 +1,15 @@
 name: build
 
 on:
-  push:
-    paths:
-      - '.github/workflows/build.yml'
-      - '**/*.py'
-    branches:
-      - '**'
-    tags:
-      - '!**'
-  pull_request:
-    paths:
-      - '.github/workflows/build.yml'
-      - '**/*.py'
+  push: ~
+  pull_request: ~
   workflow_dispatch: ~
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: extractions/setup-just@v3
-      - uses: actions/setup-python@v6
+      - uses: justintime50/composite-actions/bootstrap-python@v1
         with:
           python-version: '3.14'
       - run: just install lint
@@ -31,9 +19,7 @@ jobs:
       matrix:
         pythonversion: ['3.10', '3.11', '3.12', '3.13', '3.14']
     steps:
-      - uses: actions/checkout@v5
-      - uses: extractions/setup-just@v3
-      - uses: actions/setup-python@v6
+      - uses: justintime50/composite-actions/bootstrap-python@v1
         with:
           python-version: ${{ matrix.pythonversion }}
       - run: just install coverage
@@ -41,9 +27,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: extractions/setup-just@v3
-      - uses: actions/setup-python@v6
+      - uses: justintime50/composite-actions/bootstrap-python@v1
         with:
           python-version: '3.14'
       - run: just install coverage
