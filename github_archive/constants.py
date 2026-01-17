@@ -1,7 +1,6 @@
 import os
 from typing import Literal
 
-
 DEFAULT_BASE_URL = "https://api.github.com"
 DEFAULT_LOCATION = os.path.join("~", "github-archive")
 DEFAULT_NUM_THREADS = 10

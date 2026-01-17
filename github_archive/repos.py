@@ -16,7 +16,6 @@ from typing import (
 import woodchips
 from github import Repository
 
-
 if TYPE_CHECKING:
     # This is needed to get around circular imports while allowing `mypy` to be happy
     from github_archive.archive import GithubArchive  # pragma: no cover
