@@ -27,7 +27,11 @@ from github_archive.constants import (
 )
 
 
-def iterate_gists_to_archive(github_archive: GithubArchive, gists: List[Gist.Gist], operation: str) -> None:
+def iterate_gists_to_archive(
+    github_archive: GithubArchive,
+    gists: List[Gist.Gist],
+    operation: str,
+) -> List[Optional[str]]:
     """Iterate over each gist and start a thread if it can be archived."""
     pool = ThreadPoolExecutor(github_archive.threads)
     thread_list = []
@@ -45,6 +49,9 @@ def iterate_gists_to_archive(github_archive: GithubArchive, gists: List[Gist.Gis
         )
 
     wait(thread_list, return_when=ALL_COMPLETED)
+    failed_gists = [gist.result() for gist in thread_list if gist.result()]
+
+    return failed_gists
 
 
 def view_gists(gists: List[Gist.Gist]):

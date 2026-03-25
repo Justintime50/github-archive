@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v7.0.3 (2026-03-25)
+
+- Fixes a bug where failed gists would blow up GitHub Archive due to NoneType being returned
+- Bumps PyGithub to 2.9.x
+
 ## v7.0.2 (2025-11-30)
 
 - Include the Rust buildchain when releasing via Homebrew to support building the `cryptography` transient dependency

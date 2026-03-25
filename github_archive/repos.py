@@ -28,7 +28,9 @@ from github_archive.constants import (
 
 
 def iterate_repos_to_archive(
-    github_archive: GithubArchive, repos: List[Repository.Repository], operation: str
+    github_archive: GithubArchive,
+    repos: List[Repository.Repository],
+    operation: str,
 ) -> List[Optional[str]]:
     """Iterate over each repository and start a thread after filtering based on the
     user input and attempt to archive it.
@@ -81,7 +83,7 @@ def view_repos(repos: List[Repository.Repository]):
         logger.info(repo_name)
 
 
-def iterate_repos_to_fork(github_archive: GithubArchive, repos: List[Repository.Repository]) -> None:
+def iterate_repos_to_fork(github_archive: GithubArchive, repos: List[Repository.Repository]) -> List[Optional[str]]:
     """Iterates through a list of repos and attempts to fork them."""
     pool = ThreadPoolExecutor(github_archive.threads)
     thread_list = []
@@ -95,6 +97,9 @@ def iterate_repos_to_fork(github_archive: GithubArchive, repos: List[Repository.
         )
 
     wait(thread_list, return_when=ALL_COMPLETED)
+    failed_repos = [repo.result() for repo in thread_list if repo.result()]
+
+    return failed_repos
 
 
 def _fork_repo(repo: Repository.Repository):
