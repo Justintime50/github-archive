@@ -12,7 +12,8 @@ license = { text = "MIT" }
 authors = [{ name = "Justintime50" }]
 urls = { Homepage = "http://github.com/justintime50/github-archive" }
 scripts = { github-archive = "github_archive.cli:main" }
-dependencies = ["PyGithub == 2.9.*", "woodchips == 2.*"]
+# TODO: PyGithub 2.9+ requires `pyjwt[crypto]` which isn't compatible on newer Python versions in Homebrew
+dependencies = ["PyGithub == 2.8.*", "woodchips == 2.*"]
 optional-dependencies = { dev = [
     "bandit == 1.9.*",
     "build == 1.3.*",

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v7.0.4 (2026-03-25)
+
+- Rollback PyGithub upgrade as it's not compatible with newer versions of Python in Homebrew
+
 ## v7.0.3 (2026-03-25)
 
 - Fixes a bug where failed gists would blow up GitHub Archive due to NoneType being returned
