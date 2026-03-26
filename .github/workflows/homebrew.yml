@@ -27,12 +27,14 @@ jobs:
             "openssl@3"
           install: |
             venv = virtualenv_create(libexec, "python3.14")
+            cryptography_resource = resources.find { |r| r.name == "cryptography" }
             venv.pip_install resources.reject { |r| r.name == "cryptography" }
-            resource("cryptography").stage do
-              system venv.root/"bin/pip", "install", "--no-build-isolation", "-v", "."
+            if cryptography_resource
+              cryptography_resource.stage do
+                system venv.root/"bin/pip", "install", "--no-build-isolation", "-v", "."
+              end
             end
             venv.pip_install_and_link buildpath
           test: 'assert_match "github-archive #{version}", shell_output("#{bin}/github-archive --version")'
           formula_includes: 'include Language::Python::Virtualenv'
-          # Do not use homebrew-releaser's auto-update python resources here because we need the custom flow above
-          update_python_resources: false
+          update_python_resources: true
