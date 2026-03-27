@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v7.0.5 (2026-03-27)
+
+- Bumps PyGithub back to 2.9.x
+- Drops support for installation via Homebrew
+
 ## v7.0.4 (2026-03-25)
 
 - Rollback PyGithub upgrade as it's not compatible with newer versions of Python in Homebrew
